@@ -34,3 +34,6 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Ignore my test ts3 server
+teamspeak3-server_win64
