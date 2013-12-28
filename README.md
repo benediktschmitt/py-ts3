@@ -1,4 +1,7 @@
 # Py-TS3
+
+**>>> This package is in an early state and not ready for productive use!<<<**
+
 This package implements an API for the **TeamSpeak 3 Server Query** and the
 **TeamSpeak 3 File Transfer Interface**. 
 It's developed and tested under **Python 3**.
