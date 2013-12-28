@@ -36,4 +36,5 @@ nosetests.xml
 .pydevproject
 
 # Ignore my test ts3 server
-teamspeak3-server_win64
+ts3-testserver
+ts3_serverquery_manual.pdf

@@ -7,6 +7,8 @@ import re
 import socket
 import telnetlib
 
+# local
+from protocoll import TS3Commands
 
 # Data
 # ------------------------------------------------
@@ -203,7 +205,15 @@ class TS3Response(object):
         The error id of the returned command.
         """
         self._parse_error()
-        return self._error
+        return self._error    
+
+    # ----------- DICT TYPE ----------
+
+    def __getitem__(self, key):
+        """
+        Returns the value in the *parsed* dict corresponding to the *key*.
+        """
+        return self.parsed[key]
 
     # ----------- PARSER ----------
     
@@ -327,11 +337,12 @@ class TS3Response(object):
         return None
 
     
-class TS3Connection(object):
+class TS3BaseConnection(object):
     """
     The TS3 query client.
-    
-    """                 
+
+    For a more convenient interface, use the TS3Connection class.    
+    """ 
    
     def __init__(self, host=None, port=10011):
         """
@@ -343,6 +354,9 @@ class TS3Connection(object):
         # Counter for unfetched responses and a queue for the responses.
         self._unfetched_resp = 0
         self._responses = list()
+
+        # Always wait for responses.
+        self.wait_for_resp = False
         
         if host is not None:
             self.open(host, port)
@@ -456,6 +470,9 @@ class TS3Connection(object):
             msg = msg.encode()
         self._telnet_conn.write(msg)
         self._unfetched_resp += 1
+        
+        if self.wait_for_resp:
+            self._recv()
         return None
 
     def _recv(self):
@@ -478,7 +495,7 @@ class TS3Connection(object):
         return None
 
     @property
-    def responses(self):
+    def resp(self):
         """
         Fetches all unfetched responses and returns them.
         """
@@ -486,7 +503,7 @@ class TS3Connection(object):
         return self._responses
 
     @property
-    def last_response(self):
+    def last_resp(self):
         """
         Returns the last response. If there's no response available,
         None is returned.
@@ -494,12 +511,24 @@ class TS3Connection(object):
         self._recv()
         return self._responses[-1] if self._responses else None
         
-    def flush_response_queue(self):
+    def flush_resp_queue(self):
         """
         Clears the response queue.
         """
         self._responses = list()
         return None
+
+
+class TS3Connection(TS3BaseConnection, TS3Commands):
+    """
+    TS3 server query client.
+    """
+
+    def _return_proxy(self, cmd, params, opt):
+        """
+        Executes the command created with a method of TS3Protocoll directly.
+        """
+        return TS3BaseConnection.send(self, cmd, params, opt)
 
     
 # Main
@@ -508,27 +537,9 @@ if __name__ == "__main__":
     from pprint import pprint
 
     with TS3Connection("localhost") as ts3conn:
-        # Login and check, if the login succeeded.
-        ts3conn.send(
-            "login", {"client_login_name": "serveradmin",
-                      "client_login_password": "8PFedd2R"
-                      }
-            )
-        if ts3conn.last_response.error["id"] != "0":
-            print("login failed:", ts3conn.last_response.error["msg"])
-        else:
-            print("login successful")
+        ts3conn.login("serveradmin", "1U0FkWci")
+        ts3conn.use(1)
+        ts3conn.gm("Hello World")
 
-        # Kick as many clients as possible from the virtual server 0.
-        ts3conn.send("use 1")
-        ts3conn.send("sendtextmessage",
-                     {"targetmode": definitions.TextMessageTargetMode.SERVER,
-                      "target": 0,
-                      "msg": "I will kick all of you!"}
-                     )
-        ts3conn.send("clientlist")
-        resp = ts3conn.last_response
-        for client in resp.parsed:
-            ts3conn.send("clientkick", {"clid": client["clid"], "reasonid": 4})
-            print(ts3conn.last_response.error)
-
+        ts3conn.channellist()
+        pprint(ts3conn.last_resp.parsed)

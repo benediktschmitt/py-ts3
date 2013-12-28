@@ -1,12 +1,6 @@
 #!/usr/bin/python3
 
 
-"""
-Implementation of the TS3 server query protocoll.
-This module should help to build valid ts3 query commands.
-"""
-
-
 # Classes
 # ------------------------------------------------
 class TS3Commands(object):
@@ -14,8 +8,16 @@ class TS3Commands(object):
     Returns the string described in the documentation to execute the command.
     Consider this as the implementation of the protocoll.
 
-    Each method returns a triple:
-        (command, parameters, options)
+    Each method returns:
+
+        return self._return_proxy(str, dict|None, list|None)
+        return self._return_proxy(command, parameters, options)
+
+    Example:
+
+        return self._return_proxy("help", None, None)
+        return self._return_proxy("use", {"port": 21293}, ["virtual"])
+        
     """
 
     def _return_proxy(self, cmd, params, opt):
@@ -59,13 +61,12 @@ class TS3Commands(object):
 
     def use(self, sid=None, port=None, virtual=False):
         params = dict()
-        opt = list()
         if sid is not None:
-            sid = int(sid)
-            params["sid"] = sid
+            params["sid"] = int(sid)
         if port is not None:
-            port = int(port)
-            params["port"] = port
+            params["port"] = int(port)
+        
+        opt = list()
         if virtual:
             opt.append("virtual")
         return self._return_proxy("use", params, opt)
@@ -159,65 +160,56 @@ class TS3Commands(object):
         params = dict()
         params["ssgid"] = int(ssgid)
         params["tsgid"] = int(tsgid)
-        params["name"] = str(name)
+        params["name"] = name
         params["type"] = int(type_)
         return self._return_proxy("servergroupcopy", params, None)
 
-    # --------------------------------------------
-    
-##    def servergrouprename(self, sgid, name):
-##        sgid = int(sgid)
-##        name = common.escape(name)
-##        qcmd = "servergrouprename sgid={0} name={1}".format(sgid, name)
-##        return self._return_proxy(qcmd)
+    def servergrouprename(self, sgid, name):
+        params = dict()
+        params["sgid"] = int(sgid)
+        params["name"] = name
+        return self._return_proxy("servergrouprename", params, None)
 
-##    def servergrouppermlist(self, sgid, permsid=False):
-##        sgid = int(sgid)
-##        qcmd = "servergrouppermlist sgid={0}".format(sgid)
-##        if permsid:
-##            qcmd += " -permsid"
-##        return self._return_proxy(qcmd)
+    def servergrouppermlist(self, sgid, permsid=False):
+        params = dict()
+        params["sgid"] = int(sgid)
 
-##    def servergroupaddperm(self, ):
-##        cmd = ""
-##        return self._return_proxy(qcmd)
+        opt = list()
+        if permsid:
+            opt.append("permsid")
+        return self._return_proxy("servergrouppermlist", params, opt)
+
+##    def servergroupaddperm(self, ...):
+##        pass
 
 ##    def servergroupdelperm(self, sgid, permid=None, permsid=None):
-##        sgid = int(sgid)            
-##        cmd = "servergroupdelperm sgid={0} ".format(sgid)
-##        if permid is not None:
-##            permid = int(permid)
-##            cmd += " permid={}".format(permid)
-##        if permsid is not None:
-##            permid = Escape.escape(permsid)
-##            cmd += " permsid={}".format(permsid)
-##        return self._return_proxy(qcmd)
+##        pass
 
-##    def servergroupaddclient(self, sgid, cldbid):
-##        sgid = int(sgid)
-##        cldbid = int(cldbid)
-##        qcmd = "servergroupaddclient sgid={} cldbid={}"\
-##               .format(sgid, cldbid)
-##        return self._return_proxy(qcmd)
+    def servergroupaddclient(self, sgid, cldbid):
+        params = dict()
+        params["sgid"] = int(sgid)
+        params["cldbid"] = int(cldbid)
+        return self._return_proxy("servergroupaddclient", params, None)
 
-##    def servergroupdelclient(self, sgid, cldbid):
-##        sgid = int(sgid)
-##        cldbid = int(cldbid)
-##        qcmd = "servergroupdelclient sgid={} cldbid={}"\
-##               .format(sgid, cldbid)
-##        return self._return_proxy(qcmd)
+    def servergroupdelclient(self, sgid, cldbid):
+        params = dict()
+        params["sgid"] = int(sgid)
+        params["cldbid"] = int(cldbid)
+        return self._return_proxy("servergroupdelclient", params, None)
 
-##    def servergroupclientlist(self, sgid, names=False):
-##        sgid = int(sgid)
-##        qcmd = "servergroupclientlist sgid={}".format(sgid)
-##        if names:
-##            qcmd += " -names"
-##        return self._return_proxy(qcmd)
+    def servergroupclientlist(self, sgid, names=False):
+        params = dict()
+        params["sgid"] = int(sgid)
 
-##    def servergroupsbyclientid(self, cldbid):
-##        cldbid = int(cldbid)
-##        qcmd = "servergroupsbyclientid cldbid={}".format(cldbid)
-##        return self._return_proxy(qcmd)
+        opt = list()
+        if names:
+            opt.append("names")
+        return self._return_proxy("servergroupclientlist", params, opt)
+
+    def servergroupsbyclientid(self, cldbid):
+        params = dict()
+        params["cldbid"] = int(cldbid)
+        return self._return_proxy("servergroupsbyclientid", params, None)
 
 ##    def servergroupautooaddperm(self, ...):
 ##        pass
@@ -225,197 +217,178 @@ class TS3Commands(object):
 ##    def servergroupautodelperm(self, ...):
 ##        pass
 
-##    def serversnapshotcreate(self):
-##        qcmd = "serversnapshotcreate"
-##        return self._return_proxy(qcmd)
+    def serversnapshotcreate(self):
+        return self._return_proxy("serversnapshotcreate", None, None)
 
 ##    def serversnapshotdeploy(self, snapshot):
-##        # Snapshot should already be escaped, so don't change it.
-##        qcmd = "serversnapshotdeploy virtualserver_snapshot={}"\
-##               .format(snapshot)
-##        return self._return_proxy(qcmd)
+##        return self._return_proxy("serversnapshotdeploy " + snapshot, None, None)
 
-##    def servernotifyregister(self, event, id_=None):
-##        event = common.escape(event)
-##        cmd = "servernotifyregister event={0}".format(event)
-##        if id_ is not None:
-##            id_ = int(id_)
-##            cmd += " id={}".format(id_)
-##        return self._return_proxy(qcmd)
+    def servernotifyregister(self, event, id_=None):
+        params = dict()
+        params["event"] = event
+        if id_ is not None:
+            params["id"] = int(id_)
+        return self._return_proxy("servernotifyregister", params, None)
 
-##    def servernotifyunregister(self):
-##        cmd = "servernotifyunregister"
-##        return self._return_proxy(qcmd)
+    def servernotifyunregister(self):
+        return self._return_proxy("servernotifyunregister", None, None)
 
-##    def sendtextmessage(self, targetmode, target, msg):
-##        targetmode = int(targetmode)
-##        target = int(target)
-##        msg = Escape.escape(msg)
-##        cmd = "sendtextmessage targetmode={0} target={1} msg={2}"\
-##              .format(targetmode, target, msg)
-##        return self._return_proxy(qcmd)
+    def sendtextmessage(self, targetmode, target, msg):
+        params = dict()
+        params["targetmode"] = int(targetmode)
+        params["target"] = int(target)
+        params["msg"] = msg
+        return self._return_proxy("sendtextmessage", params, None)
+    
+    def logview(self, lines=None, reverse=None,
+                instance=None, begin_pos=None):
+        params = dict()
+        if lines is not None:
+            params["lines"] = int(lines)
+        if reverse is not None:
+            params["reverse"] = int(reverse)
+        if instance is not None:
+            params["instance"] = int(instance)
+        if begin_pos is not None:
+            params["begin_pos"] = int(begin_pos)
+        return self._return_proxy("logview", params, None)
 
-##    def logview(self, lines=None, reverse=None,
-##                instance=None, begin_pos=None):
-##        cmd = "logview"
-##        if lines is not None:
-##            lines = int(lines)
-##            cmd += " lines={}".format(lines)
-##        if reverse is not None:
-##            reverse = int(reverse)
-##            cmd += " reverse={}".format(reverse)
-##        if instance is not None:
-##            instance = int(instance)
-##            cmd += " instance={}".format(instance)
-##        if begin_pos is not None:
-##            begin_pos = int(begin_pos)
-##            cmd += " beginpos={}".format(begin_pos)
-##        return self._return_proxy(qcmd)
+    def logadd(self, loglevel, logmsg):
+        params = dict()
+        params["loglevel"] = int(loglevel)
+        params["logmsg"] = int(logmsg)
+        return self._return_proxy("logadd", params, None)
 
-##    def logadd(self, loglevel, logmsg):
-##        loglevel = int(loglevel)
-##        logmsg = Escape.escape(logmsg)
-##        cmd = "logadd loglevel={0} logmsg={1}"\
-##              .format(loglevel, logmsg)
-##        return self._return_proxy(qcmd)
+    def gm(self, msg):
+        params = dict()
+        params["msg"] = msg
+        return self._return_proxy("gm", params, None)
 
-##    def gm(self, msg):
-##        msg = Escape.escape(msg)
-##        cmd = "gm msg={0}".format(msg)
-##        return self._return_proxy(qcmd)
+    def channellist(self, topic=False, flags=False, voice=False, limits=False,
+                    icon=False, secondsempty=False):
+        opt = list()
+        if topic:
+            opt.append("topic")
+        if flags:
+            opt.append("flags")
+        if voice:
+            opt.append("voice")
+        if limits:
+            opt.append("limits")
+        if icon:
+            opt.append("icon")
+        if secondsempty:
+            opt.append("secondsempty")
+        return self._return_proxy("channellist", None, opt)
 
-##    def channellist(self, topic=False, flags=False,
-##                    voice=False, limits=False, icon=False):
-##        cmd = "channellist"
-##        if topic:
-##            cmd += " -topic"
-##        if flags:
-##            cmd += " -flags"
-##        if voice:
-##            cmd += " -voice"
-##        if limits:
-##            cmd += " -limits"
-##        if icon:
-##            cmd += " -icon"
-##        return self._return_proxy(qcmd)
+    def channelinfo(self, cid):
+        params = dict()
+        params["cid"] = int(cid)
+        return self._return_proxy("channelinfo", params, None)
 
-##    def channelinfo(self, cid):
-##        cid = int(cid)
-##        cmd = "channelinfo cid={0}".format(cid)
-##        return self._return_proxy(qcmd)
+    def channelfind(self, pattern=None):
+        params = dict()
+        if pattern is not None:
+            params["pattern"] = pattern
+        return self._return_proxy("channelfind", params, None)
 
-##    def channelfind(self, pattern=None):
-##        cmd = "channelfind"
-##        if pattern is not None:
-##            # Todo: Escape the pattern string?
-##            cmd += " pattern={}".format(pattern)
-##        return self._return_proxy(qcmd)
+    def channelmove(self, cid, cpid, order=None):
+        params = dict()
+        params["cid"] = int(cid)
+        params["cpid"] = int(cpid)
+        if order is not None:
+            params["order"] = int(order)
+        return self._return_proxy("channelmove", params, None)
 
-##    def channelmove(self, cid, cpid, order=None):
-##        cid = int(cid)
-##        cpid = int(cpid)
-##        cmd = "channelmove cid={0} cpid={1}"\
-##              .format(cid, cpid)
-##        if order is not None:
-##            order = int(order)
-##            cmd += " order={}".format(order)
-##        return self._return_proxy(qcmd)
-
-##    def channelcreate(self, name, properties=None):
-##        name = Escape.escape(name)
-##        properties = Escape.properties_to_str(properties)
-##        cmd = "channelcreate name={0} {1}"\
-##              .format(name, properties)
-##        return self._return_proxy(qcmd)
+    def channelcreate(self, name, properties=None):
+        params = dict()
+        params["name"] = name
+        if properties is not None:
+            params.update(properties)
+        return self._return_proxy("channelcreate", params, None)
         
-##    def channeldelete(self, cid, force):
-##        cid = int(cid)
-##        force = int(force)
-##        cmd = "channeldelete cid={0} force={1}"\
-##              .format(cid, force)
-##        return self._return_proxy(qcmd)
+    def channeldelete(self, cid, force):
+        params = dict()
+        params["cid"] = int(cid)
+        params["force"] = int(force)
+        return self._return_proxy("channeldelete", params, None)
 
-##    def channeledit(self, cid, properties=None):
-##        cid = int(cid)
-##        properties = Escape.properties_to_str(properties)
-##        cmd = "channeledit cid={0} {1}"\
-##              .format(cid, properties)
-##        return self._return_proxy(qcmd)
+    def channeledit(self, cid, properties=None):
+        params = dict()
+        params["cid"] = int(cid)
+        if properties is not None:
+            params.update(properties)
+        return self._return_proxy("channeledit", params, None)
         
-##    def channelgrouplist(self):
-##        cmd = "channelgrouplist"
-##        return self._return_proxy(qcmd)
+    def channelgrouplist(self):
+        return self._return_proxy("channelgrouplist", None, None)
 
-##    def channelgroupadd(self, name, type_):
-##        name = Escape.escape(name)
-##        type_ = int(type_)
-##        cmd = "channelgroupadd name={0} type={1}"\
-##              .format(name, type_)
-##        return self._return_proxy(qcmd)
+    def channelgroupadd(self, name, type_):
+        params = dict()
+        params["name"] = name
+        params["type"] = int(type_)
+        return self._return_proxy("channelgroupadd", params, None)
 
-##    def channelgroupdel(self, cgid, force):
-##        cgid = int(cgid)
-##        force = int(force)
-##        cmd = "channelgroupdelete cgid={0} force={1}"\
-##              .format(cgid, force)
-##        return self._return_proxy(qcmd)
+    def channelgroupdel(self, cgid, force):
+        params = dict()
+        params["cgid"] = int(cgid)
+        params["force"] = int(force)
+        return self._return_proxy("channelgroupdel", params, None)
 
-##    def channelgroupcopy(self, scgid, tcgid, name, type_):
-##        scgid = int(scgid)
-##        tcgid = int(tcgid)
-##        name = Escape.escape(name)
-##        type_ = int(type_)
-##        cmd = "channelgroupcopy scgid={0} tcgid={1} name={2} type={3}"\
-##              .format(scgid, tcgid, name, type_)
-##        return self._return_proxy(qcmd)
+    def channelgroupcopy(self, scgid, tcgid, name, type_):
+        params = dict()
+        params["scgid"] = int(scgid)
+        params["tcgid"] = int(tcgid)
+        params["name"] = name
+        params["type"] = int(type_)
+        return self._return_proxy("channelgroupcopy", params, None)
 
-##    def channelgrouprename(self, cgid, name):
-##        cgid = int(cgid)
-##        name = Escape.escape(name)
-##        cmd = "channelgrouprename cgid={} name={}"\
-##              .format(cigd, name)
-##        return self._return_proxy(qcmd)
+    def channelgrouprename(self, cgid, name):
+        params = dict()
+        params["cgid"] = int(cgid)
+        params["name"] = name
+        return self._return_proxy("channelgrouprename", params, None)
 
 ##    def channelgroupaddperm(self, ...):
 ##        pass
 
-##    def channelgrouppermlist(self, cgid, permsid=False):
-##        cgid = int(cgid)
-##        cmd = "channelgrouppermlist cgid={0}".format(cgid)
-##        if permsid:
-##            cmd += " -permsid"
-##        return self._return_proxy(qcmd)
+    def channelgrouppermlist(self, cgid, permsid=False):
+        params = dict()
+        params["cgid"] = int(cgid)
+
+        opt = list()
+        if permsid:
+            opt.append("permsid")
+        return self._return_proxy("channelgrouppermlist", params, opt)
 
 ##    def channelgroupdelperm(self, ...):
 ##        pass
 
-##    def channelgroupclientlist(self, cid=None, cldbid=None, cgid=None):
-##        cmd = "channelgroupclientlist"
-##        if cid is not None:
-##            cid = int(cid)
-##            cmd += " cid={}".format(cid)
-##        if cldbid is not None:
-##            cldbid = int(cldbid)
-##            cmd += " cldbid={}".format(cldbid)
-##        if cgid is not None:
-##            cgid = int(cgid)
-##            cmd += " cgid={}".format(cgid)
-##        return self._return_proxy(qcmd)
+    def channelgroupclientlist(self, cid=None, cldbid=None, cgid=None):
+        params = dict()
+        if cid is not None:
+            params["cid"] = int(cid)
+        if cldbid is not None:
+            params["cldbid"] = int(cldbid)
+        if cgid is not None:
+            params["cgid"] = int(cgid)
+        return self._return_proxy("channelgroupclientlist", params, None)
 
-##    def setclientchannelgroup(self, cgid, cid, cldbid):
-##        cgid = int(cgid)
-##        cid = int(cid)
-##        cldbid = int(cldbid)
-##        cmd = "setclientchannelgroup cgid={0} cid={1} cldbid={2}"\
-##              .format(cgid, cid, cldbid)
-##        return self._return_proxy(qcmd)
+    def setclientchannelgroup(self, cgid, cid, cldbid):
+        params = dict()
+        params["cgid"] = int(cgid)
+        params["cid"] = int(cid)
+        params["cldbid"] = int(cldbid)
+        return self._return_proxy("setclientchannelgroup", params, None)
+        
+    def channelpermlist(self, cid, permsid=False):
+        params = dict()
+        params["cid"] = int(cid)
 
-##    def channelpermlist(self, cid, permsid=False):
-##        cid = int(cid)
-##        cmd = "channelpermlist cid={0}".format(cid)
-##        if permsid:
-##            cmd += " -permsid"
-##        return self._return_proxy(qcmd)
+        opt = list()
+        if permsid:
+            opt.append("permsid")
+        return self._return_proxy("channelpermlist", params, opt)
 
 ##    def channeladdperm(self, ...):
 ##        pass
@@ -423,155 +396,151 @@ class TS3Commands(object):
 ##    def channeldelperm(self, ...):
 ##        pass
 
-##    def clientlist(self, uid=False, away=False, voice=False,
-##                   times=False, groups=False, info=False, icon=False,
-##                   country=False):
-##        cmd = "clientlist"
-##        if uid:
-##            cmd += " -uid"
-##        if away:
-##            cmd += " -away"
-##        if voice:
-##            cmd += " -voice"
-##        if times:
-##            cmd += " -times"
-##        if groups:
-##            cmd += " -groups"
-##        if info:
-##            cmd += " -info"
-##        if icon:
-##            cmd += " -icon"
-##        if country:
-##            cmd += " -country"
-##        return self._return_proxy(qcmd)
+    def clientlist(self, uid=False, away=False, voice=False,
+                   times=False, groups=False, info=False, icon=False,
+                   country=False, ip=False):
+        opt = list()
+        if uid:
+            opt.append("uid")
+        if away:
+            opt.append("away")
+        if voice:
+            opt.append("voice")
+        if times:
+            opt.append("times")
+        if groups:
+            opt.append("groups")
+        if info:
+            opt.append("info")
+        if icon:
+            opt.append("icon")
+        if country:
+            opt.append("country")
+        if ip:
+            opt.append("ip")
+        return self._return_proxy("clientlist", None, opt)
 
-##    def clientinfo(self, clid):
-##        clid = int(clid)
-##        cmd = "clientinfo clid={0}".format(clid)
-##        return self._return_proxy(qcmd)
+    def clientinfo(self, clid):
+        params = dict()
+        params["clid"] = int(clid)
+        return self._return_proxy("clientinfo", params, None)
 
-##    def clientfind(self, pattern):
-##        # Todo: Escape the pattern?
-##        pattern = Escape.escape(pattern)
-##        cmd = "clientfind pattern={}".format(pattern)
-##        return self._return_proxy(qcmd)
+    def clientfind(self, pattern):
+        params = dict()
+        params["pattern"] = pattern
+        return self._return_proxy("clientfind", params, None)
 
-##    def clientedit(self, clid, properties=None):
-##        clid = int(clid)
-##        properties = Escape.properties_to_str(properties)
-##        cmd = "clientedit clid={0} {1}"\
-##              .format(clientid, properties)
-##        return self._return_proxy(qcmd)
+    def clientedit(self, clid, properties=None):
+        params = dict()
+        params["clid"] = int(clid)
+        if properties is not None:
+            params.update(properties)
+        return self._return_proxy("clientedit", params, None)
     
-##    def clientdblist(self, start=None, duration=None, count=False):
-##        cmd = "clientdblist"
-##        if start is not None:
-##            start = int(start)
-##            cmd += " start={}".format(start)
-##        if duration is not None:
-##            duration = int(duration)
-##            cmd += " duration={}".format(duration)
-##        if count:
-##            cmd += " -count"
-##        return self._return_proxy(qcmd)
+    def clientdblist(self, start=None, duration=None, count=False):
+        params = dict()
+        if start is not None:
+            # Todo: Is this an int?
+            params["start"] = int(start)
+        if duration is not None:
+            # Todo: Is this an int?
+            params["duration"] = int(duration)
 
-##    def clientdbinfo(self, cldbid):
-##        cldbid = int(cldbid)
-##        cmd = "clientdbinfo cldbid={0}".format(cldbid)
-##        return self._return_proxy(qcmd)
+        opt = list()
+        if count:
+            opt.append("count")
+        return self._return_proxy("clientdblist", params, opt)
 
-##    def clientdbfind(self, pattern, uid=False):
-##        # Todo: Escape this pattern?
-##        pattern = Escape.escape(pattern)
-##        cmd = "clientdbfind pattern={0}".format(pattern)
-##        if uid:
-##            cmd += " -uid"
-##        return self._return_proxy(qcmd)
+    def clientdbinfo(self, cldbid):
+        params = dict()
+        params["cldbid"] = int(cldbid)
+        return self._return_proxy("clientdbinfo", params, None)
 
-##    def clientdbedit(self, cldbid, properties=None):
-##        cldbid = int(cldbid)
-##        properties = Escape.properties_to_str(properties)
-##        cmd = "clientdbedit cldbid={0} {1}"\
-##              .format(cldbid, properties)
-##        return self._return_proxy(qcmd)
+    def clientdbfind(self, pattern, uid=False):
+        params = dict()
+        params["pattern"] = pattern
 
-##    def clientdbdelete(self, cldbid):
-##        cldbid = int(cldbid)
-##        cmd = "clientdbdelete cldbid={0}".format(cldbid)
-##        return self._return_proxy(qcmd)
+        opt = list()
+        if uid:
+            opt.append("uid")
+        return self._return_proxy("clientdbfind", params, opt)
 
-##    def clientgetids(self, cluid):
-##        # Todo: Is escaping reasonable?
-##        cluid = Escape.escape(cluid)
-##        cmd = "clientgetids cluid={0}"\
-##              .format(cluid)
-##        return self._return_proxy(qcmd)
+    def clientdbedit(self, cldbid, properties=None):
+        params = dict()
+        params["cldbid"] = int(cldbid)
+        if properties is not None:
+            params.update(properties)
+        return self._return_proxy("clientdbedit", params, None)
 
-##    def clientgetdbidfromuid(self, cluid):
-##        # Todo: Is escaping reasonable?
-##        cluid = Escape.escape(cluid)
-##        cmd = "clientgetdbidfromuid cluid={0}"\
-##              .format(cluid)
-##        return self._return_proxy(qcmd)
+    def clientdbdelete(self, cldbid):
+        params = dict()
+        params["cldbid"] = int(cldbid)
+        return self._return_proxy("clientdbdelete", params, None)
 
-##    def clientgetnamefromuid(self, cluid):
-##        # Todo: Is escaping reasonable?
-##        cluid = Escape.escape(cluid)
-##        cmd = "clientgetnamefromuid cluid={0}"\
-##              .format(cluid)
-##        return self._return_proxy(qcmd)
+    def clientgetids(self, cluid):
+        params = dict()
+        params["cluid"] = cluid
+        return self._return_proxy("clientgetids", params, None)
 
-##    def clientgetnamefromdbid(self, cldbid):
-##        cldbid = int(cldbid)
-##        cmd = "clientgetnamefromdbid cldbid={0}"\
-##              .format(cldbid)
-##        return self._return_proxy(qcmd)
+    def clientgetdbidfromuid(self, cluid):
+        params = dict()
+        params["cluid"] = cluid
+        return self._return_proxy("clientgetdbidfromuid", params, None)
 
-##    def clientsetserverquerylogin(self, client_login_name):
-##        client_login_name = Escape.escape(client_login_name)
-##        cmd = "clientsetserverquerylogin client_login_name={0}"\
-##              .format(client_login_name)
-##        return self._return_proxy(qcmd)
+    def clientgetnamefromuid(self, cluid):
+        params = dict()
+        params["cluid"] = cluid
+        return self._return_proxy("clientgetnamefromuid", params, None)
+    
+    def clientgetnamefromdbid(self, cldbid):
+        params = dict()
+        params["cldbid"] = int(cldbid)
+        return self._return_proxy("clientgetnamefromdbid", params, None)
 
-##    def clientupdate(self, properties):
-##        properties = Escape.properties_to_str(properties)
-##        cmd = "clientupdate {0}".format(properties)
-##        return self._return_proxy(qcmd)
+    def clientsetserverquerylogin(self, client_login_name):
+        params = dict()
+        params["client_login_name"] = client_login_name
+        return self._return_proxy("clientsetserverquerylogin", params, None)
 
-##    def clientmove(self, clid, cid, cpw=None):
-##        if isinstance(clid, int):
-##            clid = [clid]
-##        clid = "|".join("clid={}".format(int(e)) for e in clid)
-##        cid = int(cid)
-##        
-##        cmd = "clientmove clid={0} cid={1}"\
-##              .format(clid, cid)
-##        if cpw is not None:
-##            cpw = Escape.escape(cpw)
-##            cmd += " cpw={0}".format(cpw)
-##        return self._return_proxy(qcmd)
-##
-##    def clientkick(self, clid, reasonid, reasonmsg=None):
-##        if isinstance(clid, int):
-##            clid = [clid]
-##        clid = "|".join("clid={}".format(int(e)) for e in clid)
-##        reasonid = int(reasonid)
-##
-##        cmd = "clientkick clid =
+    def clientupdate(self, properties=None):
+        params = dict()
+        if properties is not None:
+            params.update(properties)
+        return self._return_proxy("clientupdate", params, None)
 
-##    def clientpoke(self, clid, msg):
-##        clid = int(clid)
-##        msg = Escape.escape(msg)
-##        cmd = "clientpoke clid={0} msg={1}"\
-##              .format(clid, msg)
-##        return self._return_proxy(qcmd)
+    def clientmove(self, clid, cid, cpw=None):
+        params = dict()
+        # Todo: Support for multiple clids.
+        params["clid"] = clid
+        params["cid"] = cid
+        if cpw is not None:
+            params["cpw"] = cpw
+        return self._return_proxy("clientmove", params, None)
 
-##    def clientpermlist(self, cldbid, permsid=False):
-##        cldbid = int(cldbid)
-##        cmd = "clientpermlist cldbid={0}".format(cldbid)
-##        if permsid:
-##            cmd += " -permsid"
-##        return self._return_proxy(qcmd)
+    def clientkick(self, clid, reasonid, reasonmsg=None):
+        params = dict()
+        # Todo: Support for multiple clients.
+        params["clid"] = clid
+        params["reasonid"] = int(reasonid)
+        if reasonmsg is not None:
+            params["reasonmsg"] = reasonmsg        
+        return self._return_proxy("clientkick", params, None)
+    
+    def clientpoke(self, clid, msg):
+        params = dict()
+        # Todo: Support for multiple clients
+        params["clid"] = clid
+        params["msg"] = msg    
+        return self._return_proxy("clientpoke", params, None)
+
+    def clientpermlist(self, cldbid, permsid=False):
+        params = dict()
+        params["cldbid"] = int(cldbid)
+
+        opt = list()
+        if permsid:
+            opt.append("permsid")
+        return self._return_proxy("clientpermlist", params, opt)
 
 ##    def clientaddperm(self, ...):
 ##        pass
@@ -579,14 +548,15 @@ class TS3Commands(object):
 ##    def clientdelperm(self, ...):
 ##        pass
 
-##    def channelclientpermlist(self, cid, cldbid, permsid=False):
-##        cid = int(cid)
-##        cldbid = int(cldbid)
-##        cmd = "channelclientpermlist cid={} cldbid={}"\
-##              .format(cid, cldbid)
-##        if permsid:
-##            cmd += " -permsid"
-##        return self._return_proxy(qcmd)
+    def channelclientpermlist(self, cid, cldbid, permsid=False):
+        params = dict()
+        params["cid"] = int(cid)
+        params["cldbid"] = int(cldbid)
+
+        opt = list()
+        if permsid:
+            opt.append("permsid")
+        return self._return_proxy("channelclientpermlist", params, opt)
 
 ##    def channelclientaddperm(self, ...):
 ##        pass
@@ -594,6 +564,11 @@ class TS3Commands(object):
 ##    def channelclientdelperm(self, ...):
 ##        pass
 
-##    def permissionlist(self):
-##        cmd = "permissionlist"
-##        return self._return_proxy(qcmd)
+    def permissionlist(self):
+        return self._return_proxy("permissionlist", None, None)
+
+    def permidgetbyname(self, permsid):
+        params = dict()
+        # Todo: Add support for multiple permsids.
+        params["permsid"] = permsid
+        return self._return_proxy("permidgetbyname", params, None)

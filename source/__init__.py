@@ -1,9 +1,19 @@
 #!/usr/bin/python3
 
 
-import query
-import filetransfer
-import protocoll
+__version__ = "0.1.0"
 
-# For convenience
-from definitions import *
+
+try:
+    import query
+    import filetransfer
+    import protocoll
+
+    # For convenience
+    from definitions import *
+
+except ImportError:
+    from . import query
+    from . import filetransfer
+    from . import protocoll
+    from .definitions import *
