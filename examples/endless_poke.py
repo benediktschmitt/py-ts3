@@ -3,7 +3,11 @@
 
 # Modules
 # ------------------------------------------------
+import sys
+sys.path.append("../source")
+
 import ts3
+import time
 
 
 # Functions
@@ -19,8 +23,11 @@ def endless_poke(ts3conn, nickname, msg=None, num=100, delay=1):
 
     # Get the clients id
     ts3conn.clientfind(nickname)
-    clients = ts3conn.last_response.parsed
+    clients = ts3conn.last_resp.parsed
     clients = [client["clid"] for client in clients]
+    
+    # Todo: remove this line, when clientpoke supports multiple clids.
+    clients = clients[0]
     
     # Poke them
     i = 0
@@ -39,4 +46,4 @@ if __name__ == "__main__":
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
         ts3conn.login(USER, PASS)
         ts3conn.use(SID)
-        endless_poke(ts3conn)
+        endless_poke(ts3conn, "ben")

@@ -538,8 +538,16 @@ if __name__ == "__main__":
 
     with TS3Connection("localhost") as ts3conn:
         ts3conn.login("serveradmin", "1U0FkWci")
+        print(ts3conn.last_resp.error)
+        
         ts3conn.use(1)
+        print(ts3conn.last_resp.error)
+        
         ts3conn.gm("Hello World")
+        print(ts3conn.last_resp.error)
 
         ts3conn.channellist()
+        pprint(ts3conn.last_resp.parsed)
+
+        ts3conn.clientfind("ben")
         pprint(ts3conn.last_resp.parsed)

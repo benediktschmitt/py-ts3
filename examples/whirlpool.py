@@ -3,7 +3,11 @@
 
 # Modules
 # ------------------------------------------------
+import sys
+sys.path.append("../source")
+
 import ts3
+import time
 import random
 
 
@@ -21,13 +25,14 @@ def whirlpool(ts3conn, duration=30, relax_time=0.5):
         ts3conn.sendtextmessage(
             targetmode=ts3.TextMessageTargetMode.SERVER,
             target=0, msg="Whirpool in {}s".format(i))
+        time.sleep(1)
 
     # Fetch the clientlist and the channellist.
     ts3conn.clientlist()
-    clientlist = ts3conn.last_response.parsed
+    clientlist = ts3conn.last_resp.parsed
 
     ts3conn.channellist()
-    channellist = ts3conn.last_response.parsed
+    channellist = ts3conn.last_resp.parsed
 
     # Whirpool with one channel is boring.
     if len(channellist) == 1:
@@ -40,14 +45,14 @@ def whirlpool(ts3conn, duration=30, relax_time=0.5):
             cid = random.choice(channellist)["cid"]
             ts3conn.clientmove(clid, cid)
             # Todo: Can I remove this ?
-            ts3conn.last_response
+            ts3conn.last_resp
         time.sleep(relax_time)
 
     # Move all clients back
     for client in clientlist:
         ts3conn.clientmove(client["clid"], client["cid"])
         # Todo: Can I remove this?
-        ts3conn.last_response
+        ts3conn.last_resp
     return None
 
 

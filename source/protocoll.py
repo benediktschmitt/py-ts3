@@ -302,9 +302,10 @@ class TS3Commands(object):
 
     def channelcreate(self, name, properties=None):
         params = dict()
-        params["name"] = name
+        params["channel_name"] = name
         if properties is not None:
             params.update(properties)
+        print(params)
         return self._return_proxy("channelcreate", params, None)
         
     def channeldelete(self, cid, force):
