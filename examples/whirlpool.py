@@ -4,9 +4,9 @@
 # Modules
 # ------------------------------------------------
 import sys
-sys.path.append("../source")
+sys.path.append("../")
 
-import ts3
+import source as ts3
 import time
 import random
 
@@ -44,15 +44,11 @@ def whirlpool(ts3conn, duration=30, relax_time=0.5):
             clid = client["clid"]
             cid = random.choice(channellist)["cid"]
             ts3conn.clientmove(clid, cid)
-            # Todo: Can I remove this ?
-            ts3conn.last_resp
         time.sleep(relax_time)
 
     # Move all clients back
     for client in clientlist:
         ts3conn.clientmove(client["clid"], client["cid"])
-        # Todo: Can I remove this?
-        ts3conn.last_resp
     return None
 
 

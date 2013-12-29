@@ -8,7 +8,11 @@ import socket
 import telnetlib
 
 # local
-from protocoll import TS3Commands
+try:
+    from protocoll import TS3Commands
+except ImportError:
+    from .protocoll import TS3Commands
+    
 
 # Data
 # ------------------------------------------------
@@ -17,6 +21,7 @@ __all__ = [
     "TS3RegEx",
     "TS3ParserError",
     "TS3Response",
+    "TS3BaseConnection",
     "TS3Connection"]
 
 
@@ -88,17 +93,34 @@ class TS3Escape(object):
         """
         Folds the *params* dict to a string, so that it can be used in a query
         command.
+        
+            >>> TS3Escape.properties_to_str({'virtualserver_name': 'foo bar'})
+            'virtualserver_name=foo\\\sbar'
+        
         If *params* is None, the empty string is returned.
         
-        >>> TS3Escape.properties_to_str({'virtualserver_name': 'foo bar'})
-        'virtualserver_name=foo\\\sbar'
+            >>> TS3Escape.properties_to_str(None)
+            ''
+
+        This method supports also lists as values:
+
+            >>> TS3Escape.properties_to_str({'clid': [0,2,4,45]})
+            'clid=0|clid=2|clid=4|clid=45'        
         """
         if params is None:
             return str()
         
         # It's not necessairy to escape the key.
-        tmp = " ".join(str(key).lower() + "=" + cls.escape(str(val))
-                       for key, val in params.items())
+        tmp = list()
+        for key, val in params.items():
+            key = str(key).lower()
+            
+            if isinstance(val, list):
+                tmp.append(cls.key_mulval_to_str(key, val))
+            else:
+                val = cls.escape(str(val))
+                tmp.append(key + "=" + val)
+        tmp = " ".join(tmp)
         return tmp
 
     @classmethod
@@ -110,7 +132,7 @@ class TS3Escape(object):
         >>> TS3Escape.key_mulval_str('clid', [1,2,3])
         'clid=1|clid=2|clid=3'
         """
-        key = str(key)
+        key = str(key).lower()
         tmp = "|".join(key + "=" + cls.escape(str(val))
                        for val in values)
         return tmp
@@ -521,7 +543,7 @@ class TS3BaseConnection(object):
 
 class TS3Connection(TS3BaseConnection, TS3Commands):
     """
-    TS3 server query client.
+    TS3 server query client. 
     """
 
     def _return_proxy(self, cmd, params, opt):
@@ -529,7 +551,7 @@ class TS3Connection(TS3BaseConnection, TS3Commands):
         Executes the command created with a method of TS3Protocoll directly.
         """
         return TS3BaseConnection.send(self, cmd, params, opt)
-
+    
     
 # Main
 # ------------------------------------------------

@@ -17,8 +17,8 @@ setup(
     author_email = "benedikt@benediktschmitt.de",
     url = "https://github.com/benediktschmitt/py-ts3",
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
-    packages = ["source"],
-##    package_dir = {"source": "ts3"},
+    packages = ["ts3"],
+    package_dir = {"ts3": "source"},
     license = open("LICENSE").read(),
     )
     

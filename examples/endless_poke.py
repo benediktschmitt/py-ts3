@@ -4,9 +4,9 @@
 # Modules
 # ------------------------------------------------
 import sys
-sys.path.append("../source")
+sys.path.append("../")
 
-import ts3
+import source as ts3
 import time
 
 
@@ -46,4 +46,4 @@ if __name__ == "__main__":
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
         ts3conn.login(USER, PASS)
         ts3conn.use(SID)
-        endless_poke(ts3conn, "ben")
+        endless_poke(ts3conn, "BEN")
