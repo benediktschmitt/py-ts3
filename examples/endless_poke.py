@@ -27,6 +27,9 @@ def endless_poke(ts3conn, nickname, msg=None, num=100, delay=1):
     i = 0
     while num == -1 or i < num:
         ts3conn.clientpoke(clients, msg)
+        if ts3conn.last_resp.error["id"] != "0":
+            print("Error while poking:", ts3conn.last_resp.error["msg"])
+            return None
         time.sleep(delay)
     return None
 
@@ -40,4 +43,4 @@ if __name__ == "__main__":
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
         ts3conn.login(USER, PASS)
         ts3conn.use(SID)
-        endless_poke(ts3conn, "Mau")
+        endless_poke(ts3conn, "FOO")

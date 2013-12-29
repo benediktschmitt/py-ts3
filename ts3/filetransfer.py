@@ -4,3 +4,7 @@
 """
 Todo: Implement this feature.
 """
+
+
+class TS3FileTransfer(object):
+    pass

@@ -17,7 +17,7 @@ it:
 	```
 
 ## Quick Introduction
-The easiest way is to get to grips with this library is taking a look at the
+The easiest way to get to grips with this library is taking a look at the
 *examples*.
 If you need information about the possible query commands, take a look at the 
 *TS3 Server Query Manual*.

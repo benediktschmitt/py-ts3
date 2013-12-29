@@ -19,7 +19,7 @@ class TS3Commands(object):
         return (cmd, params, opt)
 
     # Implementation of the query factories
-    # ------------------------------------------------ 
+    # ------------------------------------------------
 
     def help(self, cmd=None):
         if cmd is not None:

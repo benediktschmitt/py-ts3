@@ -46,6 +46,7 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
     # Move all clients back
     for client in clientlist:
         ts3conn.clientmove(client["clid"], client["cid"])
+        ts3conn.last_resp
     return None
 
 
