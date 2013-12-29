@@ -7,7 +7,6 @@ __version__ = "0.1.0"
 try:
     import query
     import filetransfer
-    import protocoll
 
     # For convenience
     from definitions import *
@@ -15,6 +14,5 @@ try:
 except ImportError:
     from . import query
     from . import filetransfer
-    from . import protocoll
-    
+
     from .definitions import *

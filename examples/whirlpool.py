@@ -3,17 +3,14 @@
 
 # Modules
 # ------------------------------------------------
-import sys
-sys.path.append("../")
-
-import source as ts3
+import ts3
 import time
 import random
 
 
 # Functions
 # ------------------------------------------------
-def whirlpool(ts3conn, duration=30, relax_time=0.5):
+def whirlpool(ts3conn, duration=10, relax_time=0.5):
     """
     Moves all clients randomly in other channels for *duration* seconds.
     After the whirpool event, all clients will be in the same channel as

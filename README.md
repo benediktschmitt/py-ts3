@@ -1,15 +1,14 @@
 # Py-TS3
-
-**>>> This package is in an early state and not ready for productive use!<<<**
-
 This package implements an API for the **TeamSpeak 3 Server Query** and the
 **TeamSpeak 3 File Transfer Interface**. 
 It's developed and tested under **Python 3**.
 
 ## Installation
+The master branch is a valid *distutils* package. So simply download and install
+it:
 
-1.	The master branch contains also the Python distutils package. So
-	[download](https://github.com/benediktschmitt/emsm/archive/master.zip) it.
+1.	[Download](https://github.com/benediktschmitt/emsm/archive/master.zip) the
+    master branch.
 	
 2.	Go to the download location and run the *setup.py* script:
 
@@ -17,15 +16,21 @@ It's developed and tested under **Python 3**.
 	$ setup.py install
 	```
 
-## Examples
-1. Show clients:
+## Quick Introduction
+The easiest way is to get to grips with this library is taking a look at the
+*examples*.
+If you need information about the possible query commands, take a look at the 
+*TS3 Server Query Manual*.
+
+### Examples
+1. Show all clients on the virtual server 1:
 
 	```Python
 	#!/usr/bin/python3
 
-	from ts3 import query
+	from ts3.query import TS3Connection
 
-	with query.TS3Connection("localhost") as ts3conn:
+	with TS3Connection("localhost") as ts3conn:
 		# Note, that the client will not wait for the response, unless you
 		# set the response flag *ts3conn.wait_for_resp = True* or you call
 		# *ts3conn.last_resp* after each command.
@@ -39,7 +44,7 @@ It's developed and tested under **Python 3**.
 			print(client["cid"], client["client_nickname"])	
 	```
 
-2. Kick all clients from the server:
+2. Greet every client:
 
 	```Python
 	#!/usr/bin/python3
@@ -53,17 +58,20 @@ It's developed and tested under **Python 3**.
 		
 		resp = ts3conn.last_resp
 		for client in resp.parsed:
-			ts3conn.clientkick(clid=client["clid"], reasonid=5)
+			msg = "Hi {}".format(client["client_nickname"])
+			ts3conn.clientpoke(clid=client["clid"], msg=msg)
 	```
 	
-You can find more examples in the **examples** directory.
+More examples are in the **examples directory**.
 
 ## Bugs
 This project is in an early state, so you'll probably find a bug. Please report
-it.
+it. 
+
+If you found a grammar or spelling error, please report it too.
 
 ## Versioning
 For the version numbers, take a look at http://semver.org/.
 
 ## License
-This package itself is licensed under the **MIT License**.
+This package is licensed under the **MIT License**. 

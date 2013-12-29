@@ -35,6 +35,6 @@ nosetests.xml
 .project
 .pydevproject
 
-# Ignore my test ts3 server
+# appendix
 ts3-testserver
-ts3_serverquery_manual.pdf
+build

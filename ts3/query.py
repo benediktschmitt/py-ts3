@@ -9,9 +9,9 @@ import telnetlib
 
 # local
 try:
-    from protocoll import TS3Commands
+    from commands import TS3Commands
 except ImportError:
-    from .protocoll import TS3Commands
+    from .commands import TS3Commands
     
 
 # Data
@@ -45,77 +45,85 @@ class TS3Escape(object):
         ("\v", r"\v")
         ]
 
-    # The same map, but with the byte strings.
-    _B_MAP = [(e0.encode(), e1.encode()) for e0, e1 in _MAP]
-
     @classmethod
-    def _get_map(cls, str_):
+    def escape(cls, txt):
         """
-        Returns the string escape map or the bytes escape map, depending
-        on the type of *str_*. If there's no map for the type of *str_*
-        available, a TypeError is raised.
-        """
-        if isinstance(str_, bytes):
-            return cls._B_MAP
-        elif isinstance(str_, str):
-            return cls._MAP
-        else:
-            raise TypeError("*str_* has to be bytes or str object.")        
+        txt: str
+        
+        Escapes the characters in the string *txt* as described in the
+        TS3 server query manual:
 
-    @classmethod
-    def escape(cls, str_):
+            >>> TS3Escape.escape('Hallo Welt')
+            'Hallo\\sWelt'
         """
-        Escapes the characters in the string as described in the manual.
-
-        >>> TS3Escape.escape('Hallo Welt')
-        'Hallo\\sWelt'
-        """                
+        if not isinstance(txt, str):
+            raise TypeError("*txt* has to be a string.")
+            
         # The order of the replacement is not trivial.
-        for char, repl_char in cls._get_map(str_):
-            str_ = str_.replace(char, repl_char)
-        return str_
+        for char, repl_char in cls._MAP:
+            txt = txt.replace(char, repl_char)
+        return txt
 
     @classmethod
-    def unescape(cls, str_):
+    def unescape(cls, txt):
         """
-        Unescapes the charactes in the string as described in the manual.
+        txt: str
+        
+        Unescapes the charactes in the string *txt* as described in the
+        manual.
 
-        >>> TS3Escape.unescape('Hallo\\sWelt')
-        'Hallo Welt'
+            >>> TS3Escape.unescape('Hallo\\sWelt')
+            'Hallo Welt'
         """
+        if not isinstance(txt, str):
+            raise TypeError("*txt* has to be a string.")
+        
         # Again, the order of the replacement is not trivial.
-        for repl_char, char in reversed(cls._get_map(str_)):
-            str_ = str_.replace(char, repl_char)
-        return str_
+        for repl_char, char in reversed(cls._MAP):
+            txt = txt.replace(char, repl_char)
+        return txt
 
     @classmethod
     def parameters_to_str(cls, params):
         """
-        Folds the *params* dict to a string, so that it can be used in a query
-        command.
-        
-            >>> TS3Escape.properties_to_str({'virtualserver_name': 'foo bar'})
-            'virtualserver_name=foo\\\sbar'
-        
-        If *params* is None, the empty string is returned.
-        
-            >>> TS3Escape.properties_to_str(None)
+        *params* is either a dictionary with the possible key-value types:
+            key    value
+            str -> str
+            str -> [str]
+            str -> None
+
+        or None.
+
+        The return value is a string formatted as described in the TS3 server
+        query manual:
+
+            >>> # None
+            >>> TS3Escape.parameters_to_str(None)
             ''
+            
+            >>> # key -> str
+            >>> TS3Escape.parameters_to_str({'virtualserver_name': 'foo bar'})
+            'virtualserver_name=foo\\\sbar'
 
-        This method supports also lists as values:
-
-            >>> TS3Escape.properties_to_str({'clid': [0,2,4,45]})
-            'clid=0|clid=2|clid=4|clid=45'        
+            >>> # key -> [str]
+            >>> TS3Escape.parameters_to_str({'clid': [0,2,4,45]})
+            'clid=0|clid=2|clid=4|clid=45'
+            
+            >>> # key -> None
+            >>> TS3Escape.parameters_to_str({"permsid": None})
+            ''
         """
         if params is None:
             return str()
-        
-        # It's not necessairy to escape the key.
+
         tmp = list()
         for key, val in params.items():
-            key = str(key).lower()
-            
-            if isinstance(val, list):
+            # Escaping a key will never making it a valid key.
+            key = key.lower()
+
+            if val is None:
+                pass
+            elif isinstance(val, list):
                 tmp.append(cls.key_mulval_to_str(key, val))
             else:
                 val = cls.escape(str(val))
@@ -126,34 +134,47 @@ class TS3Escape(object):
     @classmethod
     def key_mulval_to_str(cls, key, values):
         """
-        Can be used to convert multiple key value pairs, with the same key
-        to a valid TS3 ServerQuery string.
+        key: str
+        values: [str|None]
         
-        >>> TS3Escape.key_mulval_str('clid', [1,2,3])
-        'clid=1|clid=2|clid=3'
+        Can be used to convert multiple key value pairs, with the same key
+        to a valid TS3 server query string. If an item is None, it will be
+        ignored:
+        
+            >>> TS3Escape.key_mulval_str('clid', [1, 2, None, 3])
+            'clid=1|clid=2|clid=3'
         """
         key = str(key).lower()
-        tmp = "|".join(key + "=" + cls.escape(str(val))
-                       for val in values)
+        tmp = "|".join(key + "=" + cls.escape(val) \
+                       for val in values if val is not None)
         return tmp
 
     @classmethod
     def options_to_str(cls, options):
         """
-        Escapes the options and adds a *-* if necessairy to each option.
-        If *options* is None, the empty string will be returned.
+        options: None | [str|None]
+        
+        Escapes the options and prepends a *-* if necessairy to an option.
+        If *options* is None, the empty string will be returned. If
+        *options* itself is None, the emtpy string will be returned.
 
-        >>> TS3Escape.options_to_str(['permsid', '-virtual'])
-        '-permsid -virtual'
+            >>> TS3Escape.options_to_str(None)
+            ''
+
+            >>> TS3Escape.options_to_str([None, 'permsid', '-virtual'])
+            '-permsid -virtual'
         """
         if options is None:
             return str()
-        
+
+        # Either an option is valid or not. Escaping doesn't change this fact.
         tmp = list()
         for i, e in enumerate(options):
-            if not e.startswith("-"):
+            if e is None:
+                continue
+            elif not e.startswith("-"):
                 e = "-" + e
-            tmp.append(e)        
+            tmp.append(e)
         tmp = " ".join(tmp)
         return tmp
     
@@ -163,7 +184,7 @@ class TS3RegEx(object):
     Frequently used and important regular expressions.
     """
 
-    # XXX: The telnet interface does not accept compiled regex.
+    # XXX: The telnet interface does not accept compiled regex ...
     LINE =  b"\n\r"
 
     # Matches the error *line* (with line ending)
@@ -185,11 +206,16 @@ class TS3ParserError(Exception):
     
 class TS3Response(object):
     """
-    Parses **ONE** response and stores it's data.
+    Parses **ONE** response and stores it's data. If you init an instance
+    with the data of more than one response, parsing will fail.
+
+    Note, that this class is **lazy**. The response is only parsed, if you
+    request an attribute, that requires a parsed version of the data.
     """
         
     def __init__(self, data):
         self._data = data
+        self._data_bytestr = None
 
         self._parsed = None
         self._parseable = None
@@ -203,6 +229,16 @@ class TS3Response(object):
         The raw response as byte list.
         """
         return self._data
+
+    @property
+    def data_bytestr(self):
+        """
+        Returns the data as byte string.
+        """
+        if self._data_bytestr is None:
+            tmp = b"\n".join(self._data)
+            self._data_bytestr = tmp
+        return self._data_bytestr        
 
     @property
     def parsed(self):
@@ -231,11 +267,12 @@ class TS3Response(object):
 
     # ----------- DICT TYPE ----------
 
-    def __getitem__(self, key):
+    def __getitem__(self, index):
         """
-        Returns the value in the *parsed* dict corresponding to the *key*.
+        Todo: let this simulate a dict, not a list.
         """
-        return self.parsed[key]
+        # self[0, "cid"] -> self.parsed[index][key] <- Not nice
+        return self.parsed[index]
 
     # ----------- PARSER ----------
     
@@ -270,11 +307,12 @@ class TS3Response(object):
         """
         >>> parse_property(b'key=value')
         ('key', 'value')
+        
         >>> parse_property(b'foo')
-        Traceback (most recent call last):
-          ...
-            raise TS3ParserError()
-        TS3ParserError
+        ('foo', '')
+
+        >>> parse_property(b'client_unique_identifier=gZ7K[...]GIik=')
+        ('client_unique_identifier', 'gZ7K[...]GIik=')
         """
         prop = prop.split(b"=")
         if len(prop) == 1:
@@ -283,12 +321,9 @@ class TS3Response(object):
         elif len(prop) == 2:
             key, val = prop
         else:
-            # XXX: If a b'=' is in a string. Error occured while parsing
-            #  b''client_unique_identifier=gZ7Kw+uoO9LppsDG0\\/T2lqOGIik='
             key = prop[0]
             val = b"=".join(prop[1:])
 
-        # TODO: Is decoding really necessairy?
         try:
             key = key.decode()
             val = val.decode()
@@ -329,7 +364,7 @@ class TS3Response(object):
         except TS3ParserError:
             self._parsed = None
             self._parseable = False
-        else:            
+        else:
             self._parsed = parsed
             self._parseable = True
         return None
@@ -450,6 +485,10 @@ class TS3BaseConnection(object):
 
     def send(self, command, parameters=None, options=None):
         """
+        command: str
+        parameters: None | {str->None|str->[str]|str->str}
+        options: None | [None|str]
+        
         The general syntax of a TS3 query command is:
         
             command [parameter...] [option]
@@ -459,8 +498,8 @@ class TS3BaseConnection(object):
         
             command key1=value1 key2=value2 ... -option1 -option2 ...
             
-        Examples:
-        ---------
+        Possible calls:
+        ---------------
             >>> # serverlist
             >>> self.send("serverlist")
             
@@ -471,18 +510,22 @@ class TS3BaseConnection(object):
             >>> self.send("clientdbfind", {"pattern": "FOOBAR"}, ["uid"])
         """
         # Escape the command and build the final query command string.
-        command = str(command)
+        if not isinstance(command, str):
+            raise TypeError("*command* has to be a string.")
+        
+        command = command
         parameters = TS3Escape.parameters_to_str(parameters)
         options = TS3Escape.options_to_str(options)
         
         query_command = command + " " + parameters + " " + options + "\n\r"
         query_command = query_command.encode()
 
-        # Send the command.
         return self.send_raw(query_command)
 
     def send_raw(self, msg):
         """
+        msg: bytes
+        
         Sends the bytestring *msg* directly to the server. If *msg* is
         a string, it will be encoded.
 
@@ -499,27 +542,24 @@ class TS3BaseConnection(object):
 
     def _recv(self):
         """
-        Waits for a response and stores all responses in *self._resp*.
-
-        Stores unfetched responses in the resp_queue.
+        Blocks until all unfetched responses are received. The responses
+        are stored in *self_resp*.
         """
-        # Send the new command.
-        all_resp = list()
         resp = list()
         while self._unfetched_resp:
             line = self._telnet_conn.read_until(TS3RegEx.LINE)
             resp.append(line)
             if re.match(TS3RegEx.ERROR_LINE, line):
-                all_resp.append(TS3Response(resp))
-                resp = list()
+                self._responses.append(TS3Response(resp))
                 self._unfetched_resp -= 1
-        self._responses.extend(all_resp)
+                resp = list()
         return None
 
     @property
     def resp(self):
         """
-        Fetches all unfetched responses and returns them.
+        Fetches all unfetched responses and returns all responses in the
+        response list.
         """
         self._recv()
         return self._responses
@@ -533,7 +573,7 @@ class TS3BaseConnection(object):
         self._recv()
         return self._responses[-1] if self._responses else None
         
-    def flush_resp_queue(self):
+    def clear_resp_list(self):
         """
         Clears the response queue.
         """
@@ -560,16 +600,13 @@ if __name__ == "__main__":
 
     with TS3Connection("localhost") as ts3conn:
         ts3conn.login("serveradmin", "1U0FkWci")
-        print(ts3conn.last_resp.error)
+        pprint(ts3conn.last_resp.error)
         
         ts3conn.use(1)
-        print(ts3conn.last_resp.error)
+        pprint(ts3conn.last_resp.error)
         
         ts3conn.gm("Hello World")
-        print(ts3conn.last_resp.error)
+        pprint(ts3conn.last_resp.error)
 
-        ts3conn.channellist()
-        pprint(ts3conn.last_resp.parsed)
-
-        ts3conn.clientfind("ben")
+        ts3conn.whoami()
         pprint(ts3conn.last_resp.parsed)

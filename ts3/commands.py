@@ -5,19 +5,11 @@
 # ------------------------------------------------
 class TS3Commands(object):
     """
-    Returns the string described in the documentation to execute the command.
-    Consider this as the implementation of the protocoll.
+    A little helper class, that creates the *command* string,
+    *parameters* dict and the *options* list for all available query commands,
+    so that these values can be used to call *TS3BaseConnection.send(...)*.
 
-    Each method returns:
-
-        return self._return_proxy(str, dict|None, list|None)
-        return self._return_proxy(command, parameters, options)
-
-    Example:
-
-        return self._return_proxy("help", None, None)
-        return self._return_proxy("use", {"port": 21293}, ["virtual"])
-        
+    The type or values of the parameters are **NOT* validated.
     """
 
     def _return_proxy(self, cmd, params, opt):
@@ -30,7 +22,11 @@ class TS3Commands(object):
     # ------------------------------------------------ 
 
     def help(self, cmd=None):
-        return self._return_proxy("help", None, [cmd])
+        if cmd is not None:
+            qcmd = "help " + cmd
+        else:
+            qcmd = "help"
+        return self._return_proxy(qcmd, None, None)
     
     def quit(self):
         return self._return_proxy("quit", None, None)
@@ -61,11 +57,9 @@ class TS3Commands(object):
 
     def use(self, sid=None, port=None, virtual=False):
         params = dict()
-        if sid is not None:
-            params["sid"] = int(sid)
-        if port is not None:
-            params["port"] = int(port)
-        
+        params["sid"] = sid
+        params["port"] = port
+
         opt = list()
         if virtual:
             opt.append("virtual")
@@ -86,29 +80,29 @@ class TS3Commands(object):
 
     def serveridgetbyport(self, port):
         params = dict()
-        params["virtualserver_port"] = int(port)
+        params["virtualserver_port"] = port
         return self._return_proxy("serveridgetbyport", params, None)
 
     def serverdelete(self, sid):
         params = dict()
-        params["sid"] = int(sid)
+        params["sid"] = sid
         return self._return_proxy("serverdelete", params, None)
 
-    def servercreate(self, name, properties=None):
-        params = dict()
-        params["virtualserver_name"] = name
-        if properties is not None:
-            params.update(properties)
-        return self._return_proxy("servercreate", params, None)
+##    def servercreate(self, name, properties=None):
+##        params = dict()
+##        params["virtualserver_name"] = name
+##        if properties is not None:
+##            params.update(properties)
+##        return self._return_proxy("servercreate", params, None)
 
     def serverstart(self, sid):
         params = dict()
-        params["sid"] = int(sid)
+        params["sid"] = sid
         return self._return_proxy("serverstart", params, None)
 
     def serverstop(self, sid):
         params = dict()
-        params["sid"] = int(sid)
+        params["sid"] = sid
         return self._return_proxy("serverstop", params, None)
 
     def serverprocessstop(self):
@@ -121,13 +115,13 @@ class TS3Commands(object):
         return self._return_proxy("serverrequestconnectioninfo", None, None)
 
     def servertemppasswordadd(self, password, description,
-                              duration, tcid, tcpw):
+                              duration, target_cid, target_channel_pw):
         params = dict()
         params["pw"] = password
         params["desc"] = description
-        params["duration"] = int(duration)
-        params["tcid"] = int(tcid)
-        params["tcpw"] = tcpw
+        params["duration"] = duration
+        params["tcid"] = target_cid
+        params["tcpw"] = target_channel_pw
         return self._return_proxy("servertemppasswordadd", params, None)
         
     def servertemppassworddel(self, password):
@@ -144,35 +138,36 @@ class TS3Commands(object):
     def servergrouplist(self):
         return self._return_proxy("servergrouplist", None, None)
     
-    def servergroupadd(self, name, type_=None):
+    def servergroupadd(self, groupName, groupDbType=None):
         params = dict()
-        params["name"] = name
-        params["type"] = int(type_)
+        params["name"] = groupName
+        params["type"] = groupDbType
         return self._return_proxy("servergroupadd", params, None)
 
-    def servergroupdel(self, sgid, force):
+    def servergroupdel(self, groupID, force):
         params = dict()
-        params["sgid"] = int(sgid)
-        params["force"] = int(force)
+        params["sgid"] = groupID
+        params["force"] = force
         return self._return_proxy("servergroupdel", params, None)
 
-    def servergroupcopy(self, ssgid, tsgid, name, type_):
+    def servergroupcopy(self, sourceGroupID, targetGroupID,
+                        groupName, groupDbType):
         params = dict()
-        params["ssgid"] = int(ssgid)
-        params["tsgid"] = int(tsgid)
-        params["name"] = name
-        params["type"] = int(type_)
+        params["ssgid"] = sourceGroupID
+        params["tsgid"] = targetGroupID
+        params["name"] = groupName
+        params["type"] = groupDbType
         return self._return_proxy("servergroupcopy", params, None)
 
-    def servergrouprename(self, sgid, name):
+    def servergrouprename(self, groupID, groupName):
         params = dict()
-        params["sgid"] = int(sgid)
-        params["name"] = name
+        params["sgid"] = groupID
+        params["name"] = groupName
         return self._return_proxy("servergrouprename", params, None)
 
-    def servergrouppermlist(self, sgid, permsid=False):
+    def servergrouppermlist(self, groupID, permsid=False):
         params = dict()
-        params["sgid"] = int(sgid)
+        params["sgid"] = groupID
 
         opt = list()
         if permsid:
@@ -185,30 +180,30 @@ class TS3Commands(object):
 ##    def servergroupdelperm(self, sgid, permid=None, permsid=None):
 ##        pass
 
-    def servergroupaddclient(self, sgid, cldbid):
+    def servergroupaddclient(self, groupID, clientDBID):
         params = dict()
-        params["sgid"] = int(sgid)
-        params["cldbid"] = int(cldbid)
+        params["sgid"] = groupID
+        params["cldbid"] = clientDBID
         return self._return_proxy("servergroupaddclient", params, None)
 
-    def servergroupdelclient(self, sgid, cldbid):
+    def servergroupdelclient(self, groupID, clientDBID):
         params = dict()
-        params["sgid"] = int(sgid)
-        params["cldbid"] = int(cldbid)
+        params["sgid"] = groupID
+        params["cldbid"] = clientDBID
         return self._return_proxy("servergroupdelclient", params, None)
 
-    def servergroupclientlist(self, sgid, names=False):
+    def servergroupclientlist(self, groupID, names=False):
         params = dict()
-        params["sgid"] = int(sgid)
+        params["sgid"] = groupID
 
         opt = list()
         if names:
             opt.append("names")
         return self._return_proxy("servergroupclientlist", params, opt)
 
-    def servergroupsbyclientid(self, cldbid):
+    def servergroupsbyclientid(self, clientDBID):
         params = dict()
-        params["cldbid"] = int(cldbid)
+        params["cldbid"] = clientDBID
         return self._return_proxy("servergroupsbyclientid", params, None)
 
 ##    def servergroupautooaddperm(self, ...):
@@ -223,11 +218,10 @@ class TS3Commands(object):
 ##    def serversnapshotdeploy(self, snapshot):
 ##        return self._return_proxy("serversnapshotdeploy " + snapshot, None, None)
 
-    def servernotifyregister(self, event, id_=None):
+    def servernotifyregister(self, event, channelID=None):
         params = dict()
         params["event"] = event
-        if id_ is not None:
-            params["id"] = int(id_)
+        params["id"] = channelID
         return self._return_proxy("servernotifyregister", params, None)
 
     def servernotifyunregister(self):
@@ -235,28 +229,24 @@ class TS3Commands(object):
 
     def sendtextmessage(self, targetmode, target, msg):
         params = dict()
-        params["targetmode"] = int(targetmode)
-        params["target"] = int(target)
+        params["targetmode"] = targetmode
+        params["target"] = target
         params["msg"] = msg
         return self._return_proxy("sendtextmessage", params, None)
     
     def logview(self, lines=None, reverse=None,
                 instance=None, begin_pos=None):
         params = dict()
-        if lines is not None:
-            params["lines"] = int(lines)
-        if reverse is not None:
-            params["reverse"] = int(reverse)
-        if instance is not None:
-            params["instance"] = int(instance)
-        if begin_pos is not None:
-            params["begin_pos"] = int(begin_pos)
+        params["line"] = lines
+        params["reverse"] = reverse
+        params["instance"] = instance
+        params["begin_pos"] = begin_pos
         return self._return_proxy("logview", params, None)
 
     def logadd(self, loglevel, logmsg):
         params = dict()
-        params["loglevel"] = int(loglevel)
-        params["logmsg"] = int(logmsg)
+        params["loglevel"] = loglevel
+        params["logmsg"] = logmsg
         return self._return_proxy("logadd", params, None)
 
     def gm(self, msg):
@@ -283,43 +273,40 @@ class TS3Commands(object):
 
     def channelinfo(self, cid):
         params = dict()
-        params["cid"] = int(cid)
+        params["cid"] = cid
         return self._return_proxy("channelinfo", params, None)
 
     def channelfind(self, pattern=None):
         params = dict()
-        if pattern is not None:
-            params["pattern"] = pattern
+        params["pattern"] = pattern
         return self._return_proxy("channelfind", params, None)
 
     def channelmove(self, cid, cpid, order=None):
         params = dict()
-        params["cid"] = int(cid)
-        params["cpid"] = int(cpid)
-        if order is not None:
-            params["order"] = int(order)
+        params["cid"] = cid
+        params["cpid"] = cpid
+        params["order"] = order
         return self._return_proxy("channelmove", params, None)
 
-    def channelcreate(self, name, properties=None):
-        params = dict()
-        params["channel_name"] = name
-        if properties is not None:
-            params.update(properties)
-        print(params)
-        return self._return_proxy("channelcreate", params, None)
+##    def channelcreate(self, name, properties=None):
+##        params = dict()
+##        params["channel_name"] = name
+##        if properties is not None:
+##            params.update(properties)
+##        return self._return_proxy("channelcreate", params, None)
         
     def channeldelete(self, cid, force):
         params = dict()
-        params["cid"] = int(cid)
-        params["force"] = int(force)
+        params["cid"] = cid
+        params["force"] = force
         return self._return_proxy("channeldelete", params, None)
 
-    def channeledit(self, cid, properties=None):
-        params = dict()
-        params["cid"] = int(cid)
-        if properties is not None:
-            params.update(properties)
-        return self._return_proxy("channeledit", params, None)
+##    def channeledit(self, cid, properties=None):
+##        params = dict()
+##        params["cid"] = cid
+##        if properties is not None:
+##            params.update(properties)
+##        return self._return_proxy("channeledit", params, None)
         
     def channelgrouplist(self):
         return self._return_proxy("channelgrouplist", None, None)
@@ -327,26 +314,26 @@ class TS3Commands(object):
     def channelgroupadd(self, name, type_):
         params = dict()
         params["name"] = name
-        params["type"] = int(type_)
+        params["type"] = type_
         return self._return_proxy("channelgroupadd", params, None)
 
     def channelgroupdel(self, cgid, force):
         params = dict()
-        params["cgid"] = int(cgid)
-        params["force"] = int(force)
+        params["cgid"] = cgid
+        params["force"] = force
         return self._return_proxy("channelgroupdel", params, None)
 
     def channelgroupcopy(self, scgid, tcgid, name, type_):
         params = dict()
-        params["scgid"] = int(scgid)
-        params["tcgid"] = int(tcgid)
+        params["scgid"] = scgid
+        params["tcgid"] = tcgid
         params["name"] = name
-        params["type"] = int(type_)
+        params["type"] = type_
         return self._return_proxy("channelgroupcopy", params, None)
 
     def channelgrouprename(self, cgid, name):
         params = dict()
-        params["cgid"] = int(cgid)
+        params["cgid"] = cgid
         params["name"] = name
         return self._return_proxy("channelgrouprename", params, None)
 
@@ -355,7 +342,7 @@ class TS3Commands(object):
 
     def channelgrouppermlist(self, cgid, permsid=False):
         params = dict()
-        params["cgid"] = int(cgid)
+        params["cgid"] = cgid
 
         opt = list()
         if permsid:
@@ -367,24 +354,21 @@ class TS3Commands(object):
 
     def channelgroupclientlist(self, cid=None, cldbid=None, cgid=None):
         params = dict()
-        if cid is not None:
-            params["cid"] = int(cid)
-        if cldbid is not None:
-            params["cldbid"] = int(cldbid)
-        if cgid is not None:
-            params["cgid"] = int(cgid)
+        params["cid"] = cid
+        params["cldbid"] = cldbid
+        params["cgid"] = cgid
         return self._return_proxy("channelgroupclientlist", params, None)
 
     def setclientchannelgroup(self, cgid, cid, cldbid):
         params = dict()
-        params["cgid"] = int(cgid)
-        params["cid"] = int(cid)
-        params["cldbid"] = int(cldbid)
+        params["cgid"] = cgid
+        params["cid"] = cid
+        params["cldbid"] = cldbid
         return self._return_proxy("setclientchannelgroup", params, None)
         
     def channelpermlist(self, cid, permsid=False):
         params = dict()
-        params["cid"] = int(cid)
+        params["cid"] = cid
 
         opt = list()
         if permsid:
@@ -423,7 +407,7 @@ class TS3Commands(object):
 
     def clientinfo(self, clid):
         params = dict()
-        params["clid"] = int(clid)
+        params["clid"] = clid
         return self._return_proxy("clientinfo", params, None)
 
     def clientfind(self, pattern):
@@ -431,21 +415,17 @@ class TS3Commands(object):
         params["pattern"] = pattern
         return self._return_proxy("clientfind", params, None)
 
-    def clientedit(self, clid, properties=None):
-        params = dict()
-        params["clid"] = int(clid)
-        if properties is not None:
-            params.update(properties)
-        return self._return_proxy("clientedit", params, None)
+##    def clientedit(self, clid, properties=None):
+##        params = dict()
+##        params["clid"] = clid
+##        if properties is not None:
+##            params.update(properties)
+##        return self._return_proxy("clientedit", params, None)
     
     def clientdblist(self, start=None, duration=None, count=False):
         params = dict()
-        if start is not None:
-            # Todo: Is this an int?
-            params["start"] = int(start)
-        if duration is not None:
-            # Todo: Is this an int?
-            params["duration"] = int(duration)
+        params["start"] = start
+        params["duration"] = duration
 
         opt = list()
         if count:
@@ -454,7 +434,7 @@ class TS3Commands(object):
 
     def clientdbinfo(self, cldbid):
         params = dict()
-        params["cldbid"] = int(cldbid)
+        params["cldbid"] = cldbid
         return self._return_proxy("clientdbinfo", params, None)
 
     def clientdbfind(self, pattern, uid=False):
@@ -466,16 +446,16 @@ class TS3Commands(object):
             opt.append("uid")
         return self._return_proxy("clientdbfind", params, opt)
 
-    def clientdbedit(self, cldbid, properties=None):
-        params = dict()
-        params["cldbid"] = int(cldbid)
-        if properties is not None:
-            params.update(properties)
-        return self._return_proxy("clientdbedit", params, None)
+##    def clientdbedit(self, cldbid, properties=None):
+##        params = dict()
+##        params["cldbid"] = cldbid
+##        if properties is not None:
+##            params.update(properties)
+##        return self._return_proxy("clientdbedit", params, None)
 
     def clientdbdelete(self, cldbid):
         params = dict()
-        params["cldbid"] = int(cldbid)
+        params["cldbid"] = cldbid
         return self._return_proxy("clientdbdelete", params, None)
 
     def clientgetids(self, cluid):
@@ -495,7 +475,7 @@ class TS3Commands(object):
     
     def clientgetnamefromdbid(self, cldbid):
         params = dict()
-        params["cldbid"] = int(cldbid)
+        params["cldbid"] = cldbid
         return self._return_proxy("clientgetnamefromdbid", params, None)
 
     def clientsetserverquerylogin(self, client_login_name):
@@ -503,40 +483,35 @@ class TS3Commands(object):
         params["client_login_name"] = client_login_name
         return self._return_proxy("clientsetserverquerylogin", params, None)
 
-    def clientupdate(self, properties=None):
-        params = dict()
-        if properties is not None:
-            params.update(properties)
-        return self._return_proxy("clientupdate", params, None)
+##    def clientupdate(self, properties=None):
+##        params = dict()
+##        if properties is not None:
+##            params.update(properties)
+##        return self._return_proxy("clientupdate", params, None)
 
     def clientmove(self, clid, cid, cpw=None):
         params = dict()
-        # Todo: Support for multiple clids.
         params["clid"] = clid
         params["cid"] = cid
-        if cpw is not None:
-            params["cpw"] = cpw
+        params["cpw"] = cpw
         return self._return_proxy("clientmove", params, None)
 
     def clientkick(self, clid, reasonid, reasonmsg=None):
         params = dict()
-        # Todo: Support for multiple clients.
         params["clid"] = clid
-        params["reasonid"] = int(reasonid)
-        if reasonmsg is not None:
-            params["reasonmsg"] = reasonmsg        
+        params["reasonid"] = reasonid
+        params["reasonmsg"] = reasonmsg        
         return self._return_proxy("clientkick", params, None)
     
     def clientpoke(self, clid, msg):
         params = dict()
-        # Todo: Support for multiple clients
         params["clid"] = clid
         params["msg"] = msg    
         return self._return_proxy("clientpoke", params, None)
 
     def clientpermlist(self, cldbid, permsid=False):
         params = dict()
-        params["cldbid"] = int(cldbid)
+        params["cldbid"] = cldbid
 
         opt = list()
         if permsid:
@@ -551,8 +526,8 @@ class TS3Commands(object):
 
     def channelclientpermlist(self, cid, cldbid, permsid=False):
         params = dict()
-        params["cid"] = int(cid)
-        params["cldbid"] = int(cldbid)
+        params["cid"] = cid
+        params["cldbid"] = cldbid
 
         opt = list()
         if permsid:
@@ -570,6 +545,205 @@ class TS3Commands(object):
 
     def permidgetbyname(self, permsid):
         params = dict()
-        # Todo: Add support for multiple permsids.
         params["permsid"] = permsid
         return self._return_proxy("permidgetbyname", params, None)
+
+    def permoverview(self, cid, cldbid, permid=None, permsid=None):
+        params = dict()
+        params["cid"] = cid
+        params["cldbid"] = cldbid
+        params["permid"] = permid
+        params["permsid"] = permsid
+        return self._return_proxy("permoverview", params, None)
+
+    def permget(self, permid=None, permsid=None):
+        params = dict()
+        params["permid"] = permid
+        params["permsid"] = permsid
+        return self._return_proxy("permget", params, None)
+
+    def permfind(self, permid=None, permsid=None):
+        params = dict()
+        params["permid"] = permid
+        params["permsid"] = permsid
+        return self._return_proxy("permfind", params, None)
+
+    def permreset(self):
+        return self._return_proxy("permreset", None, None)
+
+    def privilegekeylist(self):
+        return self._return_proxy("privilegekeylist", None, None)
+
+    def privilegekeyadd(self, tokentype, group_id, channel_id,
+                        tokendescription=None, tokencustomset=None):
+        params = dict()
+        params["tokentype"] = tokentype
+        params["tokenid1"] = group_id
+        params["tokenid2"] = channel_id
+        params["tokendescription"] = tokendescription
+        params["tokencustomset"] = tokencustomset
+        return self._return_proxy("privilegekeyadd", params, None)
+
+    def privilegekeydelete(self, token):
+        params = dict()
+        params["token"] = token
+        return self._return_proxy("privilegekeydelete", params, None)
+
+    def privilegekeyuse(self, token):
+        params = dict()
+        params["token"] = token
+        return self._return_proxy("privilegekeyuse", params, None)
+
+    def messagelist(self):        
+        return self._return_proxy("messagelist", None, None)
+
+    def messageadd(self, cluid, subject, message):
+        params = dict()
+        params["cluid"] = cluid
+        params["subject"] = subject
+        params["message"] = message      
+        return self._return_proxy("messageadd", params, None)
+
+    def messagedel(self, msgid):
+        params = dict()
+        params["msgid"] = msgid   
+        return self._return_proxy("messagedel", params, None)
+
+    def messageget(self, msgid):
+        params = dict()
+        params["msgid"] = msgid
+        return self._return_proxy("messageget", params, None)
+
+    def messageupdateflag(self, msgid, flag):
+        params = dict()
+        params["msgid"] = msgid
+        params["flag"] = flag
+        return self._return_proxy("messageupdateflag", params, None)
+
+    def complainlist(self, tcldbid=None):
+        params = dict()
+        params["tcldbid"] = tcldbid
+        return self._return_proxy("complainlist", params, None)
+
+    def complainadd(self, tcldbid, message):
+        params = dict()
+        params["tcldbid"] = tcldbid
+        params["message"] = message
+        return self._return_proxy("complainadd", params, None)
+
+    def complaindelall(self, tcldbid):
+        params = dict()
+        params["tcldbid"] = tcldbid
+        return self._return_proxy("complaindelall", params, None)
+
+    def complaindel(self, tcldbid, fcldbid):
+        params = dict()
+        params["tcldbid"] = tcldbid
+        params["fcldbid"] = fcldbid
+        return self._return_proxy("complaindel", params, None)
+
+    def banclient(self, clid, time=None, banreason=None):
+        params = dict()
+        params["clid"] = clid
+        params["time"] = time
+        params["banreason"] = banreason
+        return self._return_proxy("banclient", params, None)
+
+    def banlist(self):
+        return self._return_proxy("banlist", None, None)
+
+    def banadd(self, ip=None, name=None, uid=None, time=None, banreason=None):
+        params = dict()
+        params["ip"] = ip
+        params["name"] = name
+        params["uid"] = uid
+        params["time"] = time
+        params["banreason"] = banreason
+        return self._return_proxy("banadd", params, None)
+
+    def bandel(self, banid):
+        params = dict()
+        params["banid"] = banind
+        return self._return_proxy("bandel", params, None)
+        
+    def bandelall(self):
+        return self._return_proxy("bandelall", None, None)
+
+    def ftinitupload(self, clientftfid, name, cid, cpw,
+                     size, overwrite, resume):
+        params = dict()
+        params["clientftfid"] = clientftfid
+        params["name"] = name
+        params["cid"] = cid
+        params["cpw"] = cpw
+        params["size"] = size
+        params["overwrite"] = overwrite
+        params["resume"] = resume
+        return self._return_proxy("ftinitupload", params, None)
+
+    def ftinitdownload(self, clientftfid, name, cid, cpw, seekpos):
+        params = dict()
+        params["clientftfid"] = clientftfid
+        params["name"] = name
+        params["cid"] = cid
+        params["cpw"] = cpw
+        params["seekpos"] = seekpos
+        return self._return_proxy("ftinitdownload", params, None)
+
+    def ftlist(self):
+        return self._return_proxy("ftlist", None, None)
+
+    def ftgetfilelist(self, cid, cpw, path):
+        params = dict()
+        params["cid"] = cid
+        params["cpw"] = cpw
+        params["path"] = path
+        return self._return_proxy("ftgetfilelist", params, None)
+
+##    def ftgetfileinfo(self, cid, cpw, name):
+##        params = dict()
+##        # Todo: Support multiple files
+##        params["cid"] = cid
+##        params["cpw"] = cpw
+##        params["name"] = name
+##        return self._return_proxy("ftgetfileinfo", params, None)
+
+    def ftstop(self, serverftfid, delete):
+        params = dict()
+        params["serverftfid"] = serverftfid
+        params["delete"] = delete
+        return self._return_proxy("ftstop", params, None)
+
+##    def ftdeletefile(self, cid, cpw, name):
+##        pass
+        
+    def ftcreatedir(self, cid, cpw, dirname):
+        params = dict()
+        params["cid"] = cid
+        params["cpw"] = cpw
+        params["dirname"] = dirname
+        return self._return_proxy("ftcreatedir", params, None)
+
+    def ftrenamefile(self, cid, cpw, oldname, newname, tcid=None, tcpw=None):
+        params = dict()
+        params["cid"] = cid
+        params["cpw"] = cpw
+        params["oldname"] = oldname
+        params["newname"] = newname
+        params["tcid"] = tcid
+        params["tcpw"] = tcpw
+        return self._return_proxy("ftrenamefile", params, None)
+
+    def customsearch(self, ident, pattern):
+        params = dict()
+        params["ident"] = ident
+        params["pattern"] = pattern
+        return self._return_proxy("customsearch", params, None)
+
+    def custominfo(self, cldbid):
+        params = dict()
+        params["cldbid"] = cldbid
+        return self._return_proxy("custominfo", params, None)
+
+    def whoami(self):
+        return self._return_proxy("whoami", None, None)
