@@ -21,7 +21,3 @@ PORT = 10011
 
 # The id of the virtual server
 SID = 1
-
-
-HOST = "benediktschmitt.de"
-PASS = "RVF3eU+P"
