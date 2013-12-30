@@ -68,7 +68,7 @@ More examples are in the **examples directory**.
 This project is in an early state, so you'll probably find a bug. Please report
 it. 
 
-If you found a grammar or spelling error, please report them too.
+If you found a grammar or spelling error, please report it too.
 
 ## Versioning
 For the version numbers, take a look at http://semver.org/.
