@@ -3,65 +3,135 @@
 
 # Modules
 # ------------------------------------------------
-import sys
-sys.path.insert(1,"../")
-
 import ts3
-from pprint import pprint
 
 
-# Functions
+# Classes
 # ------------------------------------------------
-
 class ChannelTree(object):
     """
-    Note, that the used algorithms and data structures are not very efficient,
-    but it works.
+    Node of a channel tree.
     """
 
     def __init__(self, channel):
+        self.root = channel
         self.childs = list()
-        self.root = None
         return None
 
-    def is_child(self, channel)
+    @classmethod
+    def init_node(cls, channel):
+        return cls(channel)
 
+    @classmethod
+    def init_root(cls, servername=None):
+        if servername is None:
+            servername = str()
+        obj = cls(None)
+        obj.servername = servername        
+        return obj
 
-def is_child(channel, tree):
-    """
-    Returns true, if the channel is a child of any other channel in the tree.
-    """
-    if not tree:
-        return False
-    elif channel["pid"] == tree[0]["cid"]:
-        return True
-    else:
-        for sub_tree in tree[1]:
-            if is_child(chanel, sub_tree):
+    @classmethod
+    def build_tree(cls, channellist, servername=None):
+        """
+        Transforms the channellist in a ChannelTree.
+        """
+        tree = cls.init_root(servername)
+                   
+        for channel in channellist:
+            ctree = cls.init_node(channel)
+            tree.insert(ctree)
+        return tree
+
+    def insert(self, ctree):
+        """
+        Inserts the channel tree *ctree* recursivly in the channel tree.
+        Returns true, if the tree has been inserted.
+        """
+        # We assumed on previous insertions, that a channel is a direct child
+        # of the root, if we could not find the parent. Correct this, if ctree
+        # is the parent from one of these orpheans
+        if self.root is None:
+            i = 0
+            while i < len(self.childs):
+                child = self.childs[i]
+                if ctree.root["cid"] == child.root["pid"]:
+                    ctree.childs.append(child)
+                    self.childs.pop(i)
+                else:
+                    i += 1
+
+        # We are currently not at the root and the channel is a direct child
+        # of this one. We can append it and the work is done.
+        elif ctree.root["pid"] == self.root["cid"]:
+            self.childs.append(ctree)
+            return True
+
+        # Try to insert the ctree now recursive.
+        for child in self.childs:
+            if child.insert(ctree):
                 return True
+
+        # If we could not find a parent in the whole tree, assume, that the
+        # channel tree is a child of the root.
+        if self.root is None:
+            self.childs.append(ctree)
         return False
 
-                  
-def insert_channel(channel, tree):
-    """
-    Builds a tree of the channel.
-    """
-    if not tree:
-        return [cha
-    
+    def sort_childs(self):
+        """
+        Sorts the child channels by the channel_order attribute.
+        """
+        self.childs.sort(key=lambda c: c.root["channel_order"])
+        return None
 
-          
+    def print(self, clients=None, indent=0):
+        """
+        Prints the channel and its subchannels recursive.
+        You can provide a dictionary *clients*, that maps the channel id to
+        the clients in the channel.
+        """
+        if self.root is None:
+            print(" "*indent + "|-", self.servername)
+        else:
+            print(" "*indent + "|-", self.root["channel_name"])
+            if clients is not None:
+                for client in clients[self.root["cid"]]:
+                    print(" "*(indent + 3) + "| ", client["client_nickname"])
+
+        self.sort_childs()
+        for child in self.childs:
+            child.print(clients, indent + 3)
+        return None
+
+        
+# Functions
+# ------------------------------------------------
 def view(ts3conn):
     """
-    Prints a list with the channel tree and the clients in the channels.
+    Prints a simple channel tree with the clients.
     """
+    # Get the name of the virtual server
+    ts3conn.serverinfo()
+    serverinfo = ts3conn.last_resp.parsed[0]
+    servername = serverinfo["virtualserver_name"]
+    
+    # Get the channellist
     ts3conn.channellist()
     channellist = ts3conn.last_resp.parsed
 
+    # and the clientlist.
     ts3conn.clientlist()
     clientlist = ts3conn.last_resp.parsed
 
-    tree = build_channel_tree(channellist)
+    # Map the channel id to the clients in the channel.
+    channel_to_clients = {channel["cid"]: [client for client in clientlist \
+                                           if client["cid"] == channel["cid"]]
+                          for channel in channellist}
+
+    # Create the channel tree and print it.    
+    channel_tree = ChannelTree.build_tree(channellist, servername)
+    channel_tree.print(channel_to_clients)
+    return None
     
 
 # Main
@@ -74,4 +144,3 @@ if __name__ == "__main__":
         ts3conn.login(USER, PASS)
         ts3conn.use(SID)
         view(ts3conn)
-

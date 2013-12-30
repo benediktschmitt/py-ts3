@@ -4,6 +4,7 @@
 # Modules
 # ------------------------------------------------
 import ts3
+import ts3.definitions as ts3def
 import time
 import random
 
@@ -20,7 +21,7 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
     # Countdown till whirlpool
     for i in range(5, 0, -1):
         ts3conn.sendtextmessage(
-            targetmode=ts3.TextMessageTargetMode.SERVER,
+            targetmode=3,
             target=0, msg="Whirpool in {}s".format(i))
         time.sleep(1)
 

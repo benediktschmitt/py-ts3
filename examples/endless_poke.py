@@ -43,4 +43,4 @@ if __name__ == "__main__":
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
         ts3conn.login(USER, PASS)
         ts3conn.use(SID)
-        endless_poke(ts3conn, "FOO")
+        endless_poke(ts3conn, "GENIUS", msg="Was machst du?", delay=0.25)
