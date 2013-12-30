@@ -21,7 +21,7 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
     # Countdown till whirlpool
     for i in range(5, 0, -1):
         ts3conn.sendtextmessage(
-            targetmode=3,
+            targetmode=ts3def.TextMessageTargetMode.SERVER,
             target=0, msg="Whirpool in {}s".format(i))
         time.sleep(1)
 

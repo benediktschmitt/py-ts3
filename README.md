@@ -28,9 +28,9 @@ If you need information about the possible query commands, take a look at the
 	```Python
 	#!/usr/bin/python3
 
-	from ts3.query import TS3Connection
+	import ts3
 
-	with TS3Connection("localhost") as ts3conn:
+	with ts3.TS3Connection("localhost") as ts3conn:
 		# Note, that the client will not wait for the response, unless you
 		# set the response flag *ts3conn.wait_for_resp = True* or you call
 		# *ts3conn.last_resp* after each command.
@@ -49,9 +49,9 @@ If you need information about the possible query commands, take a look at the
 	```Python
 	#!/usr/bin/python3
 
-	from ts3 import query
+	import ts3
 
-	with query.TS3Connection("localhost") as ts3conn:
+	with ts3.TS3Connection("localhost") as ts3conn:
 		ts3conn.login("serveradmin", "FoOBa9")
 		ts3conn.use(1)
 		ts3conn.clientlist()
