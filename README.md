@@ -70,13 +70,13 @@ If you need information about the possible query commands, take a look at the
 	import ts3
 	
 	# The examples package already contains this implementation:
-	from ts3examples import viewer as ts3viewer
+	from ts3.examples.viewer import ChannelTreeNode
 	
 	with ts3.TS3Connection("localhost") as ts3conn:
 		ts3conn.login("serveradmin", "FoOBa9")
 		
 		# Create the channel tree of the virtual server with the id 1:
-		channel_tree = ts3viewer.ChannelTreeNode.build_tree(ts3conn, 1)
+		channel_tree = ChannelTreeNode.build_tree(ts3conn, 1)
 		channel_tree.print()
 	```
 	
