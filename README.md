@@ -62,6 +62,24 @@ If you need information about the possible query commands, take a look at the
 			ts3conn.clientpoke(clid=client["clid"], msg=msg)
 	```
 	
+3. A simple TS3 viewer:
+
+	```Python
+	#!/usr/bin/python3
+	
+	import ts3
+	
+	# The examples package already contains this implementation:
+	from ts3examples import viewer as ts3viewer
+	
+	with ts3.TS3Connection("localhost") as ts3conn:
+		ts3conn.login("serveradmin", "FoOBa9")
+		
+		# Create the channel tree of the virtual server with the id 1:
+		channel_tree = ts3viewer.ChannelTreeNode.build_tree(ts3conn, 1)
+		channel_tree.print()
+	```
+	
 More examples are in the **examples directory**.
 
 ## Bugs

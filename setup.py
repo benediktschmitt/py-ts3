@@ -4,7 +4,7 @@
 # Modules
 # ------------------------------------------------
 from distutils.core import setup
-from ts3 import __version__
+from source import __version__
 
 
 # Main
@@ -19,7 +19,8 @@ setup(
     url = "https://github.com/benediktschmitt/py-ts3",
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
     packages = ["ts3", "ts3examples"],
-    package_dir = {"ts3examples": "examples"},
+    package_dir = {"ts3": "source",
+                   "ts3examples": "examples"},
     license = open("LICENSE").read(),
     )
     
