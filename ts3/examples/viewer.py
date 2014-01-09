@@ -226,4 +226,4 @@ if __name__ == "__main__":
     
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
         ts3conn.login(USER, PASS)
-        tview(ts3conn, sid=1)
+        view(ts3conn, sid=1)

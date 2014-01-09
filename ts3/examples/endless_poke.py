@@ -29,14 +29,15 @@ def endless_poke(ts3conn, nickname, msg=None, num=100, delay=1):
     ts3conn.clientfind(nickname)
     clients = ts3conn.last_resp.parsed
     clients = [client["clid"] for client in clients]
-    
+
+    # Break, if there's no client.
+    if not clients:
+        return None
+
     # Poke them
     i = 0
     while num == -1 or i < num:
         ts3conn.clientpoke(clients, msg)
-        if ts3conn.last_resp.error["id"] != "0":
-            print("Error while poking:", ts3conn.last_resp.error["msg"])
-            return None
         time.sleep(delay)
     return None
 
