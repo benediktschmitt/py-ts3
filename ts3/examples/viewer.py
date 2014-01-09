@@ -9,7 +9,8 @@ from pprint import pprint
 
 # Data
 # ------------------------------------------------
-__all__ = ["ChannelTreeNode"]
+__all__ = ["ChannelTreeNode",
+           "view"]
 
 
 # Classes
@@ -205,15 +206,22 @@ class ChannelTreeNode(object):
             child.print(indent=indent + 1)
         return None
 
+
+def view(ts3conn, sid=1):
+    """
+    Prints the channel tree of the virtual server, including all clients.
+    """
+    tree = ChannelTreeNode.build_tree(ts3conn, sid)
+    tree.print()
+    return None
+
     
 # Main
 # ------------------------------------------------
 if __name__ == "__main__":
     # USER, PASS, HOST, ...
-    from _def_param import *
+    from def_param import *
     
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
         ts3conn.login(USER, PASS)
-
-        tree = ChannelTreeNode.build_tree(ts3conn, 1)
-        tree.print()
+        tview(ts3conn, sid=1)

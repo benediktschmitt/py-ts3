@@ -4,6 +4,8 @@ This package implements an API for the **TeamSpeak 3 Server Query** and the
 It's developed and tested under **Python 3**.
 
 ## Installation
+
+### Distutils
 The master branch is a valid *distutils* package. So simply download and install
 it:
 
@@ -15,6 +17,10 @@ it:
 	```Shell
 	$ setup.py install
 	```
+	
+### As portable library
+You can simply download the master branch and copy the *ts3* directory in
+your projects folder or wherever you need it.
 
 ## Quick Introduction
 The easiest way to get to grips with this library is taking a look at the
@@ -70,17 +76,14 @@ If you need information about the possible query commands, take a look at the
 	import ts3
 	
 	# The examples package already contains this implementation:
-	from ts3.examples.viewer import ChannelTreeNode
+	from ts3.examples.viewer import view
 	
 	with ts3.TS3Connection("localhost") as ts3conn:
 		ts3conn.login("serveradmin", "FoOBa9")
-		
-		# Create the channel tree of the virtual server with the id 1:
-		channel_tree = ChannelTreeNode.build_tree(ts3conn, 1)
-		channel_tree.print()
+		view(ts3conn, sid=1)
 	```
 	
-More examples are in the **examples directory**.
+More examples are in the **examples package** (```import ts3.examples```).
 
 ## Bugs
 This project is in an early state, so you'll probably find a bug. Please report
