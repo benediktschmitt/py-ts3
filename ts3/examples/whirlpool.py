@@ -3,10 +3,17 @@
 
 # Modules
 # ------------------------------------------------
-import ts3
-import ts3.definitions as ts3def
 import time
 import random
+
+# local
+import ts3
+import ts3.definitions as ts3def
+
+
+# Data
+# ------------------------------------------------
+__all__ = ["whirlpool"]
 
 
 # Functions
@@ -55,7 +62,7 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
 # ------------------------------------------------
 if __name__ == "__main__":
     # USER, PASS, HOST, ...
-    from _def_param import *
+    from def_param import *
     
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
         ts3conn.login(USER, PASS)

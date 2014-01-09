@@ -14,11 +14,13 @@ try:
     from common import TS3RegEx
     from escape import TS3Escape
     from response import TS3Response
+    from exceptions import TS3QueryError
 except ImportError:
     from .commands import TS3Commands
     from .common import TS3RegEx
     from .escape import TS3Escape
     from .response import TS3Response
+    from .exceptions import TS3QueryError
     
 
 # Data
@@ -51,8 +53,12 @@ class TS3BaseConnection(object):
         self._unfetched_resp = 0
         self._responses = list()
 
-        # Always wait for responses.
-        self.wait_for_resp = False
+        # Always wait for responses if true.
+        self.patient_mode = False
+
+        # Wait for responses and raise an error, if the error code of the
+        # response is not 0.
+        self.quiet_mode = False
         
         if host is not None:
             self.open(host, port)
@@ -175,7 +181,7 @@ class TS3BaseConnection(object):
         self._telnet_conn.write(msg)
         self._unfetched_resp += 1
 
-        if self.wait_for_resp:
+        if self.patient_mode or not self.quiet_mode:
             self._recv()
         return None
 
@@ -189,8 +195,14 @@ class TS3BaseConnection(object):
             line = self._telnet_conn.read_until(TS3RegEx.LINE)
             resp.append(line)
             if re.match(TS3RegEx.ERROR_LINE, line):
-                self._responses.append(TS3Response(resp))
+                resp = TS3Response(resp)
+                self._responses.append(resp)
                 self._unfetched_resp -= 1
+
+                # Raise an error, if wished.
+                if (not self.quiet_mode) and resp.error["id"] != "0":
+                    raise TS3QueryError(resp.error["id"], resp.error["msg"])
+                
                 resp = list()
         return None
 

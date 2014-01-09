@@ -3,8 +3,10 @@
 
 # Modules
 # ------------------------------------------------
-import ts3
 from pprint import pprint
+
+# local
+import ts3
 
 
 # Data

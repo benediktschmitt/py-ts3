@@ -3,8 +3,15 @@
 
 # Modules
 # ------------------------------------------------
-import ts3
 import time
+
+# local
+import ts3
+
+
+# Data
+# ------------------------------------------------
+__all__ = ["endless_poke"]
 
 
 # Functions
@@ -38,7 +45,7 @@ def endless_poke(ts3conn, nickname, msg=None, num=100, delay=1):
 # ------------------------------------------------
 if __name__ == "__main__":
     # USER, PASS, HOST, ...
-    from _def_param import *
+    from def_param import *
     
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
         ts3conn.login(USER, PASS)

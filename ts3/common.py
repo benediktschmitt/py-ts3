@@ -16,6 +16,7 @@ import re
 __all__ = ["TS3RegEx"]
 
 
+
 # Classes
 # ------------------------------------------------
 class TS3RegEx(object):
