@@ -166,4 +166,4 @@ For the version numbers, take a look at http://semver.org/.
 
 
 ## License
-This package is licensed under the **MIT License**. 
+This package is licensed under the [MIT License](LICENSE). 
