@@ -408,35 +408,21 @@ class TS3BaseConnection(object):
         query_command = command + " " + parameters + " " + options + "\n\r"
         query_command = query_command.encode()
 
-        return self.send_raw(query_command, timeout)
-
-    def send_raw(self, msg, timeout=None):
-        """
-        msg: bytes
-        return: TS3Response
-        
-        Sends the bytestring *msg* directly to the server. If *msg* is
-        a string, it will be encoded.
-
-        !!! DON'T FORGET THE b'\n\r' ENDING !!!
-        """
-        if isinstance(msg, str):
-            msg = msg.encode()
-
+        # Send the command.
         with self._send_lock:
-            self._telnet_conn.write(msg)
+            self._telnet_conn.write(query_command)
             # To identify the response when we receive it.
             self._query_counter += 1
             query_id = self._query_counter
 
+        # Make sure, that we receive the command if we are not in
+        # threading mode.
         try:
             self.recv()
         except RuntimeError:
-            # Continue, if the client is already receiving.
-            pass
-                
+            pass                
         return self.wait_for_resp(query_id, timeout)
-
+    
 
 class TS3Connection(TS3BaseConnection, TS3Commands):
     """

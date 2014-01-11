@@ -26,10 +26,7 @@
 # ------------------------------------------------
 import time
 import random
-
-# local
 import ts3
-import ts3.definitions as ts3def
 
 
 # Data
@@ -49,33 +46,46 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
     # Countdown till whirlpool
     for i in range(5, 0, -1):
         ts3conn.sendtextmessage(
-            targetmode=ts3def.TextMessageTargetMode.SERVER,
+            targetmode=ts3.TextMessageTargetMode.SERVER,
             target=0, msg="Whirpool in {}s".format(i))
         time.sleep(1)
 
     # Fetch the clientlist and the channellist.
-    ts3conn.clientlist()
-    clientlist = ts3conn.last_resp.parsed
+    clientlist = ts3conn.clientlist()
+    channellist = ts3conn.channellist()
 
-    ts3conn.channellist()
-    channellist = ts3conn.last_resp.parsed
+    # Ignore query clients
+    clientlist = [client for client in clientlist \
+                  if client["client_type"] != "1"]
 
-    # Whirpool with one channel is boring.
-    if len(channellist) == 1:
+    # Whirpool with one channel or no users is boring.
+    if len(channellist) == 1 or not clientlist:
         return None
 
-    end_time = time.time() + duration
-    while end_time > time.time():
+    # We need this try-final construct to make sure, that all
+    # clients will be in the same channel at the end of the
+    # whirlpool as to the beginning.
+    try:
+        end_time = time.time() + duration
+        while end_time > time.time():
+            for client in clientlist:
+                clid = client["clid"]
+                cid = random.choice(channellist)["cid"]
+                try:
+                    ts3conn.clientmove(clid, cid)
+                except ts3.TS3QueryError as err:
+                    # Only ignore 'already member of channel error'
+                    if err.resp.error["id"] != "770":
+                        raise
+            time.sleep(relax_time)
+    finally:
+        # Move all clients back
         for client in clientlist:
-            clid = client["clid"]
-            cid = random.choice(channellist)["cid"]
-            ts3conn.clientmove(clid, cid)
-        time.sleep(relax_time)
-
-    # Move all clients back
-    for client in clientlist:
-        ts3conn.clientmove(client["clid"], client["cid"])
-        ts3conn.last_resp
+            try:
+                ts3conn.clientmove(client["clid"], client["cid"])
+            except ts3.TS3QueryError as err:
+                if err.resp.error["id"] != "770":
+                    raise
     return None
 
 

@@ -25,8 +25,6 @@
 # Modules
 # ------------------------------------------------
 import time
-
-# local
 import ts3
 
 
@@ -41,14 +39,13 @@ def endless_poke(ts3conn, nickname, msg=None, num=100, delay=1):
     """
     Pokes all clients where *nickname* matches *num* times with the message
     *msg*. Sleeping *delay* seconds between the single pokes. If *num* is -1,
-    the client is poked till infinity times.
+    the client is poked forever.
     """
     if msg is None:
         msg = "Stop annoying me!"
 
-    # Get the clients id
-    ts3conn.clientfind(nickname)
-    clients = ts3conn.last_resp.parsed
+    # Get the client ids
+    clients = ts3conn.clientfind(nickname)
     clients = [client["clid"] for client in clients]
 
     # Break, if there's no client.

@@ -25,8 +25,6 @@
 # Modules
 # ------------------------------------------------
 from pprint import pprint
-
-# local
 import ts3
 
 
@@ -41,7 +39,7 @@ __all__ = ["ChannelTreeNode",
 class ChannelTreeNode(object):
     """
     Represents a channel or the virtual server in the channel tree of a virtual
-    server.
+    server. Note, that this is a recursive data structure.
 
     Common
     ------
@@ -64,8 +62,8 @@ class ChannelTreeNode(object):
     self.clients = List with dictionaries, that contains informations about the
                    clients in this channel.
 
-    Root Channel:
-    -------------
+    Root Channel
+    ------------
     Represents the virtual server itself.
 
     self.info = Dictionary with all informations about the virtual server
@@ -74,6 +72,10 @@ class ChannelTreeNode(object):
     self.parent = None
     
     self.clients = None
+
+    Usage
+    -----
+    >>> tree = ChannelTreeNode.build_tree(ts3conn, sid=1)
     """
 
     def __init__(self, info, parent, root, clients=None):
