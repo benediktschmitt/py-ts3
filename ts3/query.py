@@ -25,34 +25,66 @@
 # Modules
 # ------------------------------------------------
 import re
+import time
 import socket
 import telnetlib
 import logging
+import threading
 
 # local
 try:
     from commands import TS3Commands
-    from common import TS3RegEx
+    from common import TS3Error
     from escape import TS3Escape
-    from response import TS3Response
-    from exceptions import TS3QueryError
+    from response import TS3Response, TS3QueryResponse, TS3Event
 except ImportError:
     from .commands import TS3Commands
-    from .common import TS3RegEx
+    from .common import TS3Error
     from .escape import TS3Escape
-    from .response import TS3Response
-    from .exceptions import TS3QueryError
+    from .response import TS3Response, TS3QueryResponse, TS3Event
     
 
 # Data
 # ------------------------------------------------
 __all__ = [
-    "TS3RegEx",
+    "TS3QueryError",
+    "TS3ResponseRecvError",
     "TS3BaseConnection",
     "TS3Connection"]
 
 _logger = logging.getLogger(__name__)
 
+
+# Exceptions
+# ------------------------------------------------
+class TS3QueryError(TS3Error):
+    """
+    Raised, if the error code of the response was not 0.
+
+    * resp: The TS3Response instance that contains the query response.
+    """
+
+    def __init__(self, resp):
+        self.resp = resp
+        return None
+
+    def __str__(self):
+        tmp = "error id {}: {}".format(
+            self.resp.error["id"], self.resp.error["msg"])
+        return tmp
+
+
+class TS3ResponseRecvError(TS3Error, TimeoutError):
+    """
+    Raised, when a response could not be received due to
+    * timeout
+    * the receive progress has been stopped from another thread.
+    """
+
+    def __str__(self):
+        tmp = "Could not receive the response from the server."
+        return tmp
+    
 
 # Classes
 # ------------------------------------------------
@@ -68,24 +100,40 @@ class TS3BaseConnection(object):
         If *host* is provided, the connection will be established before
         the constructor returns.
         """
+        # None, if the client is not connected.
         self._telnet_conn = None
 
-        # Counter for unfetched responses and a queue for the responses.
-        self._unfetched_resp = 0
-        self._responses = list()
+        # The last query id, that has been given.
+        self._query_counter = 0
+        
+        # The last query id, that has been fetched.
+        self._query_id = 0
 
-        # Always wait for responses if true.
-        self.patient_mode = False
+        # Maps the query id to the response.
+        # query id => TS3Response
+        self._responses = dict()
 
-        # Wait for responses and raise an error, if the error code of the
-        # response is not 0.
-        self.quiet_mode = False
+        # Set to true, if a new response has been received.
+        self._new_response_event = threading.Condition()
+
+        # Avoid sending data to the same time.
+        self._send_lock = threading.Lock()
+
+        # To stop the receive progress, if we are waiting for events from
+        # another thread.
+        self._stop_event = threading.Event()
+        self._waiting_for_stop = False
+        self._is_listening = False
         
         if host is not None:
             self.open(host, port)
         return None
 
-    def get_telnet_connection(self):
+    # *Simple* get and set methods
+    # ------------------------------------------------
+
+    @property
+    def telnet_conn(self):
         """
         Returns the used telnet instance.
         """
@@ -93,12 +141,38 @@ class TS3BaseConnection(object):
 
     def is_connected(self):
         """
+        return: bool
+        
         Returnes *True*, if a connection is currently established.
         """
         return self._telnet_conn is not None
+        
+    @property
+    def last_resp(self):
+        """
+        return: TS3Response
+        raises: LookupError
+        """
+        # Get the responses with the highest query id in the response
+        # dictionary.
+        try:
+            tmp = max(self._responses)
+        except ValueError:
+            raise LookupError()
+        else:
+            return self._responses[tmp]
 
+    def remaining_responses(self):
+        """
+        Returns the number of unfetched responses.
+        """
+        return self._query_counter - self._query_id
+        
+    # Networking
+    # ------------------------------------------------
+    
     def open(self, host, port=10011,
-                timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+             timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         """
         Connect to a TS3 server.
 
@@ -109,27 +183,38 @@ class TS3BaseConnection(object):
         raised.
         """
         if not self.is_connected():
+            self._query_counter = 0
+            self._query_id = 0
+            self._responses = dict()
+
             self._telnet_conn = telnetlib.Telnet(host, port, timeout)            
             # Wait for the first and the second greeting:
             # b'TS3\n\r'
             # b'Welcome to the [...] on a specific command.\n\r'
             self._telnet_conn.read_until(b"\n\r")
             self._telnet_conn.read_until(b"\n\r")
+
+            _logger.info("Created connection to {}:{}.".format(host, port))
         return None
 
     def close(self):
         """
         Sends the *quit* command and closes the telnet connection.
+
+        If you are receiving data from another thread, this method will
+        call *self.stop_receiving()* and therefore block, until the
+        the receive thread stopped.
         """
         if self.is_connected():
             try:
-                self.send("quit")
+                # We need to send the quit command directly to avoid
+                # dead locks.
+                self._telnet_conn.write(b"quit\n\r")
             finally:
+                self.stop_recv()
                 self._telnet_conn.close()
                 self._telnet_conn = None
-                
-                self._unfetched_resp = 0
-                self._responses = list()
+                _logger.debug("Disconnected client.")
         return None
 
     def fileno(self):
@@ -149,11 +234,148 @@ class TS3BaseConnection(object):
         self.close()
         return None
 
-    def send(self, command, parameters=None, options=None):
+    # Receiving
+    # -------------------------
+
+    def on_event(self, event):
+        """
+        event: TS3Event
+        
+        Called, when an event has been received.
+
+        When you use *servernotifyregister*, I assume, that you want to
+        be informed, when the server reported an event. To catch the
+        events, you have the choice between:
+        
+        1.) Subclassing and overwriting this method.
+        2.) ts3conn.on_event = my_handler
+        """
+        msg = "Uncatched event: {}".format(event.event)
+        _logger.debug(msg)
+        return None
+    
+    def wait_for_resp(self, query_id, timeout=None):
+        """
+        Waits for an response. *query_id* is the internally used
+        counter for queries. This method will block untill the response to
+        the query has been received, when *timeout* exceeds or when the
+        connection is closes.
+        """
+        if timeout is None:
+            end_time = None
+        else:
+            end_time = time.time() + timeout
+
+        while True:
+            # We need to catch this case here, to avoid dead locks, when we
+            # are not in threading mode.
+            if query_id in self._responses:
+                break           
+            if not self.is_connected():
+                break
+            if timeout is not None and time.time() < end_time:
+                break
+            
+            # Wait for a new response and try to find the
+            # response corresponding to the query.
+            with self._new_response_event:
+                self._new_response_event.wait(timeout=0.5)
+
+        resp = self._responses.get(query_id)
+        if resp is None:
+            raise TS3ResponseRecvError()
+        if resp.error["id"] != "0":
+            raise TS3QueryError(resp)
+        return resp
+    
+    def stop_recv(self):
+        """
+        If *self.recv()* has been called from another thread, it will be
+        told to stop.
+        This method blocks, until *self.recv()* has terminated.
+        """
+        if self._is_listening:
+            self._stop_event.clear()
+            self._waiting_for_stop = True
+            self._stop_event.wait()
+        return None
+
+    def recv_in_thread(self):
+        """
+        Calls self.recv(recv_forever=True) in a thread. Useful, if you
+        used *servernotifyregister* and you expect to receive events.
+        """
+        thread = threading.Thread(target=self.recv, args=(True,))
+        thread.start()
+        return None
+
+    def recv(self, recv_forever=False, poll_intervall=0.5):
+        """
+        raises: RuntimeError
+        
+        Blocks untill all responses have been received or *recv_forever* is
+        true.
+        You can call *self.stop_recv()* to stop the *recv_forever* loop.
+        Each *poll_intervall* seconds, we lookup for a stop request.
+        """
+        if self._is_listening:
+            raise RuntimeError("Already receiving data!")
+        
+        self._is_listening = True
+        try:
+            lines = list()
+            # Stop, when
+            # * the client is disconnected.
+            # * the stop flag is set.
+            # * we don't recv forever and we don't wait for responses.
+            while self.is_connected() \
+                  and (not self._waiting_for_stop) \
+                  and (self.remaining_responses() or recv_forever):
+
+                # Read one line
+                # 1.) An event (Note, that an event has no trailing error line)
+                # 2.) Query response
+                # 3.) The error line of the query response.                
+                data = self._telnet_conn.read_until(
+                    b"\n\r", timeout=poll_intervall)
+                if not data:
+                    continue
+                
+                lines.append(data)
+
+                # If we found an error line, the previous received line must
+                # be the response we are waiting for.
+                if re.match(b"error id=(.)*? msg=(.)*?\n\r", data):
+                    resp = TS3QueryResponse(lines)
+                    lines = list()
+                    
+                    self._query_id += 1
+                    self._responses[self._query_id] = resp
+
+                    with self._new_response_event:
+                        self._new_response_event.notify_all()
+                
+                # If we are not waiting for a response or we received two
+                # lines and the second one is no error line, the first one
+                # must have been an event.
+                elif (not self.remaining_responses()) or len(lines) == 2:
+                    event = TS3Event([lines.pop(0)])
+                    self.on_event(event)
+        finally:
+            self._stop_event.set()
+            self._waiting_for_stop = False
+            self._is_listening = False
+        return None
+    
+    # Sending
+    # -------------------------
+
+    def send(self, command, parameters=None, options=None, timeout=None):
         """
         command: str
         parameters: None | {str->None|str->[str]|str->str}
         options: None | [None|str]
+        timeout: None | float | int
         
         The general syntax of a TS3 query command is:
         
@@ -186,11 +408,12 @@ class TS3BaseConnection(object):
         query_command = command + " " + parameters + " " + options + "\n\r"
         query_command = query_command.encode()
 
-        return self.send_raw(query_command)
+        return self.send_raw(query_command, timeout)
 
-    def send_raw(self, msg):
+    def send_raw(self, msg, timeout=None):
         """
         msg: bytes
+        return: TS3Response
         
         Sends the bytestring *msg* directly to the server. If *msg* is
         a string, it will be encoded.
@@ -199,58 +422,20 @@ class TS3BaseConnection(object):
         """
         if isinstance(msg, str):
             msg = msg.encode()
-        self._telnet_conn.write(msg)
-        self._unfetched_resp += 1
 
-        if self.patient_mode or not self.quiet_mode:
-            self._recv()
-        return None
+        with self._send_lock:
+            self._telnet_conn.write(msg)
+            # To identify the response when we receive it.
+            self._query_counter += 1
+            query_id = self._query_counter
 
-    def _recv(self):
-        """
-        Blocks until all unfetched responses are received. The responses
-        are stored in *self_resp*.
-        """
-        resp = list()
-        while self._unfetched_resp:
-            line = self._telnet_conn.read_until(TS3RegEx.LINE)
-            resp.append(line)
-            if re.match(TS3RegEx.ERROR_LINE, line):
-                resp = TS3Response(resp)
-                self._responses.append(resp)
-                self._unfetched_resp -= 1
-
-                # Raise an error, if wished.
-                if (not self.quiet_mode) and resp.error["id"] != "0":
-                    raise TS3QueryError(resp.error["id"], resp.error["msg"])
+        try:
+            self.recv()
+        except RuntimeError:
+            # Continue, if the client is already receiving.
+            pass
                 
-                resp = list()
-        return None
-
-    @property
-    def resp(self):
-        """
-        Fetches all unfetched responses and returns all responses in the
-        response list.
-        """
-        self._recv()
-        return self._responses
-
-    @property
-    def last_resp(self):
-        """
-        Returns the last response. If there's no response available,
-        None is returned.
-        """
-        self._recv()
-        return self._responses[-1] if self._responses else None
-        
-    def clear_resp_list(self):
-        """
-        Clears the response queue.
-        """
-        self._responses = list()
-        return None
+        return self.wait_for_resp(query_id, timeout)
 
 
 class TS3Connection(TS3BaseConnection, TS3Commands):
