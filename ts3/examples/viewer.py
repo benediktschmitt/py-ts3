@@ -204,9 +204,10 @@ class ChannelTreeNode(object):
         
         XXX: This method does not work correct, so exit.
         """
-##        self.childs.sort(key=lambda c: int(c.info["channel_order"]))
 ##        for child in self.childs:
 ##            child.sort()
+##            
+##        self.childs.sort(key=lambda c: int(c.info["channel_order"]))
         return None
 
     def print(self, indent=0, restore_order=False):

@@ -57,10 +57,11 @@ except ImportError:
 # ------------------------------------------------
 if __name__ == "__main__":
     # Only for development
-    import pprint
+    from pprint import pprint
     import time
     import sys
     import logging
+    import socket
 
     # Set the logger up to print all debug messages.
     logger = logging.basicConfig(
@@ -71,12 +72,7 @@ if __name__ == "__main__":
     ts3conn = TS3Connection("localhost")
     ts3conn.login("serveradmin", "xh4ie1HL")        
     ts3conn.use(1)
-    ts3conn.channellist()
-    
-    ts3conn.servernotifyregister("server", channelID=8)
-    ts3conn.servernotifyregister("channel", channelID=8)        
-    ts3conn.servernotifyregister("textserver", channelID=8)
-    ts3conn.servernotifyregister("textchannel", channelID=8)
-    ts3conn.servernotifyregister("textprivate", channelID=8)
-    
-    ts3conn.recv_in_thread()
+
+    ts3ft = TS3FileTransfer(ts3conn)
+    query_hook = lambda resp: print(resp.parsed)
+    reporthook = lambda rs, bs, ts: ts+1 #print(rs, ts, bs)

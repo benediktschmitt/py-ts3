@@ -317,7 +317,7 @@ class TS3BaseConnection(object):
         true.
         You can call *self.stop_recv()* to stop the *recv_forever* loop.
         Each *poll_intervall* seconds, we lookup for a stop request.
-        """
+        """           
         if self._is_listening:
             raise RuntimeError("Already receiving data!")
         
@@ -361,6 +361,13 @@ class TS3BaseConnection(object):
                 elif (not self.remaining_responses()) or len(lines) == 2:
                     event = TS3Event([lines.pop(0)])
                     self.on_event(event)
+                    
+        # Catch socket and telnet errors
+        except (OSError, EOFError) as err:
+            # We need to set this flag here, to avoid dead locks while closing.
+            self._is_listening = False
+            self.close()
+            raise
         finally:
             self._stop_event.set()
             self._waiting_for_stop = False
