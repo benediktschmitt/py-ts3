@@ -155,8 +155,7 @@ You can find more examples in the [examples directory](ts3/examples).
 	
 *	Download and upload files:
 
-	```
-	Python
+	```Python
 	#!/usr/bin/python3
 	
 	import ts3
@@ -183,7 +182,7 @@ You can find more examples in the [examples directory](ts3/examples).
 	
 ## Bugs
 This project is in an early state, so you'll probably find a bug. Please report
-it or fork this repository, fix the bug and create a pull request. 
+it or fork this repo, fix the bug and create a pull request. 
 
 If you found a grammar or spelling error, please report it too.
 
