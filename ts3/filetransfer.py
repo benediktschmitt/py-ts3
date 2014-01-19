@@ -59,20 +59,19 @@ class TS3FtDownloadError(TS3FileTransferError):
     """
     Raised, when a download fails.
 
-    resp: The TS3QueryResponse used to init the download.
     read_size: The number of read bytes till the error occured.
     err: The original exception
     """
 
-    def __init__(self, resp, read_size, err=None):
-        self.resp = resp
+    def __init__(self, read_size, err=None):
         self.read_size = read_size
         self.err = err
         return None
 
     def __str__(self):
-        tmp = "Download of clientftid={} failed."\
-              .format(self.resp[0]["clientftfid"]) 
+        tmp = "TS3 file download failed. "
+        if self.err is not None:
+            tmp += str(self.err)
         return tmp
     
 
@@ -84,7 +83,7 @@ class TS3FileTransfer(object):
     """
 
     # Counter for the client file transfer ids.
-    _FTID = int(time.time())
+    _FTID = int(time.time()*100)
     _FTID_LOCK = threading.Lock()
 
     def __init__(self, ts3conn):
@@ -101,109 +100,126 @@ class TS3FileTransfer(object):
             cls._FTID += 1
         return tmp
 
-    def init_download(self, output_file, name, cid, cpw=None, seekpos=0,
+    # Download
+    # --------------------------------------------
+
+    def init_download(self, output_file,
+                      name, cid, cpw=None, seekpos=0,
                       query_resp_hook=None, reporthook=None):
         """
-        This is method is a shortcut for:
-        >>> resp = ts3conn.ftinitdownload(
-            TS3FileTransfer.get_ftid(), name, cid, cpw, seekpos)
-        >>> ts3ft.download(resp, output_file, reporthook)
+        This is the recommended method to download a file from a TS3 server.        
         
         *name*, *cid*, *cpw* and *seekpos* are the parameters for the TS3
-        query command ftinitdownload.
-        
+        query command *ftinitdownload*. The parameter *clientftid* is
+        automatically created and unique for the whole runtime of the programm.
+
         *query_resp_hook*, if provided, is called, when the response of the
-        ftinitdownload query has been received. It has as single parameter
+        ftinitdownload query has been received. Its single parameter is the 
         the response of the querry.
 
-        For further information take a look at: *TS3FileTransfer.download()*.
+        For downloading the file from the server, **TS3FileTransfer.download()*
+        is called. So take a look a this method for further information.
         """
         if cpw is None:
-            cpw = ""
-
+            cpw = str()
+            
         ftid = self.get_ftid()
         resp = self.ts3conn.ftinitdownload(
             ftid, name, cid, cpw, seekpos)
-
+        
         if query_resp_hook is not None:
             query_resp_hook(resp)
 
-        return self.download(output_file, resp, seekpos, reporthook=reporthook)
+        return self.download_by_resp(output_file, resp, seekpos, reporthook)
 
     @classmethod
-    def download(cls, output_file, ftinitdownload_resp,
-                 seekpos=0, reporthook=None):
+    def download_by_resp(cls, output_file, ftinitdownload_resp,
+                         seekpos=0, reporthook=None):
         """
-        The received data is directly written into the *output_file*.
-        
-        *ftinitdownload* is a TS3QueryResponse object that contains the
-        response of a ftinitdownload query.
-        
-        *reporthook* is a function, which accepts three paramters:
-        *read_size*, *block_size*, *total_size* and is called whenever a new
-        data block has been received.
-        
-        >>> hook = lambda read_size, block_size, total_size: \
-                print("{} of {} bytes received.".format(read_size, total_size)
-
-        *seekpos* must be provided, when you use the seekpos parameter in the
-        query. If you use this parameter and don't provide it here, a
-        *TS3FtDownloadError* will be raised, because the download will be
-        considered as incomplete.
-        
-        If the download fails, a *TS3FtDownloadError* is raised. The error
-        object contains the downloaded size. So that you can use *seekpos*
-        to resume the download at this position.
+        This is *almost* a shortcut for:
+            >>> TS3FileTransfer.download(
+                    output_file,
+                    adr = (resp[0]["ip"], int(resp[0]["port"])),
+                    ftkey = resp[0]["ftkey"],
+                    seekpos = seekpos,
+                    total_size = resp[0]["size"],
+                    reporthook = reporthook
+                    )
+            ...
+        Note, that the value of resp[0]["ip"] is a csv list a has to be parsed.
         """
-        # Convert some types
-        meta = ftinitdownload_resp[0]        
-        meta["port"] = int(meta["port"])
-        meta["size"] = int(meta["size"])
+        # The csv ip list is not parsed by the TS3ResponseParser, so we have
+        # to parse the list here.
+        ip_list = ftinitdownload_resp[0]["ip"]
+        ip_list = ip_list.split(",")
+        # Use the first ip in the list and make sure, that the ip is defined.
+        ip = ip_list[0] if ip_list[0] != "0.0.0.0" else "localhost"
         
-        # Multiple ips are not parsed correct, so we parse them here.
-        meta["ip"] = meta["ip"].split(",")
-        meta["ip"] = meta["ip"][0]
-        if meta["ip"] == "0.0.0.0":
-            meta["ip"] = "localhost"
+        port = int(ftinitdownload_resp[0]["port"])
+        adr = (ip, port)
+        
+        ftkey = ftinitdownload_resp[0]["ftkey"]
+        total_size = ftinitdownload_resp[0]["size"]
+        return cls.download(output_file, adr, ftkey, seekpos, total_size, reporthook)
 
-        # Start downloading the file.
+    @classmethod
+    def download(cls, output_file, adr, ftkey,
+                 seekpos=0, total_size=0, reporthook=None):
+        """
+        Downloads a file from a TS3 server in the file *output_file*. The
+        TS3 file transfer interface is specified witht the address tuple *adr*
+        and the download with the file transfer key *ftkey*.
+
+        If *seekpos* and the total *size* are provided, the *reporthook*
+        function (lambda read_size, block_size, total_size: None) is called
+        after receiving a new block.
+
+        If you provide *seekpos* and *total_size*, this method will check, if
+        the download is complete and raise a *TS3FtDownloadError* if not.
+
+        Note, that if *total_size* is 0 or less, each download will be considered
+        as complete.
+
+        If no error is raised, **read_size is returned**.
+        """
+        # Convert the ftkey if necessairy
+        if isinstance(ftkey, str):
+            ftkey = ftkey.encode()
+        if seekpos < 0:
+            raise ValueError("Seekpos has to be >= 0!")
+            
         read_size = seekpos
         block_size = 4096
         try:
-            with socket.create_connection((meta["ip"], meta["port"])) as sock:
-                sock.sendall(meta["ftkey"].encode())
+            with socket.create_connection(adr) as sock:
+                sock.sendall(ftkey)
+
+                # Begin with the download.
+                if reporthook is not None:
+                    reporthook(read_size, block_size, total_size)
 
                 while True:
-                    rs, ws, xs = select.select([], [sock], [])
                     data = sock.recv(block_size)
                     output_file.write(data)
                     
                     read_size += len(data)
                     if reporthook is not None:
-                        reporthook(read_size, block_size, meta["size"])
+                        reporthook(read_size, block_size, total_size)
 
                     # Break, if the connection has been closed.
                     if not data:
                         break
+                    
         # Catch all socket errors.
         except OSError as err:
-            raise TS3FtDownloadError(ftinitdownload_resp, read_size, err)
+            raise TS3FtDownloadError(read_size, err)
 
         # Raise an error, if the download is not complete.
-        if read_size < meta["size"]:
-            raise TS3FtDownloadError(ftinitdownload_resp, read_size)
-        return None
+        if read_size < total_size:
+            raise TS3FtDownloadError(read_size)
+        return read_size
 
-    def init_upload(self, input_file, name, cid, cpw=None,
-                    overwrite=True, resumse=False, reporthook=None):
-        """
-        """
+    # Upload
+    # --------------------------------------------
 
-    @classmethod
-    def upload(cls, input_file, ftinitupload_resp, reporthook=None):
-        """
-        Uploads the data in *input_file* to the ts3server using the
-        *ftinitupload_resp* to connect to the server and authenticate the
-        file transfer.
-        """
-        pass
+
