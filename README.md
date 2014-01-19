@@ -152,11 +152,38 @@ You can find more examples in the [examples directory](ts3/examples).
 		ts3conn.login("serveradmin", "FoOBa9")
 		view(ts3conn, sid=1)
 	```
+	
+*	Download and upload files:
+
+	```
+	Python
+	#!/usr/bin/python3
+	
+	import ts3
+	
+	with ts3.TS3Connection("localhost") as ts3conn:
+		ts3conn.login("serveradmin", "FoOBa9")
+		view(ts3conn, sid=1)
+		
+		# Create a new TS3FileTransfer instance associated with the
+		# TS3Connection.
+		ts3ft = ts3.TS3FileTransfer(ts3conn)
+		
+		# Upload the image *baz.png* to the channel with the id 2 on the
+		# TS3 server.
+		# Note, the the opening mode ("rb").
+		with open("baz.png", "rb") as file:
+			ts3ft.init_upload(file, name="/baz.png", cid=2)
+		
+		# Download the file into *baz1.png*.
+		with open("baz1.png", "wb") as file:
+			ts3ft.init_download(file, name="/baz.png", cid=2)
+	```
 
 	
 ## Bugs
 This project is in an early state, so you'll probably find a bug. Please report
-it. 
+it or fork this repository, fix the bug and create a pull request. 
 
 If you found a grammar or spelling error, please report it too.
 

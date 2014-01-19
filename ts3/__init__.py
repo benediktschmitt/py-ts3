@@ -24,7 +24,7 @@
 
 # Data
 # ------------------------------------------------
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 
 # Modules
@@ -32,7 +32,8 @@ __version__ = "0.2.0"
 try:
     from common import TS3Error
     from escape import TS3Escape
-    from filetransfer import TS3FileTransfer
+    from filetransfer import (TS3FileTransferError, TS3FtUploadError,
+                              TS3FtDownloadError, TS3FileTransfer)
     from query import (TS3QueryError, TS3ResponseRecvError,
                        TS3BaseConnection, TS3Connection)
     from response import (TS3Response, TS3ParserError,
@@ -43,7 +44,8 @@ try:
 except ImportError:
     from .common import TS3Error
     from .escape import TS3Escape
-    from .filetransfer import TS3FileTransfer
+    from .filetransfer import (TS3FileTransferError, TS3FtUploadError,
+                               TS3FtDownloadError, TS3FileTransfer)
     from .query import (TS3QueryError, TS3ResponseRecvError,
                         TS3BaseConnection, TS3Connection)
     from .response import (TS3Response, TS3ParserError,
@@ -72,7 +74,3 @@ if __name__ == "__main__":
     ts3conn = TS3Connection("localhost")
     ts3conn.login("serveradmin", "xh4ie1HL")        
     ts3conn.use(1)
-
-    ts3ft = TS3FileTransfer(ts3conn)
-    query_hook = lambda resp: print(resp.parsed)
-    reporthook = lambda rs, bs, ts: ts+1 #print(rs, ts, bs)
