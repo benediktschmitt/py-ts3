@@ -55,7 +55,21 @@ class TS3FileTransferError(TS3Error):
 class TS3FtUploadError(TS3FileTransferError):
     """
     Raised when an upload fails.
+    
+    send_size: The number of sent bytes till the error occured.
+    err: The original exception
     """
+
+    def __init__(self, send_size, err=None):
+        self.send_size = send_size
+        self.err = err
+        return None
+
+    def __str__(self):
+        tmp = "TS3 file upload failed. "
+        if self.err is not None:
+            tmp += str(self.err)
+        return tmp
     
 
 class TS3FtDownloadError(TS3FileTransferError):
