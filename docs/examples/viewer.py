@@ -64,6 +64,7 @@ class ChannelTreeNode(object):
 
     Root Channel
     ------------
+    
     Represents the virtual server itself.
 
     self.info = Dictionary with all informations about the virtual server
@@ -75,7 +76,13 @@ class ChannelTreeNode(object):
 
     Usage
     -----
+    
     >>> tree = ChannelTreeNode.build_tree(ts3conn, sid=1)
+
+    Todo
+    ----
+    
+    * It's not sure, that the tree is always correct sorted.
     """
 
     def __init__(self, info, parent, root, clients=None):
@@ -152,8 +159,6 @@ class ChannelTreeNode(object):
                 info=channelinfo, parent=root, root=root,
                 clients=clientlist[channel["cid"]])
             root.insert(channel)
-
-        root.sort()
         return root
 
     def insert(self, channel):
@@ -197,27 +202,11 @@ class ChannelTreeNode(object):
             self.childs.append(channel)
         return False
 
-    def sort(self):
-        """
-        Sorts the channels in the tree recursive using the *channel_order*
-        attribute.
-        
-        XXX: This method does not work correct, so exit.
-        """
-##        for child in self.childs:
-##            child.sort()
-##            
-##        self.childs.sort(key=lambda c: int(c.info["channel_order"]))
-        return None
-
-    def print(self, indent=0, restore_order=False):
+    def print(self, indent=0):
         """
         Prints the channel and it's subchannels recursive. If restore_order is
         true, the child channels will be sorted before printing them.
-        """
-        if restore_order:
-            self.sort()
-            
+        """            
         if self.is_root():
             print(" "*(indent*3) + "|-", self.info["virtualserver_name"])
         else:

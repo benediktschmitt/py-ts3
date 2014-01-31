@@ -22,11 +22,6 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-"""
-This module contains some little helper classes and functions.
-"""
-
-
 # Data
 # ------------------------------------------------
 __all__ = ["TS3Error"]

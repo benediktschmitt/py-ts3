@@ -70,8 +70,8 @@ class TS3Commands(object):
     def instanceinfo(self):
         return self._return_proxy("instanceinfo", None, None)
 
-##    def instanceedit(self, params=None):
-##        return self._return_proxy("instanceedit", params, None)
+    def instanceedit(self, params=None):
+        return self._return_proxy("instanceedit", params, None)
 
     def bindinglist(self):
         return self._return_proxy("bindinglist", None, None)
@@ -109,12 +109,12 @@ class TS3Commands(object):
         params["sid"] = sid
         return self._return_proxy("serverdelete", params, None)
 
-##    def servercreate(self, name, properties=None):
-##        params = dict()
-##        params["virtualserver_name"] = name
-##        if properties is not None:
-##            params.update(properties)
-##        return self._return_proxy("servercreate", params, None)
+    def servercreate(self, name, properties=None):
+        params = dict()
+        params["name"] = name
+        if properties is not None:
+            params.update(properties)
+        return self._return_proxy("servercreate", params, None)
 
     def serverstart(self, sid):
         params = dict()
@@ -153,8 +153,8 @@ class TS3Commands(object):
     def servertemppasswordlist(self):
         return self._return_proxy("servertemppasswordlist", None, None)
 
-##    def serveredit(self, properties=None):
-##        return self._return_proxy("serveredit", properties, None)
+    def serveredit(self, properties=None):
+        return self._return_proxy("serveredit", properties, None)
             
     def servergrouplist(self):
         return self._return_proxy("servergrouplist", None, None)
@@ -309,12 +309,12 @@ class TS3Commands(object):
         params["order"] = order
         return self._return_proxy("channelmove", params, None)
 
-##    def channelcreate(self, name, properties=None):
-##        params = dict()
-##        params["channel_name"] = name
-##        if properties is not None:
-##            params.update(properties)
-##        return self._return_proxy("channelcreate", params, None)
+    def channelcreate(self, name, properties=None):
+        params = dict()
+        params["channel_name"] = name
+        if properties is not None:
+            params.update(properties)
+        return self._return_proxy("channelcreate", params, None)
         
     def channeldelete(self, cid, force):
         params = dict()
@@ -322,12 +322,12 @@ class TS3Commands(object):
         params["force"] = force
         return self._return_proxy("channeldelete", params, None)
 
-##    def channeledit(self, cid, properties=None):
-##        params = dict()
-##        params["cid"] = cid
-##        if properties is not None:
-##            params.update(properties)
-##        return self._return_proxy("channeledit", params, None)
+    def channeledit(self, cid, properties=None):
+        params = dict()
+        params["cid"] = cid
+        if properties is not None:
+            params.update(properties)
+        return self._return_proxy("channeledit", params, None)
         
     def channelgrouplist(self):
         return self._return_proxy("channelgrouplist", None, None)
@@ -358,8 +358,9 @@ class TS3Commands(object):
         params["name"] = name
         return self._return_proxy("channelgrouprename", params, None)
 
-##    def channelgroupaddperm(self, ...):
-##        pass
+##    def channelgroupaddperm(...):
+##        params = dict()
+##        params["cgid"] = cgid
 
     def channelgrouppermlist(self, cgid, permsid=False):
         params = dict()

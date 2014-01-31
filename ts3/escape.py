@@ -55,12 +55,13 @@ class TS3Escape(object):
     def escape(cls, txt):
         """
         txt: str
+        returns: str
         
         Escapes the characters in the string *txt* as described in the
         TS3 server query manual:
 
             >>> TS3Escape.escape('Hallo Welt')
-            'Hallo\\sWelt'
+            'Hallo\\sWelt'        
         """
         if not isinstance(txt, str):
             raise TypeError("*txt* has to be a string.")
@@ -74,6 +75,7 @@ class TS3Escape(object):
     def unescape(cls, txt):
         """
         txt: str
+        returns: str
         
         Unescapes the charactes in the string *txt* as described in the
         manual.
@@ -92,6 +94,9 @@ class TS3Escape(object):
     @classmethod
     def parameters_to_str(cls, params):
         """
+        params: str->str | str->[str] | str->None | None
+        returns: str
+        
         *params* is either a dictionary with the possible key-value types:
             key    value
             str -> str
@@ -124,7 +129,8 @@ class TS3Escape(object):
 
         tmp = list()
         for key, val in params.items():
-            # Escaping a key will never making it a valid key.
+            # Note, that scaping a key will never make it valid or invalid.
+            # In other words: It's not necessairy to escape the key.
             key = key.lower()
 
             if val is None:
@@ -137,11 +143,16 @@ class TS3Escape(object):
         tmp = " ".join(tmp)
         return tmp
 
+    # TODO:
+    # Create a method to build a string from a list with multiple parameter
+    # dictionaries.
+
     @classmethod
     def key_mulval_to_str(cls, key, values):
         """
         key: str
         values: [str|None]
+        returns: str
         
         Can be used to convert multiple key value pairs, with the same key
         to a valid TS3 server query string. If an item is None, it will be
@@ -159,6 +170,7 @@ class TS3Escape(object):
     def options_to_str(cls, options):
         """
         options: None | [str|None]
+        returns: str
         
         Escapes the options and prepends a *-* if necessairy to an option.
         If *options* is None, the empty string will be returned. If
