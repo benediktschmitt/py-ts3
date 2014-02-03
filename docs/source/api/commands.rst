@@ -1,0 +1,4 @@
+:mod:`commands`
+===============
+
+.. automodule:: commands

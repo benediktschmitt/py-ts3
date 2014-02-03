@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -21,6 +21,12 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+"""
+This package contains a thread-safe Python API for the:
+    * TeamSpeak 3 Server Query
+    * TeamSpeak 3 Filetransfer Interface
+    * TeamSpeak 3 Query Events
+"""
 
 # Data
 # ------------------------------------------------

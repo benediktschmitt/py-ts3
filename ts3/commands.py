@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -30,61 +30,61 @@ class TS3Commands(object):
     *parameters* dict and the *options* list for all available query commands,
     so that these values can be used to call *TS3BaseConnection.send(...)*.
 
-    The type or values of the parameters are **NOT* validated.
+    The types and values of the parameters are **NOT** validated.
     """
 
-    def _return_proxy(self, cmd, params, opt):
+    def _return_proxy(self, command,
+                      common_parameters=None, parameters=None, options=None):
         """
-        Called by each command formatter method.
+        Called by each command formatter method and returns the parameters
+        per default.
         """
-        return (cmd, params, opt)
+        return (command, common_paramers, parameters, options)
 
     # Implementation of the query factories
     # ------------------------------------------------
 
     def help(self, cmd=None):
-        if cmd is not None:
-            qcmd = "help " + cmd
-        else:
-            qcmd = "help"
-        return self._return_proxy(qcmd, None, None)
+        if cmd is None:
+            cmd = ""
+        return self._return_proxy("help " + cmd)
     
     def quit(self):
-        return self._return_proxy("quit", None, None)
+        return self._return_proxy("quit")
 
     def login(self, user, password):
-        params = dict()
-        params["client_login_name"] = user
-        params["client_login_password"] = password
-        return self._return_proxy("login", params, None)
+        cparams = dict()
+        cparams["client_login_name"] = user
+        cparams["client_login_password"] = password
+        return self._return_proxy("login", cparams)
 
     def logout(self):        
-        return self._return_proxy("logout", None, None)
+        return self._return_proxy("logout")
     
     def version(self):
-        return self._return_proxy("version", None, None)
+        return self._return_proxy("version")
 
     def hostinfo(self):
-        return self._return_proxy("hostinfo", None, None)
+        return self._return_proxy("hostinfo")
 
     def instanceinfo(self):
-        return self._return_proxy("instanceinfo", None, None)
+        return self._return_proxy("instanceinfo")
 
-    def instanceedit(self, params=None):
-        return self._return_proxy("instanceedit", params, None)
+    def instanceedit(self, instance_properties=None):
+        return self._return_proxy("instanceedit", instance_properties)
 
     def bindinglist(self):
-        return self._return_proxy("bindinglist", None, None)
+        return self._return_proxy("bindinglist")
 
     def use(self, sid=None, port=None, virtual=False):
-        params = dict()
-        params["sid"] = sid
-        params["port"] = port
+        cparams = dict()
+        cparams["sid"] = sid
+        cparams["port"] = port
 
         opt = list()
         if virtual:
             opt.append("virtual")
-        return self._return_proxy("use", params, opt)
+        return self._return_proxy("use", cparams, None, opt)
     
     def serverlist(self, uid=False, short=False,
                    all_=False, onlyoffline=False):
@@ -97,24 +97,26 @@ class TS3Commands(object):
             opt.append("all")
         if onlyoffline:
             opt.append("onlyoffline")
-        return self._return_proxy("serverlist", None, opt)
+        return self._return_proxy("serverlist", None, None, opt)
 
     def serveridgetbyport(self, port):
-        params = dict()
-        params["virtualserver_port"] = port
-        return self._return_proxy("serveridgetbyport", params, None)
+        cparams = dict()
+        cparams["virtualserver_port"] = port
+        return self._return_proxy("serveridgetbyport", cparams)
 
     def serverdelete(self, sid):
-        params = dict()
-        params["sid"] = sid
-        return self._return_proxy("serverdelete", params, None)
+        cparams = dict()
+        cparams["sid"] = sid
+        return self._return_proxy("serverdelete", cparams)
 
     def servercreate(self, name, properties=None):
-        params = dict()
-        params["name"] = name
+        cparams = dict()
+        cparams["name"] = name
         if properties is not None:
-            params.update(properties)
-        return self._return_proxy("servercreate", params, None)
+            cparams.update(properties)
+        return self._return_proxy("servercreate", cparams)
+
+    # -----
 
     def serverstart(self, sid):
         params = dict()

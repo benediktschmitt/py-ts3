@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -21,6 +21,11 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+"""
+This module contains classes and functions used to build valid query strings
+and to unescape responses.
+"""
+
 
 # Data
 # ------------------------------------------------
@@ -31,8 +36,7 @@ __all__ = ["TS3Escape"]
 # ------------------------------------------------
 class TS3Escape(object):
     """
-    Methods to escape a string properly and to build query strings.
-    The methods work only correct, if the parameters have the correct type.
+    Provides methods to escape a string properly and to build query strings.
     """
 
     # Table with escape strings.
@@ -52,140 +56,149 @@ class TS3Escape(object):
         ]
 
     @classmethod
-    def escape(cls, txt):
-        """
-        txt: str
-        returns: str
-        
-        Escapes the characters in the string *txt* as described in the
-        TS3 server query manual:
+    def escape(cls, raw):
+        """        
+        Escapes the value of *raw*.
 
-            >>> TS3Escape.escape('Hallo Welt')
-            'Hallo\\sWelt'        
+        >>> TS3Escape.escape(None)
+        ''
+        >>> TS3Escape.escape(2)
+        '2'
+        >>> TS3Escape.escape(True)
+        '1'
+        >>> TS3Escape.escape('Hello World')
+        'Hello\\sWorld'
+
+        :arg raw: The value to escape.
+        :type raw: None, str, bool or int
+
+        :return: The escaped value of *raw*
+        :rtype: string
+        
+        :raises TypeError: If *raw* has an unsupported type.
         """
-        if not isinstance(txt, str):
-            raise TypeError("*txt* has to be a string.")
-            
-        # The order of the replacement is not trivial.
-        for char, repl_char in cls._MAP:
-            txt = txt.replace(char, repl_char)
-        return txt
+        if raw is None:
+            return str()
+        elif isinstance(raw, bool):
+            return "1" if raw else "0"
+        elif isinstance(raw, int):
+            return str(raw)
+        elif isinstance(raw, str):            
+            # The order of the replacement is not trivial.
+            for char, repl_char in cls._MAP:
+                raw = raw.replace(char, repl_char)
+            return raw
+        else:
+            raise TypeError("*raw* has to be a string.")
 
     @classmethod
     def unescape(cls, txt):
         """
-        txt: str
-        returns: str
-        
-        Unescapes the charactes in the string *txt* as described in the
-        manual.
+        Unescapes the str *txt*.
 
-            >>> TS3Escape.unescape('Hallo\\sWelt')
-            'Hallo Welt'
+        >>> TS3Escape.unescape('Hello\\sWorld')
+        'Hello World'
+
+        :arg txt: The string to escape.
+        :type txt: string
+
+        :raises TypeError: If *txt* is not a string.
         """
-        if not isinstance(txt, str):
+        if isinstance(txt, str):
+            # Again, the order of the replacement is not trivial.
+            for repl_char, char in reversed(cls._MAP):
+                txt = txt.replace(char, repl_char)
+            return txt
+        else:
             raise TypeError("*txt* has to be a string.")
-        
-        # Again, the order of the replacement is not trivial.
-        for repl_char, char in reversed(cls._MAP):
-            txt = txt.replace(char, repl_char)
-        return txt
 
     @classmethod
-    def parameters_to_str(cls, params):
+    def escape_parameters(cls, parameters):
         """
-        params: str->str | str->[str] | str->None | None
-        returns: str
+        Escapes the parameters of a TS3 query and encodes it as a part
+        of a valid ts3 query string.
         
-        *params* is either a dictionary with the possible key-value types:
-            key    value
-            str -> str
-            str -> [str]
-            str -> None
+        >>> # None
+        >>> TS3Escape.escape_parameters(None)
+        ''        
+        >>> # key -> str
+        >>> TS3Escape.escape_parameters({'virtualserver_name': 'foo bar'})
+        'virtualserver_name=foo\\\sbar'
+        >>> # key -> None
+        >>> TS3Escape.escape_parameters({"permsid": None})
+        ''
+        >>> # Of course, you can mix them:
+        >>> TS3Escape.escape_parameters(
+        ...     {'virtualserver_name': 'foo bar',
+        ...      'permsid': None}
+        ...     )
+        'virtualserver_name=foo\\\sbar'
 
-        or None.
-
-        The return value is a string formatted as described in the TS3 server
-        query manual:
-
-            >>> # None
-            >>> TS3Escape.parameters_to_str(None)
-            ''
-            
-            >>> # key -> str
-            >>> TS3Escape.parameters_to_str({'virtualserver_name': 'foo bar'})
-            'virtualserver_name=foo\\\sbar'
-
-            >>> # key -> [str]
-            >>> TS3Escape.parameters_to_str({'clid': [0,2,4,45]})
-            'clid=0|clid=2|clid=4|clid=45'
-            
-            >>> # key -> None
-            >>> TS3Escape.parameters_to_str({"permsid": None})
-            ''
+        :arg parameters: The dictionary with the key value pairs.
+        :type parameters: dictionary
         """
-        if params is None:
+        if parameters is None:
             return str()
-
+        
         tmp = list()
-        for key, val in params.items():
-            # Note, that scaping a key will never make it valid or invalid.
+        for key, val in parameters.items():
+            if val is None:
+                continue            
+            # Note, that escaping a key will never make it valid or invalid.
             # In other words: It's not necessairy to escape the key.
             key = key.lower()
-
-            if val is None:
-                pass
-            elif isinstance(val, list):
-                tmp.append(cls.key_mulval_to_str(key, val))
-            else:
-                val = cls.escape(str(val))
-                tmp.append(key + "=" + val)
+            val = cls.escape(val)
+            tmp.append(key + "=" + val)
         tmp = " ".join(tmp)
         return tmp
 
-    # TODO:
-    # Create a method to build a string from a list with multiple parameter
-    # dictionaries.
-
     @classmethod
-    def key_mulval_to_str(cls, key, values):
+    def escape_parameterlist(cls, parameterslist):
         """
-        key: str
-        values: [str|None]
-        returns: str
+        Escapes each parameter dictionary in the parameterslist and encodes
+        the list as a part of a valid ts3 query string.
         
-        Can be used to convert multiple key value pairs, with the same key
-        to a valid TS3 server query string. If an item is None, it will be
-        ignored:
-        
-            >>> TS3Escape.key_mulval_str('clid', [1, 2, None, 3])
-            'clid=1|clid=2|clid=3'
+        >>> TS3Escape.escape_parameterlist(None)
+        ''
+        >>> TS3Escape.escape_parameterlist(
+        ...     [{"permid": 17276, "permvalue": 50, "permskip": 1},
+        ...      {"permid": 21415, "permvalue": 20, "permskip": 0}]
+        ...     )
+        'permid=17276 permvalue=50 permskip=1|permid=21415 permvalue=20 permskip=0'
+
+        Note, that the order of the parameters might change, when you use the
+        built-in dictionary, that does not care about the order.
+
+        :arg parameterslist: A list of parameters.
+        :type parameterslist: None or a list of dictionaries
         """
-        key = str(key).lower()
-        tmp = "|".join(key + "=" + cls.escape(val) \
-                       for val in values if val is not None)
+        if parameterslist is None:
+            return str()
+
+        tmp += "|".join(cls.escape_parameters(parameters) \
+                        for parameters in parameterslist)
         return tmp
 
     @classmethod
-    def options_to_str(cls, options):
+    def escape_options(cls, options):
         """
-        options: None | [str|None]
-        returns: str
-        
-        Escapes the options and prepends a *-* if necessairy to an option.
-        If *options* is None, the empty string will be returned. If
-        *options* itself is None, the emtpy string will be returned.
+        Escapes the items in the *options* list and prepends a '-' if
+        necessairy.
+        If *options* is None, the empty string will be returned.
 
-            >>> TS3Escape.options_to_str(None)
-            ''
+        >>> TS3Escape.options_to_str(None)
+        ''
+        >>> TS3Escape.options_to_str([None, 'permsid', '-virtual'])
+        '-permsid -virtual'
 
-            >>> TS3Escape.options_to_str([None, 'permsid', '-virtual'])
-            '-permsid -virtual'
+        :arg options: A list with the options.
+        :type options: None or a list of strings.
         """
         if options is None:
             return str()
 
-        # Either an option is valid or not. Escaping doesn't change this fact.
+        # Either an option is valid or not.
+        # Escaping doesn't change this fact.
         tmp = list()
         for i, e in enumerate(options):
             if e is None:

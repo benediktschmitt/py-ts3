@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -21,6 +21,11 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+"""
+This module contains common functions, classes and exceptions used in almost
+all modules of the ts3 package.
+"""
+
 
 # Data
 # ------------------------------------------------
@@ -31,5 +36,5 @@ __all__ = ["TS3Error"]
 # ------------------------------------------------
 class TS3Error(Exception):
     """
-    Base class for all exceptions.
+    This is the base class for all exceptions in this package.
     """

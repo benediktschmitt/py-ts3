@@ -1,0 +1,4 @@
+:mod:`escape`
+=============
+
+.. automodule:: escape

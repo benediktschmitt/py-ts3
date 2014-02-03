@@ -1,9 +1,12 @@
-# Py-TS3
+# PyTS3
 This package provides a *thread-safe* **Python 3 API** for:
 
 * TS3 query connections
 * TS3 query events
 * TS3 file transfers
+
+You can find a complete API documentation 
+[here](http://benediktschmitt.de/docs/pyts3).
 
 
 ## Reference
@@ -37,14 +40,14 @@ This package provides a *thread-safe* **Python 3 API** for:
 
 ## Introduction
 The easiest way to get to grips with this library is taking a look at the
-[examples](ts3/examples/).
+[examples](examples/).
 
 If you need information about the possible query commands, take a look at the 
 **TS3 Server Query Manual**.
 
 
 ### Examples
-You can find more examples in the [examples directory](ts3/examples).
+You can find more examples in the [examples directory](examples).
 
 *	Show all clients on the virtual server with the server id 1:
 
@@ -53,12 +56,12 @@ You can find more examples in the [examples directory](ts3/examples).
 
 	import ts3
 
-	with ts3.TS3Connection("localhost") as ts3conn:
+	with ts3.query.TS3Connection("localhost") as ts3conn:
 		# Note, that the client will wait for the response and raise a
 		# **TS3QueryError** if the error id of the response is not 0.
 		try:
 			ts3conn.login("serveradmin", "FoOBa9")
-		except ts3.TS3QueryError as err:
+		except ts3.query.TS3QueryError as err:
 			print("Login failed:", err.resp.error["msg"])
 			exit(1)
 		
@@ -79,14 +82,14 @@ You can find more examples in the [examples directory](ts3/examples).
 			print(client)
 	```
 
-*	Greet every client:
+*	Say hello to all clients:
 
 	```Python
 	#!/usr/bin/python3
 
 	import ts3
 
-	with ts3.TS3Connection("localhost") as ts3conn:
+	with ts3.query.TS3Connection("localhost") as ts3conn:
 		ts3conn.login("serveradmin", "FoOBa9")
 		ts3conn.use(1)
 		
@@ -105,15 +108,15 @@ You can find more examples in the [examples directory](ts3/examples).
 	
 	def my_event_handler(ts3conn, event):
 		"""
-		*event* is a TS3Event instance, that contains the name of the event and
-		the data.
+		*event* is a ts3.response.TS3Event instance, that contains the name of the
+        event and the data.
 		"""
 		print("Event:")
 		print("\t", event.event)
 		print("\t", event.parsed)
 		return None
 	
-	with ts3.TS3Connection("localhost") as ts3conn:
+	with ts3.query.TS3Connection("localhost") as ts3conn:
 		ts3conn.login("serveradmin", "FoOBa9")
 		ts3conn.use(1)
 		
@@ -125,6 +128,9 @@ You can find more examples in the [examples directory](ts3/examples).
 		
 		# Start the recv loop to catch all events.
 		ts3conn.recv_in_thread()
+      
+        # Note, that you can still use the ts3conn to send queries:
+        ts3conn.clientlist()
 		
 		# The recv thread can be stopped with:
 		# >>> ts3conn.stop_recv()
@@ -148,7 +154,7 @@ You can find more examples in the [examples directory](ts3/examples).
 	# a complete channel tree of a virtual server: ChannelTreeNode
 	from ts3.examples.viewer import view
 	
-	with ts3.TS3Connection("localhost") as ts3conn:
+	with ts3.query.TS3Connection("localhost") as ts3conn:
 		ts3conn.login("serveradmin", "FoOBa9")
 		view(ts3conn, sid=1)
 	```
@@ -193,3 +199,6 @@ For the version numbers, take a look at http://semver.org/.
 
 ## License
 This package is licensed under the [MIT License](LICENSE). 
+
+The docstrings copied from the TS3 Server Query Manual are the property of the
+[TeamSpeak Systems GmbH](http://www.teamspeak.com/).

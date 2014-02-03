@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -21,9 +21,10 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 """
-Contains the enumerations defined in the TS3 ServerQuery Manual.
+This module contains the definitions described in the TeamSpeak 3 Server Manual,
+so that the variables can be used instead of the constans to improve the
+readability of the code.
 """
 
 
@@ -47,94 +48,94 @@ __all__ = [
 # ------------------------------------------------
 class HostMessageMode(object):
 
-    # Display message in chatlog
+    #: display message in chatlog
     LOG = 1
-    # Display message in modal dialog
+    #: display message in modal dialog
     MODAL = 2    
-    # Display message in modal dialog and close connection.
+    #: display message in modal dialog and close connection
     MODALQUIT = 3
 
 class HostBannerMode(object):
 
-    # do not adjust
+    #: do not adjust
     NOADJUST = 0
-    # adjust but ignore aspect ratio (like TeamSpeak 2)
+    #: adjust but ignore aspect ratio (like TeamSpeak 2)
     IGNOREASPECT = 1
-    # adjust and keep aspect ratio
+    #: adjust and keep aspect ratio
     KEEPASPECT = 2
 
 class Codec(object):
 
-    # speex narrowband (mono, 16bit, 8kHz)
+    #: speex narrowband (mono, 16bit, 8kHz)
     SPEEX_NARROWBAND = 0
-    # speex wideband (mono, 16bit, 16kHz)
+    #: speex wideband (mono, 16bit, 16kHz)
     SPEEX_WIDEBAND = 1
-    # speex ultra-wideband (mono, 16bit, 32kHz)
+    #: speex ultra-wideband (mono, 16bit, 32kHz)
     SPEEX_ULTRAWIDEBAND = 2
-    # celt mono (mono, 16bit, 48kHz)
+    #: celt mono (mono, 16bit, 48kHz)
     CELT_MONO = 3
 
 class CodecEncryptionMode(object):
 
-    # configure per channel
+    #: configure per channel
     INDIVIDUAL = 0
-    # globally disabled
+    #: globally disabled
     DISABLED = 1
-    # globally enabled
+    #: globally enabled
     ENABLED = 2
 
 class TextMessageTargetMode(object):
 
-    # target is a client
+    #: target is a client
     CLIENT = 1
-    # target is a channel
+    #: target is a channel
     CHANNEL = 2
-    # target is a virtual server
+    #: target is a virtual server
     SERVER = 3
 
 class LogLevel(object):
 
-    # everything that is really bad
+    #: everything that is really bad
     ERROR = 1
-    # everything that might be bad
+    #: everything that might be bad
     WARNING = 2
-    # output that might help find a problem
+    #: output that might help find a problem
     DEBUG = 3
-    # informational output
+    #: informational output
     INFO = 4
 
 class ReasonIdentifier(object):
 
-    # kick client from channel
+    #: kick client from channel
     KICK_CHANNEL = 4
-    # kick client from server
+    #: kick client from server
     KICK_SERVER = 5
     
 class PermissionGroupDatabaseTypes(object):
 
-    # template group (used for new virtual server)
+    #: template group (used for new virtual server)
     Template = 0
-    # regular group (used for regular clients)
+    #: regular group (used for regular clients)
     Regular = 1
-    # global query group (used for ServerQuery clients)
+    #: global query group (used for ServerQuery clients)
     Query = 2
 
 class PermissionGroupTypes(object):
 
-    # server group permission
+    #: server group permission
     ServerGroup = 0
-    # client specific permission
+    #: client specific permission
     GlobalClient = 1
-    # channel specific permission
+    #: channel specific permission
     Channel = 2
-    # channel group permission
+    #: channel group permission
     ChannelGroup = 3
-    # channel-client specific permission
+    #: channel-client specific permission
     ChannelClient = 4
 
 class TokenType(object):
 
-    # server group token (id1={groupID} id2=0)
+    #: server group token (id1={groupID} id2=0)
     ServerGroup = 0
-    # channel group token (id1={groupID} id2={channelID})
+    #: channel group token (id1={groupID} id2={channelID})
     ChannelGroup = 1

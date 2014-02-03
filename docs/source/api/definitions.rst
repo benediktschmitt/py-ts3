@@ -1,0 +1,4 @@
+:mod:`definitions`
+==================
+
+.. automodule:: definitions

@@ -1,0 +1,4 @@
+:mod:`query`
+============
+
+.. automodule:: query

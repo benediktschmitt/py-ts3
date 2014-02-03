@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -20,6 +20,11 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+"""
+This module contains the classes to parse a TeamSpeak 3 Server Query response
+and to structure the data.
+"""
 
 
 # Modules
@@ -43,18 +48,18 @@ __all__ = ["TS3Response",
            "TS3Event"]
 
 
-# Classes
+# Exceptions
 # ------------------------------------------------
 class TS3ParserError(TS3Error, ValueError):
     """
     Raised, if the data could not be parsed.
-
-    * resp: The TS3Response instance
-    * exc: The original exception
     """
 
     def __init__(self, resp, exc=None):
+        #: The TS3Response object, that has thrown the exception.
         self.resp = resp
+        #: The original exception, if the parsing failed due to an exception
+        #: like UnicodeDecodeError.
         self.exc = exc
         return None
 
@@ -64,13 +69,22 @@ class TS3ParserError(TS3Error, ValueError):
         return tmp
 
     
+# Exceptions
+# ------------------------------------------------
 class TS3Response(object):
     """
     Parses **ONE** response and stores it's data. If you init an instance
     with the data of more than one response, parsing will fail.
 
-    Note, that this class is **lazy**. The response is only parsed, if you
-    request an attribute, that requires a parsed version of the data.
+    Note, that this class is **lazy**. This means, that the response is only
+    parsed, if you request an attribute, that requires a parsed version of the
+    data.
+
+    For convenience, this class supports container emualtion, so these
+    calls are equal:
+    
+        >>> ts3resp.parsed[0]["client_nickname"] == ts3resp[0]["client_nickname"]
+        True
     """
 
     # Matches the error *line* (with line ending)
@@ -90,14 +104,20 @@ class TS3Response(object):
     @property
     def data(self):
         """
-        List of lines with the response.
+        :getter:
+            The list of lines from the original received response.
+        :type:
+            list of bytes
         """
         return self._data
 
     @property
     def data_bytestr(self):        
         """
-        The raw response as bytestring.
+        :getter:
+            The raw response as bytestring.
+        :type:
+            bytes
         """
         if self._data_bytestr is None:
             self._data_bytestr = b"".join(self._data)
@@ -106,10 +126,12 @@ class TS3Response(object):
     @property
     def parsed(self):
         """
-        The parsed response as list of dictionaries. If the response
-        is not parseable, None.
+        :getter:
+            The parsed response as a list of dictionaries.
+        :type:
+            list of dictionaries [str->str]
 
-        May raise *TS3ParserError*.
+        :raises TS3ParserError: If the response could not be parsed.
         """
         self._parse_data()
         return self._parsed
@@ -186,11 +208,9 @@ class TS3Response(object):
     def _parse_property(self, prop):
         """
         >>> parse_property(b'key=value')
-        ('key', 'value')
-        
+        ('key', 'value')        
         >>> parse_property(b'foo')
         ('foo', '')
-
         >>> parse_property(b'client_unique_identifier=gZ7K[...]GIik=')
         ('client_unique_identifier', 'gZ7K[...]GIik=')
         """
@@ -297,11 +317,11 @@ class TS3Response(object):
         if self._parsed is not None:
             return None
 
-        # An event has only one line.
         try:
+            # An event has one line, a query response two.
             if not 1 <= len(self._data) <= 2:
                 raise TS3ParseError(self)
-            
+            # If the data is a query response, the last line is the error line.
             elif re.match(self._ERROR_LINE, self._data[-1]):
                 self._parse_query_response()
             else:
@@ -316,13 +336,19 @@ class TS3Response(object):
 
 class TS3QueryResponse(TS3Response):
     """
-    Makes the error attribute available.
+    The same as :class:`TS3Response`, but the *error* attribute is public.
     """
 
     @property
     def error(self):
         """
-        Returns a dictionary, that contains the error id and message.
+        :getter:
+            A dictionary, that contains the error id and message.
+        :type:
+            dict
+        
+        :raises TS3ParserError:
+            If the response could not be parsed.
         """
         self._parse_data()
         return self._error
@@ -330,13 +356,18 @@ class TS3QueryResponse(TS3Response):
 
 class TS3Event(TS3Response):
     """
-    Makes the event attribute available. 
+    The same as :class:`TS3Response`, but the *event* attribute is public.
     """
 
     @property
     def event(self):
         """
-        Returns the name of the event.
+        :getter:
+            A dictionary with the information about the event.
+        :type:
+            dict
+
+        :raises TS3ParserError: If the response could not be parsed.
         """
         self._parse_data()
         return self._event
