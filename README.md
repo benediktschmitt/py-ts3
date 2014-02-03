@@ -40,14 +40,14 @@ You can find a complete API documentation
 
 ## Introduction
 The easiest way to get to grips with this library is taking a look at the
-[examples](examples/).
+[examples](ts3/examples/).
 
 If you need information about the possible query commands, take a look at the 
 **TS3 Server Query Manual**.
 
 
 ### Examples
-You can find more examples in the [examples directory](examples).
+You can find more examples in the [examples directory](ts3/examples).
 
 *	Show all clients on the virtual server with the server id 1:
 
