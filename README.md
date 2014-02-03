@@ -166,13 +166,13 @@ You can find more examples in the [examples directory](ts3/examples).
 	
 	import ts3
 	
-	with ts3.TS3Connection("localhost") as ts3conn:
+	with ts3.query.TS3Connection("localhost") as ts3conn:
 		ts3conn.login("serveradmin", "FoOBa9")
 		view(ts3conn, sid=1)
 		
 		# Create a new TS3FileTransfer instance associated with the
 		# TS3Connection.
-		ts3ft = ts3.TS3FileTransfer(ts3conn)
+		ts3ft = ts3.filetransfer.TS3FileTransfer(ts3conn)
 		
 		# Upload the image *baz.png* to the channel with the id 2 on the
 		# TS3 server.
