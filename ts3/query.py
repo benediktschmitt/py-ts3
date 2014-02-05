@@ -444,7 +444,7 @@ class TS3BaseConnection(object):
     # Sending
     # -------------------------
 
-    def send(self, command, common_paramters=None, unique_parameters=None,
+    def send(self, command, common_parameters=None, unique_parameters=None,
              options=None, timeout=None):
         """
         The general structure of a query command is::

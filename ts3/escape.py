@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013-2014 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt <benedikt@benediktschmitt.de>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -175,8 +175,8 @@ class TS3Escape(object):
         if parameterslist is None:
             return str()
 
-        tmp += "|".join(cls.escape_parameters(parameters) \
-                        for parameters in parameterslist)
+        tmp = "|".join(cls.escape_parameters(parameters) \
+                       for parameters in parameterslist)
         return tmp
 
     @classmethod

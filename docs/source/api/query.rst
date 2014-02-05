@@ -1,4 +1,4 @@
 :mod:`query`
 ============
 
-.. automodule:: query
+.. automodule:: ts3.query

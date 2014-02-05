@@ -1,4 +1,4 @@
 :mod:`commands`
 ===============
 
-.. automodule:: commands
+.. automodule:: ts3.commands

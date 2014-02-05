@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt <benedikt@benediktschmitt.de>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -133,7 +133,7 @@ class ChannelTreeNode(object):
         Returns the channel tree from the virtual server identified with
         *sid*, using the *TS3Connection* ts3conn.
         """
-        ts3conn.use(sid, virtual=True)
+        ts3conn.use(sid=sid, virtual=True)
 
         ts3conn.serverinfo()
         serverinfo = ts3conn.last_resp.parsed[0]
@@ -150,7 +150,7 @@ class ChannelTreeNode(object):
 
         root = cls.init_root(serverinfo)
         for channel in channellist:
-            ts3conn.channelinfo(channel["cid"])
+            ts3conn.channelinfo(cid=channel["cid"])
             channelinfo = ts3conn.last_resp.parsed[0]
             # This makes sure, that *cid* is in the dictionary.
             channelinfo.update(channel)
@@ -238,5 +238,5 @@ if __name__ == "__main__":
     from def_param import *
     
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
-        ts3conn.login(USER, PASS)
+        ts3conn.login(client_login_name=USER, client_login_password=PASS)
         view(ts3conn, sid=1)

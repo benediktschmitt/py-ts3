@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt <benedikt@benediktschmitt.de>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -27,6 +27,7 @@
 import time
 import random
 import ts3
+import ts3.definitions
 
 
 # Data
@@ -46,7 +47,7 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
     # Countdown till whirlpool
     for i in range(5, 0, -1):
         ts3conn.sendtextmessage(
-            targetmode=ts3.TextMessageTargetMode.SERVER,
+            targetmode=ts3.definitions.TextMessageTargetMode.SERVER,
             target=0, msg="Whirpool in {}s".format(i))
         time.sleep(1)
 
@@ -72,8 +73,8 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
                 clid = client["clid"]
                 cid = random.choice(channellist)["cid"]
                 try:
-                    ts3conn.clientmove(clid, cid)
-                except ts3.TS3QueryError as err:
+                    ts3conn.clientmove(clid=clid, cid=cid)
+                except ts3.query.TS3QueryError as err:
                     # Only ignore 'already member of channel error'
                     if err.resp.error["id"] != "770":
                         raise
@@ -82,8 +83,8 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
         # Move all clients back
         for client in clientlist:
             try:
-                ts3conn.clientmove(client["clid"], client["cid"])
-            except ts3.TS3QueryError as err:
+                ts3conn.clientmove(clid=client["clid"], cid=client["cid"])
+            except ts3.query.TS3QueryError as err:
                 if err.resp.error["id"] != "770":
                     raise
     return None
@@ -96,6 +97,6 @@ if __name__ == "__main__":
     from def_param import *
     
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
-        ts3conn.login(USER, PASS)
-        ts3conn.use(SID)
+        ts3conn.login(client_login_name=USER, client_login_password=PASS)
+        ts3conn.use(sid=SID)
         whirlpool(ts3conn)

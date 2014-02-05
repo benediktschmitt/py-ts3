@@ -1,4 +1,4 @@
 :mod:`escape`
 =============
 
-.. automodule:: escape
+.. automodule:: ts3.escape

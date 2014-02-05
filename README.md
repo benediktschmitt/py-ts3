@@ -20,7 +20,7 @@ You can find a complete API documentation
 ## Installation
 
 1.	[Download](https://github.com/benediktschmitt/emsm/archive/master.zip) the
-    master branch.
+	master branch.
 	
 2.	You can either install the package with *distutils*
 	
@@ -60,7 +60,8 @@ You can find more examples in the [examples directory](ts3/examples).
 		# Note, that the client will wait for the response and raise a
 		# **TS3QueryError** if the error id of the response is not 0.
 		try:
-			ts3conn.login("serveradmin", "FoOBa9")
+			ts3conn.login(client_login_name="serveradmin", 
+			              client_login_password="FoOBa9")
 		except ts3.query.TS3QueryError as err:
 			print("Login failed:", err.resp.error["msg"])
 			exit(1)
@@ -90,8 +91,9 @@ You can find more examples in the [examples directory](ts3/examples).
 	import ts3
 
 	with ts3.query.TS3Connection("localhost") as ts3conn:
-		ts3conn.login("serveradmin", "FoOBa9")
-		ts3conn.use(1)
+		ts3conn.login(client_login_name="serveradmin", 
+		              client_login_password="FoOBa9")
+		ts3conn.use(sid=1)
 		
 		for client in ts3conn.clientlist():
 			msg = "Hi {}".format(client["client_nickname"])
@@ -117,14 +119,15 @@ You can find more examples in the [examples directory](ts3/examples).
 		return None
 	
 	with ts3.query.TS3Connection("localhost") as ts3conn:
-		ts3conn.login("serveradmin", "FoOBa9")
-		ts3conn.use(1)
+		ts3conn.login(client_login_name="serveradmin", 
+		              client_login_password="FoOBa9")
+		ts3conn.use(sid=1)
 		
 		# Replace the default handler
 		ts3conn.on_event = my_event_handler
 		
 		# Register for events
-		ts3conn.servernotifyregister("server")
+		ts3conn.servernotifyregister(event="server")
 		
 		# Start the recv loop to catch all events.
 		ts3conn.recv_in_thread()
@@ -155,7 +158,8 @@ You can find more examples in the [examples directory](ts3/examples).
 	from ts3.examples.viewer import view
 	
 	with ts3.query.TS3Connection("localhost") as ts3conn:
-		ts3conn.login("serveradmin", "FoOBa9")
+		ts3conn.login(client_login_name="serveradmin",
+					  client_login_password="FoOBa9")
 		view(ts3conn, sid=1)
 	```
 	
@@ -167,7 +171,8 @@ You can find more examples in the [examples directory](ts3/examples).
 	import ts3
 	
 	with ts3.query.TS3Connection("localhost") as ts3conn:
-		ts3conn.login("serveradmin", "FoOBa9")
+		ts3conn.login(client_login_name="serveradmin",
+					  client_login_password="FoOBa9")
 		view(ts3conn, sid=1)
 		
 		# Create a new TS3FileTransfer instance associated with the
@@ -178,11 +183,11 @@ You can find more examples in the [examples directory](ts3/examples).
 		# TS3 server.
 		# Note, the the opening mode ("rb").
 		with open("baz.png", "rb") as file:
-			ts3ft.init_upload(file, name="/baz.png", cid=2)
+			ts3ft.init_upload(input_file=file, name="/baz.png", cid=2)
 		
 		# Download the file into *baz1.png*.
 		with open("baz1.png", "wb") as file:
-			ts3ft.init_download(file, name="/baz.png", cid=2)
+			ts3ft.init_download(output_file=file, name="/baz.png", cid=2)
 	```
 
 	

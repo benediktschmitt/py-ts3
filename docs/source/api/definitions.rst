@@ -1,4 +1,4 @@
 :mod:`definitions`
 ==================
 
-.. automodule:: definitions
+.. automodule:: ts3.definitions

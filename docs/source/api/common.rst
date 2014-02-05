@@ -1,4 +1,4 @@
 :mod:`common`
 =============
 
-.. automodule:: common
+.. automodule:: ts3.common

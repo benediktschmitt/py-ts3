@@ -1,4 +1,4 @@
 :mod:`filetransfer`
 ===================
 
-.. automodule:: filetransfer
+.. automodule:: ts3.filetransfer

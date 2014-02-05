@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt <benedikt@benediktschmitt.de>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -45,7 +45,7 @@ def endless_poke(ts3conn, nickname, msg=None, num=100, delay=1):
         msg = "Stop annoying me!"
 
     # Get the client ids
-    clients = ts3conn.clientfind(nickname)
+    clients = ts3conn.clientfind(pattern=nickname)
     clients = [client["clid"] for client in clients]
 
     # Break, if there's no client.
@@ -55,7 +55,8 @@ def endless_poke(ts3conn, nickname, msg=None, num=100, delay=1):
     # Poke them
     i = 0
     while num == -1 or i < num:
-        ts3conn.clientpoke(clients, msg)
+        for clid in clients:
+            ts3conn.clientpoke(msg=msg, clid=clid)
         time.sleep(delay)
     return None
 
@@ -67,6 +68,6 @@ if __name__ == "__main__":
     from def_param import *
     
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
-        ts3conn.login(USER, PASS)
-        ts3conn.use(SID)
+        ts3conn.login(client_login_name=USER, client_login_password=PASS)
+        ts3conn.use(sid=SID)
         endless_poke(ts3conn, "Ben", delay=0.25)

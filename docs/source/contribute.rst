@@ -22,7 +22,8 @@ If you know how to fix the bug, you're welcome to send a *pull request.*
 Code / Enhancements
 -------------------
 
-If you want to contribute to the code, then do it :)
+If you want to contribute to the code or you have suggestions how we could
+improve the code, then tell me about it.
 
 Spelling Mistakes
 -----------------

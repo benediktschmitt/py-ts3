@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013-2014 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt <benedikt@benediktschmitt.de>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -318,14 +318,15 @@ class TS3Response(object):
             return None
 
         try:
-            # An event has one line, a query response two.
-            if not 1 <= len(self._data) <= 2:
-                raise TS3ParseError(self)
-            # If the data is a query response, the last line is the error line.
-            elif re.match(self._ERROR_LINE, self._data[-1]):
+            has_error_line = re.match(self._ERROR_LINE, self._data[-1])
+            # An event has only one line and no error line.
+            if 1 == len(self._data) and not has_error_line:
+                self._parse_event()                
+            # A query has two lines an the last line is the error line.
+            elif has_error_line:
                 self._parse_query_response()
             else:
-                self._parse_event()
+                raise TS3ParseError(self)
         except TS3ParserError:
             self._is_parseable = False
             raise

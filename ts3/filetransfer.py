@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 # 
-# Copyright (c) 2013-2014 Benedikt Schmitt
+# Copyright (c) 2013-2014 Benedikt Schmitt <benedikt@benediktschmitt.de>
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -157,7 +157,7 @@ class TS3FileTransfer(object):
     # Download
     # --------------------------------------------
 
-    def init_download(self, output_file,
+    def init_download(self, *, output_file,
                       name, cid, cpw=None, seekpos=0,
                       query_resp_hook=None, reporthook=None):
         """
@@ -178,27 +178,25 @@ class TS3FileTransfer(object):
         
             * :meth:`~commands.TS3Commands.ftinitdownload`
             * :func:`~urllib.request.urlretrieve`
-        """
-        if cpw is None:
-            cpw = str()
-            
+        """            
         ftid = self.get_ftid()
         resp = self.ts3conn.ftinitdownload(
-            ftid, name, cid, cpw, seekpos)
+            clientftfid=ftid, name=name, cid=cid, cpw=cpw, seekpos=seekpos)
         
         if query_resp_hook is not None:
             query_resp_hook(resp)
-
-        return self.download_by_resp(output_file, resp, seekpos, reporthook)
+        return self.download_by_resp(
+            output_file=output_file, ftinitdownload_resp=resp,
+            seekpos=seekpos, reporthook=reporthook)
 
     @classmethod
-    def download_by_resp(cls, output_file, ftinitdownload_resp,
+    def download_by_resp(cls, *, output_file, ftinitdownload_resp,
                          seekpos=0, reporthook=None):
         """
         This is *almost* a shortcut for:
         
             >>> TS3FileTransfer.download(
-            ...     output_file,
+            ...     output_file = file,
             ...     adr = (resp[0]["ip"], int(resp[0]["port"])),
             ...     ftkey = resp[0]["ftkey"],
             ...     seekpos = seekpos,
@@ -215,10 +213,12 @@ class TS3FileTransfer(object):
         
         ftkey = ftinitdownload_resp[0]["ftkey"]
         total_size = int(ftinitdownload_resp[0]["size"])
-        return cls.download(output_file, adr, ftkey, seekpos, total_size, reporthook)
+        return cls.download(
+            output_file=output_file, adr=adr, ftkey=ftkey, seekpos=seekpos,
+            total_size=total_size, reporthook=reporthook)
 
     @classmethod
-    def download(cls, output_file, adr, ftkey,
+    def download(cls, *, output_file, adr, ftkey,
                  seekpos=0, total_size=0, reporthook=None):
         """
         Downloads a file from a TS3 server in the file **output_file**. The
@@ -285,7 +285,7 @@ class TS3FileTransfer(object):
     # Upload
     # --------------------------------------------
 
-    def init_upload(self, input_file,
+    def init_upload(self, *, input_file,
                     name, cid, cpw=None, overwrite=True, resume=False,
                     query_resp_hook=None, reporthook=None):
         """
@@ -309,8 +309,6 @@ class TS3FileTransfer(object):
             * :meth:`~commands.TS3Commands.ftinitupload`
             * :func:`~urllib.request.urlretrieve`
         """
-        if cpw is None:
-            cpw = str()
         overwrite = "1" if overwrite else "0"
         resume = "1" if resume else "0"
         
@@ -320,20 +318,23 @@ class TS3FileTransfer(object):
         ftid = self.get_ftid()
         
         resp = self.ts3conn.ftinitupload(
-            ftid, name, cid, cpw, size, overwrite, resume)
+            clientftfid=ftid, name=name, cid=cid, cpw=cpw, size=size,
+            overwrite=overwrite, resume=resume)
         
         if query_resp_hook is not None:
             query_resp_hook(resp)
-        return self.upload_by_resp(input_file, resp, reporthook)
+        return self.upload_by_resp(
+            input_file=input_file, ftinitupload_resp=resp,
+            reporthook=reporthook)
 
     @classmethod
-    def upload_by_resp(cls, input_file, ftinitupload_resp,
+    def upload_by_resp(cls, *, input_file, ftinitupload_resp,
                        reporthook=None):
         """
         This is *almost* a shortcut for:
         
             >>> TS3FileTransfer.upload(
-                    input_file,
+                    input_file = file,
                     adr = (resp[0]["ip"], int(resp[0]["port"])),
                     ftkey = resp[0]["ftkey"],
                     seekpos = resp[0]["seekpos"],
@@ -352,10 +353,12 @@ class TS3FileTransfer(object):
         
         ftkey = ftinitupload_resp[0]["ftkey"]
         seekpos = int(ftinitupload_resp[0]["seekpos"])
-        return cls.upload(input_file, adr, ftkey, seekpos, reporthook)        
+        return cls.upload(
+            input_file=input_file, adr=adr, ftkey=ftkey, seekpos=seekpos,
+            reporthook=reporthook) 
 
     @classmethod
-    def upload(cls, input_file, adr, ftkey,
+    def upload(cls, *, input_file, adr, ftkey,
                seekpos=0, reporthook=None):
         """
         Uploads the data in the file **input_file** to the TS3 server listening

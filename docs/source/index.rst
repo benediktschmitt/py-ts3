@@ -5,13 +5,10 @@ Content
 -------
 
 .. toctree::
-   :maxdepth: 2
-   
-   api/index   
-
-.. toctree::
    :maxdepth: 1
    
+   installation
+   api/index
    examples/index
    contribute
    license
