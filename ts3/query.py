@@ -110,7 +110,7 @@ class TS3BaseConnection(object):
         ...     ts3conn.send(...)
         ... finally:
         ...     ts3conn.close()
-    """ 
+    """
    
     def __init__(self, host=None, port=10011):
         """
@@ -407,12 +407,16 @@ class TS3BaseConnection(object):
                     b"\n\r", timeout=poll_intervall)
                 if not data:
                     continue
-                
-                lines.append(data)
 
-                # If we found an error line, the previous received line must
-                # be the response we are waiting for.
-                if re.match(b"error id=(.)*? msg=(.)*?\n\r", data):
+                # We received an event.
+                if data.startswith(b"notify"):
+                    event = TS3Event([data])
+                    self.on_event(event)
+                    
+                # We received the end of a query response.
+                elif data.startswith(b"error"):
+                    lines.append(data)
+                    
                     resp = TS3QueryResponse(lines)
                     lines = list()
                     
@@ -421,13 +425,10 @@ class TS3BaseConnection(object):
 
                     with self._new_response_event:
                         self._new_response_event.notify_all()
-                
-                # If we are not waiting for a response or we received two
-                # lines and the second one is no error line, the first one
-                # must have been an event.
-                elif (not self.remaining_responses()) or len(lines) == 2:
-                    event = TS3Event([lines.pop(0)])
-                    self.on_event(event)
+                        
+                # There's no keyword, so it must be a part of a query response.
+                else:
+                    lines.append(data)
                     
         # Catch socket and telnet errors
         except (OSError, EOFError) as err:

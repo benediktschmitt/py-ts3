@@ -282,10 +282,14 @@ class TS3Response(object):
         """
         Parses a query response.
         """
-        if len(self._data) == 2:
-            self._parsed = self._parse_itemlist(self._data[0])
-        else:
-            self._parsed = list()
+        # I assume, that this is a real query response.
+
+        # Store the parsed data only, if it the whole data can be parsed.
+        tmp_parsed = list()
+        for i in range(len(self._data) - 1):
+            line = self._data[i]
+            tmp_parsed.extend(self._parse_itemlist(line))
+        self._parsed = tmp_parsed
             
         self._error = self._parse_error(self._data[-1])
         return None
