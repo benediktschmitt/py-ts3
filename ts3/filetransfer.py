@@ -206,7 +206,7 @@ class TS3FileTransfer(object):
             
         Note, that the value of ``resp[0]["ip"]`` is a csv list and needs
         to be parsed.
-        """        
+        """
         ip = cls._ip_from_resp(ftinitdownload_resp[0]["ip"])
         port = int(ftinitdownload_resp[0]["port"])
         adr = (ip, port)
