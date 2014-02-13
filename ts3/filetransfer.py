@@ -157,7 +157,7 @@ class TS3FileTransfer(object):
     # Download
     # --------------------------------------------
 
-    def init_download(self, *, output_file,
+    def init_download(self, output_file,
                       name, cid, cpw=None, seekpos=0,
                       query_resp_hook=None, reporthook=None):
         """
@@ -190,7 +190,7 @@ class TS3FileTransfer(object):
             seekpos=seekpos, reporthook=reporthook)
 
     @classmethod
-    def download_by_resp(cls, *, output_file, ftinitdownload_resp,
+    def download_by_resp(cls, output_file, ftinitdownload_resp,
                          seekpos=0, reporthook=None):
         """
         This is *almost* a shortcut for:
@@ -218,7 +218,7 @@ class TS3FileTransfer(object):
             total_size=total_size, reporthook=reporthook)
 
     @classmethod
-    def download(cls, *, output_file, adr, ftkey,
+    def download(cls, output_file, adr, ftkey,
                  seekpos=0, total_size=0, reporthook=None):
         """
         Downloads a file from a TS3 server in the file **output_file**. The
@@ -285,7 +285,7 @@ class TS3FileTransfer(object):
     # Upload
     # --------------------------------------------
 
-    def init_upload(self, *, input_file,
+    def init_upload(self, input_file,
                     name, cid, cpw=None, overwrite=True, resume=False,
                     query_resp_hook=None, reporthook=None):
         """
@@ -328,7 +328,7 @@ class TS3FileTransfer(object):
             reporthook=reporthook)
 
     @classmethod
-    def upload_by_resp(cls, *, input_file, ftinitupload_resp,
+    def upload_by_resp(cls, input_file, ftinitupload_resp,
                        reporthook=None):
         """
         This is *almost* a shortcut for:
@@ -358,7 +358,7 @@ class TS3FileTransfer(object):
             reporthook=reporthook) 
 
     @classmethod
-    def upload(cls, *, input_file, adr, ftkey,
+    def upload(cls, input_file, adr, ftkey,
                seekpos=0, reporthook=None):
         """
         Uploads the data in the file **input_file** to the TS3 server listening
