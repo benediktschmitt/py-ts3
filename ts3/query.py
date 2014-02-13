@@ -46,6 +46,14 @@ except ImportError:
     from .common import TS3Error
     from .escape import TS3Escape
     from .response import TS3Response, TS3QueryResponse, TS3Event
+
+
+# Backward compatibility
+# ------------------------------------------------
+try:
+    TimeoutError
+except NameError:
+    TimeoutError = OSError
     
 
 # Data
