@@ -1,5 +1,5 @@
 # PyTS3
-This package provides a *thread-safe* **Python 3.3+ API** for:
+This package provides a *thread-safe* **Python 3 API** for:
 
 * TS3 query connections
 * TS3 query events
