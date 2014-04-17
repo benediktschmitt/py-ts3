@@ -31,6 +31,7 @@ except ImportError:
         os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))    
     import ts3
 
+    del os
+    del sys
+
 del ts3
-del os
-del sys
