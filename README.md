@@ -181,7 +181,7 @@ You can find more examples in the [examples directory](ts3/examples).
 		
 		# Upload the image *baz.png* to the channel with the id 2 on the
 		# TS3 server.
-		# Note, the the opening mode ("rb").
+		# Note the opening mode ("rb").
 		with open("baz.png", "rb") as file:
 			ts3ft.init_upload(input_file=file, name="/baz.png", cid=2)
 		
