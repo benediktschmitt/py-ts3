@@ -6,7 +6,7 @@ This package provides a *thread-safe* **Python 3 API** for:
 * TS3 file transfers
 
 You can find a complete API documentation 
-[here](http://benediktschmitt.de/docs/pyts3).
+[here](http://py-ts3.readthedocs.org).
 
 
 ## Reference
