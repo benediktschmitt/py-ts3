@@ -41,5 +41,14 @@ setup(
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
     packages = ["ts3", "ts3.examples"],
     license = open("LICENSE").read(),
+    classifiers = [
+        "License :: OSI Approved :: MIT License",
+        "Development Status :: 4 - Beta",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Topic :: Communications",
+        "Topic :: Internet",
+        "Topic :: Software Development :: Libraries"
+        ],
     )
     
