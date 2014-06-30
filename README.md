@@ -11,6 +11,7 @@ You can find a complete API documentation
 
 ## Reference
 * [Installation](#installation)
+* [TS3 Server Configuration](#ts3-server-configuration)
 * [Introduction](#introduction)
 * [Bugs](#bugs)
 * [Versioning](#versioning)
@@ -36,7 +37,18 @@ You can find a complete API documentation
 	
 	If you choose the portable installation mode, you may not be able to import
 	the *examples* sub-package.
+   
 
+## TS3 Server configuration
+   
+If you want to send lots of queries to the TS3 server, make sure, that you're 
+connection is not closed by the **anti-flood protection** of the TS3 server.
+So it may be wise to add the host that runs the TS3 queries to the 
+``query_ip_whitelist.txt`` of your TS3 server:
+	
+```Shell
+$ echo "192.168.178.42" >> path/to/ts3/server/directory/query_ip_whitelist.txt
+```
 
 ## Introduction
 The easiest way to get to grips with this library is taking a look at the

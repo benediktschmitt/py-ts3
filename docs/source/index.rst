@@ -10,6 +10,7 @@ Content
    installation
    api/index
    examples/index
+   faq
    contribute
    license
    
