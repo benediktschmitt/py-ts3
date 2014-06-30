@@ -30,17 +30,27 @@ from ts3 import __version__
 
 # Main
 # ------------------------------------------------
+try:
+    long_description = open("README").read()
+except OSError:
+    long_description = "n/a"
+
+try:
+    license_ = open("LICENSE").read()
+except OSError:
+    license_ = "n/a"
+
 setup(
     name = "ts3",
     version = __version__,
     description = "TS3 Server Query API",
-    long_description = open("README.md").read(),
+    long_description = long_description,
     author = "Benedikt Schmitt",
     author_email = "benedikt@benediktschmitt.de",
     url = "https://github.com/benediktschmitt/py-ts3",
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
     packages = ["ts3", "ts3.examples"],
-    license = open("LICENSE").read(),
+    license = license_,
     classifiers = [
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta",
