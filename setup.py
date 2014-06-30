@@ -31,14 +31,14 @@ from ts3 import __version__
 # Main
 # ------------------------------------------------
 try:
-    long_description = open("README").read()
+    long_description = open("README.md").read()
 except OSError:
-    long_description = "n/a"
+    long_description = "not available"
 
 try:
-    license_ = open("LICENSE").read()
+    license_ = open("LICENSE.md").read()
 except OSError:
-    license_ = "n/a"
+    license_ = "not available"
 
 setup(
     name = "ts3",
@@ -50,6 +50,7 @@ setup(
     url = "https://github.com/benediktschmitt/py-ts3",
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
     packages = ["ts3", "ts3.examples"],
+    data_files = [("", ["LICENSE.md", "README.md"])],
     license = license_,
     classifiers = [
         "License :: OSI Approved :: MIT License",
