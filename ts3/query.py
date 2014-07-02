@@ -322,9 +322,9 @@ class TS3BaseConnection(object):
 
         :raises TS3ResponseRecvError:
             If the response could not be received, because the connection has
-            been closed or the timeout has been exceeded.
+            been closed or the timeout has been exceeded.            
         :raises TS3QueryError:
-            If the *error id* of the query was not 0.
+            If the *error id* of the query was not 0.               
         """
         if timeout is None:
             end_time = None
@@ -347,7 +347,7 @@ class TS3BaseConnection(object):
                 self._new_response_event.wait(timeout=0.1)
 
         resp = self._responses.get(query_id)
-        if resp is None:
+        if resp is None or not self.is_connected():
             raise TS3ResponseRecvError()
         if resp.error["id"] != "0":
             raise TS3QueryError(resp)
@@ -533,3 +533,12 @@ class TS3Connection(TS3BaseConnection, TS3Commands):
         """
         return TS3BaseConnection.send(
             self, command, common_parameters, unique_parameters, options)
+
+    def quit(self):
+        """
+        Calls :meth:`TS3BaseConnection.close()`, to make sure we leave the
+        TS3BaseConnection (pending queries, ...) in a consitent state and that
+        running threads are terminated properly.
+        """
+        self.close()
+        return None
