@@ -1397,7 +1397,7 @@ class TS3Commands(object):
         uparams[0]["clid"] = clid
         return self._return_proxy("clientkick", cparams, uparams, options)
         
-    def clientlist(self, *, uid=False, away=False, voice=False, time=False,
+    def clientlist(self, *, uid=False, away=False, voice=False, times=False,
                    groups=False, info=False, country=False, ip=False):
         """
         Usage::
@@ -1431,8 +1431,8 @@ class TS3Commands(object):
             options.append("away")
         if voice:
             options.append("voice")
-        if time:
-            options.append("time")
+        if times:
+            options.append("times")
         if groups:
             options.append("groups")
         if info:
