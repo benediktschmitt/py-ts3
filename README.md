@@ -37,7 +37,10 @@ You can find a complete API documentation
 	
 	If you choose the portable installation mode, you may not be able to import
 	the *examples* sub-package.
-   
+	
+3.	Make sure, you have all depencies installed. Currently, *py-ts3* only depends on
+	[blinker](https://pythonhosted.org/blinker/).
+	
 
 ## TS3 Server configuration
    
@@ -120,14 +123,17 @@ You can find more examples in the [examples directory](ts3/examples).
 	import time
 	import ts3
 	
-	def my_event_handler(ts3conn, event):
+	def my_event_handler(sender, event):
 		"""
+		*sender* is the TS3Connection instance, that received the event.
+		
 		*event* is a ts3.response.TS3Event instance, that contains the name of the
         event and the data.
 		"""
 		print("Event:")
-		print("\t", event.event)
-		print("\t", event.parsed)
+		print("  sender:", sender)
+		print("  event.event:", event.event)
+		print("  event.parsed:", event.parsed)
 		return None
 	
 	with ts3.query.TS3Connection("localhost") as ts3conn:
@@ -135,8 +141,12 @@ You can find more examples in the [examples directory](ts3/examples).
 		              client_login_password="FoOBa9")
 		ts3conn.use(sid=1)
 		
-		# Replace the default handler
-		ts3conn.on_event = my_event_handler
+		# Connect the signal. This is a **blinker.Signal** instance, shared by
+		# all TS3Connections.
+		ts3conn.on_event.connect(my_event_handler)
+		
+		# If you only want to connect the handler to a specifc ts3 connection, use:
+		# ts3conn.on_event.connect(my_event_handler, sender=ts3conn)
 		
 		# Register for events
 		ts3conn.servernotifyregister(event="server")

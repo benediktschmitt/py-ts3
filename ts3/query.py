@@ -35,6 +35,9 @@ import telnetlib
 import logging
 import threading
 
+# third party
+import blinker
+
 # local
 try:
     from commands import TS3Commands
@@ -282,26 +285,31 @@ class TS3BaseConnection(object):
 
     # Receiving
     # -------------------------
-
-    def on_event(self, event):
-        """
-        Called, when an event has been received.
-
-        When you use ``servernotifyregister``, I assume, that you want to
-        be informed, when the server reported an event. To use your own
-        event handler, you have the choice between:
-        
-            * Subclassing and overwriting this method.
-            * ts3conn.on_event = my_handler
-        
-        :arg event:
-            The catched event.
-        :type event:
-            :class:`~response.TS3Event`
-        """
-        msg = "Uncatched event: {}".format(event.event)
-        _logger.debug(msg)
-        return None
+    
+    #: This signal is emitted, whenever the server reported an event. Note,
+    #: that you must use ``servernotifyregister`` to subscribe to ts3 server
+    #: events.
+    #: 
+    #: You can easily subscribe to the signal:
+    #: 
+    #: >>> @TS3Connection.on_event.connect
+    #: ... def my_handler(sender, event):
+    #: ...     print("received event:")
+    #: ...     print("  sender:", sender)
+    #: ...     print("  event: ", event)
+    #: ...     return None
+    #: 
+    #: If you want to use an handler only for one connection, you can use
+    #: ``connect_via`` to filter the signals:
+    #: 
+    #: >>> ts3conn = TS3Connection()
+    #: >>> @TS3Connection.on_event.connect_via(ts3conn)
+    #: ... def my_handler(sender, event):
+    #: ...     pass
+    #: 
+    #: The first argument is the ``TS3Connection`` that received the event
+    #: and the second argument is the received event packed into a ``TS3Event``.
+    on_event = blinker.Signal()
     
     def wait_for_resp(self, query_id, timeout=None):
         """
@@ -419,7 +427,7 @@ class TS3BaseConnection(object):
                 # We received an event.
                 if data.startswith(b"notify"):
                     event = TS3Event([data])
-                    self.on_event(event)
+                    self.on_event.send(self, event=event)
                     
                 # We received the end of a query response.
                 elif data.startswith(b"error"):
