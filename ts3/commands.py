@@ -1504,7 +1504,7 @@ class TS3Commands(object):
             options.append("permsid")
         return self._return_proxy("clientpermlist", cparams, uparams, options)
         
-    def clientpoke(self, *, msg, clid):
+    def clientpoke(self, msg, clid):
         """
         Usage::
 
