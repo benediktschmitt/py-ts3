@@ -149,6 +149,11 @@ class TS3BaseConnection(object):
         # Avoid sending data to the same time.
         self._send_lock = threading.Lock()
 
+        # Needed to store a link to the keep alive thread
+        # and information about the keep alive intervall.
+        self._keepalive_timer = None
+        self._keepalive_interval = None
+
         # To stop the receive progress, if we are waiting for events from
         # another thread.
         self._stop_event = threading.Event()
@@ -258,6 +263,7 @@ class TS3BaseConnection(object):
                 self._telnet_conn.write(b"quit\n\r")
             finally:
                 self.stop_recv()
+                self.cancel_keepalive()
                 self._telnet_conn.close()
                 self._telnet_conn = None
                 _logger.debug("Disconnected client.")
@@ -281,6 +287,72 @@ class TS3BaseConnection(object):
 
     def __del__(self):
         self.close()
+        return None
+
+    # Keep alive
+    # -------------------------
+    
+    def __send_keepalive_beacon(self):
+        """
+        Sends the keep alive beacon ``\n\r`` to the server and restarts the
+        keep alive timer :attr:`_keepalive_timer`.
+
+        .. seealso::
+
+            * :meth:`cancel_keepalive`
+            * :meth:`keepalive`
+        """        
+        # Send the beacon.
+        with self._send_lock:
+            self._telnet_conn.write(b"\n\r")
+
+        # Restart the timer.
+        if self._keepalive_timer is not None:
+            self._keepalive_timer.cancel()
+            self._keepalive_timer = None
+
+        if self._keepalive_interval is not None:            
+            self._keepalive_timer = threading.Timer(
+                interval = self._keepalive_interval,
+                function = self.__send_keepalive_beacon
+                )
+            self._keepalive_timer.start()
+        return None
+
+    def cancel_keepalive(self):
+        """
+        Cancels the *keepalive* beacon started using :meth:`keepalive`.
+
+        .. seealso::
+
+            * :meth:`keepalive`
+        """
+        if self._keepalive_timer is not None:
+            self._keepalive_timer.cancel()
+            self._keepalive_timer = None
+
+        self._keepalive_interval = None
+        return None            
+
+    def keepalive(self, interval=540):
+        """
+        Starts or restarts a timer which sends each *interval* seconds a beacon
+        to the ts3 server to prevent closing the connection due to the max idle
+        time.
+
+        :arg interval:
+            Time between a beacon is sent to the server. This should be less than
+            the maximum allowed idle time. Usually, this value is set to 600s on
+            a TS3 server. 
+
+        .. seealso::
+
+            * :meth:`cancel_keepalive`
+        """
+        # Sending a beacon now, will create a new timer
+        # or restart the timer with the new intervall.
+        self._keepalive_interval = interval
+        self.__send_keepalive_beacon()
         return None
 
     # Receiving
