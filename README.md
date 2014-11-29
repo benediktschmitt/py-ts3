@@ -112,7 +112,7 @@ You can find more examples in the [examples directory](ts3/examples).
 		
 		for client in ts3conn.clientlist():
 			msg = "Hi {}".format(client["client_nickname"])
-			ts3conn.clientpoke(client["clid"], msg)
+			ts3conn.clientpoke(clid=client["clid"], msg=msg)
 	```
 	
 *	Event handling:
