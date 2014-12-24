@@ -389,6 +389,8 @@ class TS3BaseConnection(object):
     #: 
     #: The first argument is the ``TS3Connection`` that received the event
     #: and the second argument is the received event packed into a ``TS3Event``.
+    #:
+    #: Note, that the events are dispatched in a dedicated **thread**. 
     on_event = blinker.Signal()
     
     def wait_for_resp(self, query_id, timeout=None):
