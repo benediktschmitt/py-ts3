@@ -44,11 +44,13 @@ try:
     from common import TS3Error
     from escape import TS3Escape
     from response import TS3Response, TS3QueryResponse, TS3Event
+    import _lib
 except ImportError:
     from .commands import TS3Commands
     from .common import TS3Error
     from .escape import TS3Escape
     from .response import TS3Response, TS3QueryResponse, TS3Event
+    from . import _lib
 
 
 # Backward compatibility
@@ -159,6 +161,12 @@ class TS3BaseConnection(object):
         self._stop_event = threading.Event()
         self._waiting_for_stop = False
         self._is_listening = False
+
+        # Dispatches all received events in another thread to avoid
+        # dead locks.
+        # The dispatcher is started, as soon as the first event
+        # is received and stopped, when the connection is closed.
+        self.__event_dispatcher = _lib.SignalDispatcher()
         
         if host is not None:
             self.open(host, port)
@@ -265,7 +273,7 @@ class TS3BaseConnection(object):
                 self.stop_recv()
                 self.cancel_keepalive()
                 self._telnet_conn.close()
-                self._telnet_conn = None
+                self._telnet_conn = None                
                 _logger.debug("Disconnected client.")
         return None
 
@@ -442,6 +450,7 @@ class TS3BaseConnection(object):
         if self._is_listening:
             self._stop_event.clear()
             self._waiting_for_stop = True
+            self.__event_dispatcher.stop()
             self._stop_event.wait()
         return None
 
@@ -459,11 +468,15 @@ class TS3BaseConnection(object):
         Blocks untill all unfetched responses have been received or
         forever, if *recv_forever* is true.
 
+        .. deprecated:: 0.6.0
+            The *recv_forever* argument will be removed in future versions.
+            Use :meth:`recv_in_thread` instead.
+            
         :arg recv_forever:
             If true, this method waits forever for a response and you have to
             call :meth:`stop_recv` from another thread, to stop it.
         :type recv_forever:
-            bool
+            bool           
 
         :arg poll_intervall:
             Seconds between checks for the stop request.
@@ -499,7 +512,13 @@ class TS3BaseConnection(object):
                 # We received an event.
                 if data.startswith(b"notify"):
                     event = TS3Event([data])
-                    self.on_event.send(self, event=event)
+
+                    # We start the event dispatcher as late as possible to
+                    # avoid unnecessairy threads.
+                    self.__event_dispatcher.start()
+                    self.__event_dispatcher.send(
+                        self.on_event, self, event=event
+                        )
                     
                 # We received the end of a query response.
                 elif data.startswith(b"error"):
