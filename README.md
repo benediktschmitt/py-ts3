@@ -20,7 +20,7 @@ You can find a complete API documentation
 
 ## Installation
 
-1.	[Download](https://github.com/benediktschmitt/emsm/archive/master.zip) the
+1.	[Download](https://github.com/benediktschmitt/py-ts3/archive/master.zip) the
 	master branch.
 	
 2.	You can either install the package with *distutils*
