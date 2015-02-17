@@ -143,7 +143,7 @@ You can find more examples in the ``ts3.examples`` package.
 			# Start the recv loop to catch all events.
 			ts3conn.recv_in_thread()
 
-	        # Note, that you can still use the ts3conn to send queries:
+			# Note, that you can still use the ts3conn to send queries:
 			ts3conn.clientlist()
 
 			# The recv thread can be stopped with:
