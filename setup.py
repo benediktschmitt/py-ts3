@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 # The MIT License (MIT)
-# 
+#
 # Copyright (c) 2013-2015 Benedikt Schmitt
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
 # the Software without restriction, including without limitation the rights to
 # use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 # the Software, and to permit persons to whom the Software is furnished to do so,
 # subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 # FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -31,12 +31,12 @@ from ts3 import __version__
 # Main
 # ------------------------------------------------
 try:
-    long_description = open("README.md").read()
+    long_description = open("README.rst").read()
 except OSError:
     long_description = "not available"
 
 try:
-    license_ = open("LICENSE.md").read()
+    license_ = open("LICENSE.rst").read()
 except OSError:
     license_ = "not available"
 
@@ -50,7 +50,7 @@ setup(
     url = "https://github.com/benediktschmitt/py-ts3",
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
     packages = ["ts3", "ts3.examples"],
-    data_files = [("", ["LICENSE.md", "README.md"])],
+    data_files = [("", ["LICENSE.rst", "README.rst"])],
     license = license_,
     classifiers = [
         "License :: OSI Approved :: MIT License",
@@ -62,4 +62,3 @@ setup(
         "Topic :: Software Development :: Libraries"
         ],
     )
-    
