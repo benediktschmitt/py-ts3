@@ -25,7 +25,7 @@ TS3 Server configuration
 If you want to send lots of queries to the TS3 server, make sure, that you're
 connection is not closed by the **anti-flood protection** of the TS3 server.
 So it may be wise to add the host that runs the TS3 queries to the
-:file:`query_ip_whitelist.txt` of your TS3 server:
+``query_ip_whitelist.txt`` of your TS3 server:
 
 .. code-block:: bash
 
@@ -43,7 +43,7 @@ If you need information about the possible query commands, take a look at the
 Examples
 ''''''''
 
-You can find more examples in the :file:`ts3.examples` package.
+You can find more examples in the ``ts3.examples`` package.
 
 *	Show all clients on the virtual server with the server id 1:
 
@@ -57,8 +57,10 @@ You can find more examples in the :file:`ts3.examples` package.
 			# Note, that the client will wait for the response and raise a
 			# **TS3QueryError** if the error id of the response is not 0.
 			try:
-				ts3conn.login(client_login_name="serveradmin",
-				              client_login_password="FoOBa9")
+				ts3conn.login(
+					client_login_name="serveradmin",
+					client_login_password="FoOBa9"
+				)
 			except ts3.query.TS3QueryError as err:
 				print("Login failed:", err.resp.error["msg"])
 				exit(1)
@@ -88,8 +90,10 @@ You can find more examples in the :file:`ts3.examples` package.
 		import ts3
 
 		with ts3.query.TS3Connection("localhost") as ts3conn:
-			ts3conn.login(client_login_name="serveradmin",
-			              client_login_password="FoOBa9")
+			ts3conn.login(
+				client_login_name="serveradmin",
+				client_login_password="FoOBa9"
+			)
 			ts3conn.use(sid=1)
 
 			for client in ts3conn.clientlist():
@@ -119,8 +123,10 @@ You can find more examples in the :file:`ts3.examples` package.
 			return None
 
 		with ts3.query.TS3Connection("localhost") as ts3conn:
-			ts3conn.login(client_login_name="serveradmin",
-			              client_login_password="FoOBa9")
+			ts3conn.login(
+				client_login_name="serveradmin",
+				client_login_password="FoOBa9"
+			)
 			ts3conn.use(sid=1)
 
 			# Connect the signal. This is a **blinker.Signal** instance, shared
@@ -138,7 +144,7 @@ You can find more examples in the :file:`ts3.examples` package.
 			ts3conn.recv_in_thread()
 
 	        # Note, that you can still use the ts3conn to send queries:
-	        ts3conn.clientlist()
+			ts3conn.clientlist()
 
 			# The recv thread can be stopped with:
 			# >>> ts3conn.stop_recv()
@@ -163,8 +169,10 @@ You can find more examples in the :file:`ts3.examples` package.
 		from ts3.examples.viewer import view
 
 		with ts3.query.TS3Connection("localhost") as ts3conn:
-			ts3conn.login(client_login_name="serveradmin",
-						  client_login_password="FoOBa9")
+			ts3conn.login(
+				client_login_name="serveradmin",
+				client_login_password="FoOBa9"
+			)
 			view(ts3conn, sid=1)
 
 *	Download and upload files:
@@ -176,8 +184,10 @@ You can find more examples in the :file:`ts3.examples` package.
 		import ts3
 
 		with ts3.query.TS3Connection("localhost") as ts3conn:
-			ts3conn.login(client_login_name="serveradmin",
-						  client_login_password="FoOBa9")
+			ts3conn.login(
+				client_login_name="serveradmin",
+				client_login_password="FoOBa9"
+			)
 			view(ts3conn, sid=1)
 
 			# Create a new TS3FileTransfer instance associated with the
