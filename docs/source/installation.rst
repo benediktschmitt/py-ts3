@@ -3,18 +3,14 @@
 Installation
 ============
 
-#. `Download <https://github.com/benediktschmitt/Py-TS3/archive/master.zip>`_
-   the latest master branch.
+*ts3* is registered on PyPi, so you are done with:
 
-#. PyTS3 is a valid :mod:`distutils` package and therefore, you can install it like
-   every other package:
-   
-   .. code-block:: bash
-   
-      $ setup.py install
-      
-   Or you copy the ``ts3`` folder into your application's include path
-   
-   .. code-block:: bash
-   
-      $ cp -r ts3/ /foo/bar/my-awesome-project/lib
+.. code-block:: bash
+
+   $ pip3 install ts3
+
+You can update the library then with:
+
+.. code-block:: bash
+
+   $ pip3 install --upgrade ts3
