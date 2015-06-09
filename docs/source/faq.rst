@@ -1,5 +1,5 @@
 .. _faq:
-   
+
 Frequently Asked Questions (FAQ)
 ================================
 
@@ -13,6 +13,9 @@ Please take also a look at :ref:`contribute`.
 Unexpected disconnects
 ----------------------
 
+anti-flood
+~~~~~~~~~~
+
 Check the **anti-flood** settings of your TS3 server. Per default, the server
 limits the number of queries a host can send per minute. Take a look at the
 TS3 query manual to get to know how you can increase this limit or simply add
@@ -23,4 +26,10 @@ your TS3 server:
 
    $ # In your TS3 server folder:
    $ echo "192.168.178.42" >> query_ip_whitelist.txt
-   
+
+max-idle-time
+~~~~~~~~~~~~~
+
+The ts3 server closes idle connections after 10 minutes automatically. You can
+use the :meth:`~ts3.query.TS3BaseConnection.keepalive` method to send a beacon
+before the server closes the connection.
