@@ -21,13 +21,15 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
+u"""
 This module contains a high-level API for the TeamSpeak 3 Server Query.
 """
 
 
 # Modules
 # ------------------------------------------------
+from __future__ import with_statement
+from __future__ import absolute_import
 import re
 import time
 import socket
@@ -64,10 +66,10 @@ except NameError:
 # Data
 # ------------------------------------------------
 __all__ = [
-    "TS3QueryError",
-    "TS3ResponseRecvError",
-    "TS3BaseConnection",
-    "TS3Connection"]
+    u"TS3QueryError",
+    u"TS3ResponseRecvError",
+    u"TS3BaseConnection",
+    u"TS3Connection"]
 
 _logger = logging.getLogger(__name__)
 
@@ -75,7 +77,7 @@ _logger = logging.getLogger(__name__)
 # Exceptions
 # ------------------------------------------------
 class TS3QueryError(TS3Error):
-    """
+    u"""
     Raised, if the error code of the response was not 0.
     """
 
@@ -85,26 +87,26 @@ class TS3QueryError(TS3Error):
         return None
 
     def __str__(self):
-        tmp = "error id {}: {}".format(
-            self.resp.error["id"], self.resp.error["msg"])
+        tmp = u"error id {}: {}".format(
+            self.resp.error[u"id"], self.resp.error[u"msg"])
         return tmp
 
 
 class TS3ResponseRecvError(TS3Error, TimeoutError):
-    """
+    u"""
     Raised, if a response could not be received due to a *timeout* or
     if the receive progress has been *canceled* by another thread.
     """
 
     def __str__(self):
-        tmp = "Could not receive the response from the server."
+        tmp = u"Could not receive the response from the server."
         return tmp
     
 
 # Classes
 # ------------------------------------------------
 class TS3BaseConnection(object):
-    """
+    u"""
     The TS3 query client.
 
     This class provides only the methods to **handle** the connection to a
@@ -126,7 +128,7 @@ class TS3BaseConnection(object):
     """
    
     def __init__(self, host=None, port=10011):
-        """
+        u"""
         If *host* is provided, the connection will be established before
         the constructor returns.
 
@@ -177,7 +179,7 @@ class TS3BaseConnection(object):
 
     @property
     def telnet_conn(self):
-        """
+        u"""
         :getter:
             If the client is connected, the used Telnet instance
             else None.
@@ -187,7 +189,7 @@ class TS3BaseConnection(object):
         return self._telnet_conn
 
     def is_connected(self):
-        """
+        u"""
         :return:
             True, if the client is currently connected.
         :rtype:
@@ -197,7 +199,7 @@ class TS3BaseConnection(object):
         
     @property
     def last_resp(self):
-        """
+        u"""
         :getter:
             The last received response.
         :type:
@@ -216,7 +218,7 @@ class TS3BaseConnection(object):
             return self._responses[tmp]
 
     def remaining_responses(self):
-        """
+        u"""
         :return:
             The number of unfetched responses.
         :type:
@@ -229,7 +231,7 @@ class TS3BaseConnection(object):
     
     def open(self, host, port=10011,
              timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
-        """
+        u"""
         Connect to the TS3 Server listening on the address given by the
         *host* and *port* parmeters. If *timeout* is provided, this is the
         maximum time in seconds for the connection attempt.
@@ -240,7 +242,7 @@ class TS3BaseConnection(object):
             If the connection can not be created.
         """
         if self.is_connected():
-             raise OSError("The client is already connected.") 
+             raise OSError(u"The client is already connected.") 
         else:
             self._query_counter = 0
             self._query_id = 0
@@ -250,14 +252,14 @@ class TS3BaseConnection(object):
             # Wait for the first and the second greeting:
             # b'TS3\n\r'
             # b'Welcome to the [...] on a specific command.\n\r'
-            self._telnet_conn.read_until(b"\n\r")
-            self._telnet_conn.read_until(b"\n\r")
+            self._telnet_conn.read_until("\n\r")
+            self._telnet_conn.read_until("\n\r")
 
-            _logger.info("Created connection to {}:{}.".format(host, port))
+            _logger.info(u"Created connection to {}:{}.".format(host, port))
         return None
 
     def close(self):
-        """
+        u"""
         Sends the ``quit`` command and closes the telnet connection.
 
         If you are receiving data from another thread, this method will
@@ -268,17 +270,17 @@ class TS3BaseConnection(object):
             try:
                 # We need to send the quit command directly to avoid
                 # dead locks.
-                self._telnet_conn.write(b"quit\n\r")
+                self._telnet_conn.write("quit\n\r")
             finally:
                 self.stop_recv()
                 self.cancel_keepalive()
                 self._telnet_conn.close()
                 self._telnet_conn = None                
-                _logger.debug("Disconnected client.")
+                _logger.debug(u"Disconnected client.")
         return None
 
     def fileno(self):
-        """
+        u"""
         :return:
             The fileno() of the socket object used internally.
         :rtype:
@@ -301,7 +303,7 @@ class TS3BaseConnection(object):
     # -------------------------
     
     def __send_keepalive_beacon(self):
-        """
+        u"""
         Sends the keep alive beacon ``\n\r`` to the server and restarts the
         keep alive timer :attr:`_keepalive_timer`.
 
@@ -312,7 +314,7 @@ class TS3BaseConnection(object):
         """        
         # Send the beacon.
         with self._send_lock:
-            self._telnet_conn.write(b"\n\r")
+            self._telnet_conn.write("\n\r")
 
         # Restart the timer.
         if self._keepalive_timer is not None:
@@ -328,7 +330,7 @@ class TS3BaseConnection(object):
         return None
 
     def cancel_keepalive(self):
-        """
+        u"""
         Cancels the *keepalive* beacon started using :meth:`keepalive`.
 
         .. seealso::
@@ -343,7 +345,7 @@ class TS3BaseConnection(object):
         return None            
 
     def keepalive(self, interval=540):
-        """
+        u"""
         Starts or restarts a timer which sends each *interval* seconds a beacon
         to the ts3 server to prevent closing the connection due to the max idle
         time.
@@ -394,7 +396,7 @@ class TS3BaseConnection(object):
     on_event = blinker.Signal()
     
     def wait_for_resp(self, query_id, timeout=None):
-        """
+        u"""
         Waits for an response. This method will block untill the response to
         the query has been received, when *timeout* exceeds or when the
         connection is closed.
@@ -439,12 +441,12 @@ class TS3BaseConnection(object):
         resp = self._responses.get(query_id)
         if resp is None or not self.is_connected():
             raise TS3ResponseRecvError()
-        if resp.error["id"] != "0":
+        if resp.error[u"id"] != u"0":
             raise TS3QueryError(resp)
         return resp
     
     def stop_recv(self):
-        """
+        u"""
         If :meth:`recv` has been called from another thread, it will be
         told to stop.
         This method blocks, until :meth:`recv` has terminated.
@@ -457,7 +459,7 @@ class TS3BaseConnection(object):
         return None
 
     def recv_in_thread(self):
-        """
+        u"""
         Calls :meth:`recv` in a thread. This is useful,
         if you used ``servernotifyregister`` and you expect to receive events.
         """
@@ -466,7 +468,7 @@ class TS3BaseConnection(object):
         return None
 
     def recv(self, recv_forever=False, poll_intervall=0.5):
-        """
+        u"""
         Blocks untill all unfetched responses have been received or
         forever, if *recv_forever* is true.
 
@@ -489,7 +491,7 @@ class TS3BaseConnection(object):
             When the client is already listening.
         """           
         if self._is_listening:
-            raise RuntimeError("Already receiving data!")
+            raise RuntimeError(u"Already receiving data!")
         
         self._is_listening = True
         try:
@@ -507,12 +509,12 @@ class TS3BaseConnection(object):
                 # 2.) Query response
                 # 3.) The error line of the query response.                
                 data = self._telnet_conn.read_until(
-                    b"\n\r", timeout=poll_intervall)
+                    "\n\r", timeout=poll_intervall)
                 if not data:
                     continue
 
                 # We received an event.
-                if data.startswith(b"notify"):
+                if data.startswith("notify"):
                     event = TS3Event([data])
 
                     # We start the event dispatcher as late as possible to
@@ -523,7 +525,7 @@ class TS3BaseConnection(object):
                         )
                     
                 # We received the end of a query response.
-                elif data.startswith(b"error"):
+                elif data.startswith("error"):
                     lines.append(data)
                     
                     resp = TS3QueryResponse(lines)
@@ -540,7 +542,7 @@ class TS3BaseConnection(object):
                     lines.append(data)
                     
         # Catch socket and telnet errors
-        except (OSError, EOFError) as err:
+        except (OSError, EOFError), err:
             # We need to set this flag here, to avoid dead locks while closing.
             self._is_listening = False
             self.close()
@@ -556,7 +558,7 @@ class TS3BaseConnection(object):
 
     def send(self, command, common_parameters=None, unique_parameters=None,
              options=None, timeout=None):
-        """
+        u"""
         The general structure of a query command is::
 
             <command> <options> <common parameters> <unique parameters>|<unique parameters>|...
@@ -582,8 +584,8 @@ class TS3BaseConnection(object):
             :meth:`recv`, :meth:`wait_for_resp`
         """
         # Escape the command and build the final query command string.
-        if not isinstance(command, str):
-            raise TypeError("*command* has to be a string.")
+        if not isinstance(command, unicode):
+            raise TypeError(u"*command* has to be a string.")
         
         command = command
         common_parameters = TS3Escape.escape_parameters(common_parameters)
@@ -591,10 +593,10 @@ class TS3BaseConnection(object):
         options = TS3Escape.escape_options(options)
         
         query_command = command\
-                        + " " + common_parameters\
-                        + " " +  unique_parameters\
-                        + " " + options \
-                        + "\n\r"
+                        + u" " + common_parameters\
+                        + u" " +  unique_parameters\
+                        + u" " + options \
+                        + u"\n\r"
         query_command = query_command.encode()
 
         # Send the command.
@@ -614,7 +616,7 @@ class TS3BaseConnection(object):
     
 
 class TS3Connection(TS3BaseConnection, TS3Commands):
-    """
+    u"""
     TS3 server query client.
 
     This class provides the command wrapper capabilities
@@ -629,14 +631,14 @@ class TS3Connection(TS3BaseConnection, TS3Commands):
 
     def _return_proxy(self, command, common_parameters, unique_parameters,
                       options):
-        """
+        u"""
         Executes the command created with a method of TS3Commands directly.
         """
         return TS3BaseConnection.send(
             self, command, common_parameters, unique_parameters, options)
 
     def quit(self):
-        """
+        u"""
         Calls :meth:`TS3BaseConnection.close()`, to make sure we leave the
         TS3BaseConnection (pending queries, ...) in a consitent state and that
         running threads are terminated properly.

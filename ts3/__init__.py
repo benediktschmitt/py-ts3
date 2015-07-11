@@ -21,7 +21,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
+u"""
 This package contains a thread-safe Python API for the:
     * TeamSpeak 3 Server Query
     * TeamSpeak 3 Filetransfer Interface
@@ -31,7 +31,8 @@ This package contains a thread-safe Python API for the:
 
 # Data
 # ------------------------------------------------
-__version__ = "0.6.3"
+from __future__ import absolute_import
+__version__ = u"0.6.3"
 
 
 # Modules

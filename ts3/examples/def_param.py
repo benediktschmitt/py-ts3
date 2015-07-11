@@ -21,7 +21,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
+u"""
 Default settings for the examples.
 """
 
@@ -30,13 +30,13 @@ Default settings for the examples.
 # ------------------------------------------------
 
 # Login name
-USER = "serveradmin"
+USER = u"serveradmin"
 
 # Login password
-PASS = "xh4ie1HL"
+PASS = u"xh4ie1HL"
 
 # TS3 query address
-HOST = "127.0.0.1"
+HOST = u"127.0.0.1"
 PORT = 10011
 
 # The id of the virtual server

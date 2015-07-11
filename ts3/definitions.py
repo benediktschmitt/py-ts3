@@ -21,7 +21,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
+u"""
 This module contains the definitions described in the TeamSpeak 3 Server Manual,
 so that the variables can be used instead of the constans to improve the
 readability of the code.
@@ -31,16 +31,16 @@ readability of the code.
 # Data
 # ------------------------------------------------
 __all__ = [
-    "HostMessageMode",
-    "HostBannerMode",
-    "Codec",
-    "CodecEncryptionMode",
-    "TextMessageTargetMode",
-    "LogLevel",
-    "ReasonIdentifier",
-    "PermissionGroupDatabaseTypes",
-    "PermissionGroupTypes",
-    "TokenType"
+    u"HostMessageMode",
+    u"HostBannerMode",
+    u"Codec",
+    u"CodecEncryptionMode",
+    u"TextMessageTargetMode",
+    u"LogLevel",
+    u"ReasonIdentifier",
+    u"PermissionGroupDatabaseTypes",
+    u"PermissionGroupTypes",
+    u"TokenType"
     ]
 
 

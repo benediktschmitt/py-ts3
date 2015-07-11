@@ -21,7 +21,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
+u"""
 This module contains common functions, classes and exceptions used in almost
 all modules of the ts3 package.
 """
@@ -29,12 +29,12 @@ all modules of the ts3 package.
 
 # Data
 # ------------------------------------------------
-__all__ = ["TS3Error"]
+__all__ = [u"TS3Error"]
 
 
 # Exceptions
 # ------------------------------------------------
 class TS3Error(Exception):
-    """
+    u"""
     This is the base class for all exceptions in this package.
     """

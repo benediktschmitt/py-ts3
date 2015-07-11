@@ -21,7 +21,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
+u"""
 This module contains the classes to parse a TeamSpeak 3 Server Query response
 and to structure the data.
 """
@@ -29,6 +29,7 @@ and to structure the data.
 
 # Modules
 # ------------------------------------------------
+from __future__ import absolute_import
 import re
 
 # local
@@ -42,16 +43,16 @@ except ImportError:
 
 # Data
 # ------------------------------------------------
-__all__ = ["TS3Response",
-           "TS3ParserError",
-           "TS3QueryResponse",
-           "TS3Event"]
+__all__ = [u"TS3Response",
+           u"TS3ParserError",
+           u"TS3QueryResponse",
+           u"TS3Event"]
 
 
 # Exceptions
 # ------------------------------------------------
 class TS3ParserError(TS3Error, ValueError):
-    """
+    u"""
     Raised, if the data could not be parsed.
     """
 
@@ -64,7 +65,7 @@ class TS3ParserError(TS3Error, ValueError):
         return None
 
     def __str__(self):
-        tmp = "The response could not be parsed! Desc: {}"
+        tmp = u"The response could not be parsed! Desc: {}"
         tmp.format(self.exc)
         return tmp
 
@@ -72,7 +73,7 @@ class TS3ParserError(TS3Error, ValueError):
 # Exceptions
 # ------------------------------------------------
 class TS3Response(object):
-    """
+    u"""
     Parses **ONE** response and stores it's data. If you init an instance
     with the data of more than one response, parsing will fail.
 
@@ -88,7 +89,7 @@ class TS3Response(object):
     """
 
     # Matches the error *line* (with line ending)
-    _ERROR_LINE = re.compile(b"error id=(.)*? msg=(.)*?\n\r")    
+    _ERROR_LINE = re.compile("error id=(.)*? msg=(.)*?\n\r")    
         
     def __init__(self, data):
         self._data = data
@@ -103,7 +104,7 @@ class TS3Response(object):
 
     @property
     def data(self):
-        """
+        u"""
         :getter:
             The list of lines from the original received response.
         :type:
@@ -113,19 +114,19 @@ class TS3Response(object):
 
     @property
     def data_bytestr(self):        
-        """
+        u"""
         :getter:
             The raw response as bytestring.
         :type:
             bytes
         """
         if self._data_bytestr is None:
-            self._data_bytestr = b"".join(self._data)
+            self._data_bytestr = "".join(self._data)
         return self._data_bytestr
 
     @property
     def parsed(self):
-        """
+        u"""
         :getter:
             The parsed response as a list of dictionaries.
         :type:
@@ -151,7 +152,7 @@ class TS3Response(object):
 
     # ----------- PARSER ----------
     
-    """
+    u"""
     Syntaxdiagramm
     --------------    
     Legend:
@@ -206,7 +207,7 @@ class TS3Response(object):
     """
 
     def _parse_property(self, prop):
-        """
+        u"""
         >>> parse_property(b'key=value')
         ('key', 'value')        
         >>> parse_property(b'foo')
@@ -214,20 +215,20 @@ class TS3Response(object):
         >>> parse_property(b'client_unique_identifier=gZ7K[...]GIik=')
         ('client_unique_identifier', 'gZ7K[...]GIik=')
         """
-        prop = prop.split(b"=")
+        prop = prop.split("=")
         if len(prop) == 1:
             key = prop[0]
-            val = bytes()
+            val = str()
         elif len(prop) == 2:
             key, val = prop
         else:
             key = prop[0]
-            val = b"=".join(prop[1:])
+            val = "=".join(prop[1:])
 
         try:
             key = key.decode()
             val = val.decode()
-        except UnicodeDecodeError as err:
+        except UnicodeDecodeError, err:
             # Todo: - Should we simply ignore decode errors?
             #       - Is decoding reasonable?
             raise TS3ParserError(self, err)
@@ -237,7 +238,7 @@ class TS3Response(object):
         return (key, val)
 
     def _parse_item(self, item):
-        """
+        u"""
         >>> parse_item(b'key0=val0 key1=val1')
         {'key0': 'val0', 'key1': 'val1'}
         """
@@ -246,19 +247,19 @@ class TS3Response(object):
         return properties
 
     def _parse_itemlist(self, itemlist):
-        """
+        u"""
         >>> parse_itemlist(b'key00=val00 key01=val01|b'key10=val10 key11=val11')
         [{'key00': 'val00', 'key01': 'val01'},
          {'key10': 'val10', 'key11': 'val11'}]
         >>> parse_itemlist(b'key0=val0 key1=val1)
         [{'key0': 'val0', 'key1': 'val1'}]
         """
-        itemlist = itemlist.split(b"|")
+        itemlist = itemlist.split("|")
         itemlist = [self._parse_item(item) for item in itemlist]
         return itemlist
 
     def _parse_error(self, line):
-        """
+        u"""
         Returns the parsed error line. If the line is not a valid error
         line, None is returned.
 
@@ -272,21 +273,21 @@ class TS3Response(object):
         
         line = line.split()
         error = dict(self._parse_property(line[i]) \
-                     for i in range(1, len(line)))
+                     for i in xrange(1, len(line)))
         return error
 
     # Highest abstraction layer
     # -------------------------
 
     def _parse_query_response(self):
-        """
+        u"""
         Parses a query response.
         """
         # I assume, that this is a real query response.
 
         # Store the parsed data only, if it the whole data can be parsed.
         tmp_parsed = list()
-        for i in range(len(self._data) - 1):
+        for i in xrange(len(self._data) - 1):
             line = self._data[i]
             tmp_parsed.extend(self._parse_itemlist(line))
         self._parsed = tmp_parsed
@@ -295,22 +296,22 @@ class TS3Response(object):
         return None
 
     def _parse_event(self):
-        """
+        u"""
         Parses a bytestring containing an event.
         """
-        tmp = self._data[0].find(b" ")
+        tmp = self._data[0].find(" ")
         event, itemlist = self._data[0][:tmp], self._data[0][tmp:]
 
         try:
             self._event = event.decode()
-        except UnicodeDecodeError as err:
+        except UnicodeDecodeError, err:
             raise TS3ParserError(self, err)
         
         self._parsed = self._parse_itemlist(itemlist)
         return None
 
     def _parse_data(self):
-        """
+        u"""
         Parses *self._data* and saves the result in the member variables.
 
         This method decides, if self.data contains an event or a response.
@@ -340,13 +341,13 @@ class TS3Response(object):
 
 
 class TS3QueryResponse(TS3Response):
-    """
+    u"""
     The same as :class:`TS3Response`, but the *error* attribute is public.
     """
 
     @property
     def error(self):
-        """
+        u"""
         :getter:
             A dictionary, that contains the error id and message.
         :type:
@@ -360,13 +361,13 @@ class TS3QueryResponse(TS3Response):
 
 
 class TS3Event(TS3Response):
-    """
+    u"""
     The same as :class:`TS3Response`, but the *event* attribute is public.
     """
 
     @property
     def event(self):
-        """
+        u"""
         :getter:
             A dictionary with the information about the event.
         :type:
