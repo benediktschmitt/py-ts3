@@ -24,18 +24,19 @@
 
 # Modules
 # ------------------------------------------------
+from __future__ import absolute_import
 from collections import OrderedDict
 
 
 # Data
 # ------------------------------------------------
-__all__ = ["TS3Commands"]
+__all__ = [u"TS3Commands"]
 
 
 # Classes
 # ------------------------------------------------
 class TS3Commands(object):
-    """
+    u"""
     Provides a convenient interface to build the parameters for
     :meth:`query.TS3BaseConnection.send`.
 
@@ -55,7 +56,7 @@ class TS3Commands(object):
     """
 
     def _return_proxy(self, command, cparameters, uparameters, options):
-        """
+        u"""
         Each method ends with::
 
             return self._return_proxy(...)
@@ -76,8 +77,18 @@ class TS3Commands(object):
         """
         return (command, cparameters, uparameters, options)
 
-    def banadd(self, *, ip=None, name=None, uid=None, time=None, banreason=None):
-        """
+    def banadd(self, **_3to2kwargs):
+        if 'banreason' in _3to2kwargs: banreason = _3to2kwargs['banreason']; del _3to2kwargs['banreason']
+        else: banreason = None
+        if 'time' in _3to2kwargs: time = _3to2kwargs['time']; del _3to2kwargs['time']
+        else: time = None
+        if 'uid' in _3to2kwargs: uid = _3to2kwargs['uid']; del _3to2kwargs['uid']
+        else: uid = None
+        if 'name' in _3to2kwargs: name = _3to2kwargs['name']; del _3to2kwargs['name']
+        else: name = None
+        if 'ip' in _3to2kwargs: ip = _3to2kwargs['ip']; del _3to2kwargs['ip']
+        else: ip = None
+        u"""
         Usage::
 
             banadd [ip={regexp}] [name={regexp}] [uid={clientUID}] [time={timeInSeconds}] [banreason={text}]
@@ -103,15 +114,20 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["ip"] = ip
-        cparams["name"] = name
-        cparams["uid"] = uid
-        cparams["time"] = time
-        cparams["banreason"] = banreason
-        return self._return_proxy("banadd", cparams, uparams, options)
+        cparams[u"ip"] = ip
+        cparams[u"name"] = name
+        cparams[u"uid"] = uid
+        cparams[u"time"] = time
+        cparams[u"banreason"] = banreason
+        return self._return_proxy(u"banadd", cparams, uparams, options)
 
-    def banclient(self, *, clid, time=None, banreason=None):
-        """
+    def banclient(self, **_3to2kwargs):
+        if 'banreason' in _3to2kwargs: banreason = _3to2kwargs['banreason']; del _3to2kwargs['banreason']
+        else: banreason = None
+        if 'time' in _3to2kwargs: time = _3to2kwargs['time']; del _3to2kwargs['time']
+        else: time = None
+        clid = _3to2kwargs['clid']; del _3to2kwargs['clid']
+        u"""
         Usage::
 
             banclient clid={clientID} [time={timeInSeconds}] [banreason={text}]
@@ -136,13 +152,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["clid"] = clid
-        cparams["time"] = time
-        cparams["banreason"] = banreason
-        return self._return_proxy("banclient", cparams, uparams, options)
+        cparams[u"clid"] = clid
+        cparams[u"time"] = time
+        cparams[u"banreason"] = banreason
+        return self._return_proxy(u"banclient", cparams, uparams, options)
 
-    def bandel(self, *, banid):
-        """
+    def bandel(self, **_3to2kwargs):
+        banid = _3to2kwargs['banid']; del _3to2kwargs['banid']
+        u"""
         Usage::
 
             bandel banid={banID}
@@ -163,11 +180,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["banid"] = banid
-        return self._return_proxy("bandel", cparams, uparams, options)
+        cparams[u"banid"] = banid
+        return self._return_proxy(u"bandel", cparams, uparams, options)
 
     def bandelall(self):
-        """
+        u"""
         Usage::
 
             bandelall
@@ -187,10 +204,10 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("bandelall", cparams, uparams, options)
+        return self._return_proxy(u"bandelall", cparams, uparams, options)
 
     def banlist(self):
-        """
+        u"""
         Usage::
 
             banlist
@@ -212,10 +229,10 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("banlist", cparams, uparams, options)
+        return self._return_proxy(u"banlist", cparams, uparams, options)
 
     def bindinglist(self):
-        """
+        u"""
         Usage::
 
             bindinglist
@@ -237,10 +254,16 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("bindinglist", cparams, uparams, options)
+        return self._return_proxy(u"bindinglist", cparams, uparams, options)
 
-    def channeladdperm(self, *, cid, permvalue, permid=None, permsid=None):
-        """
+    def channeladdperm(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        permvalue = _3to2kwargs['permvalue']; del _3to2kwargs['permvalue']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             channeladdperm cid={channelID} ( permid={permID}|permsid={permName} permvalue={permValue} )...
@@ -264,17 +287,23 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
+        cparams[u"cid"] = cid
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        uparams[0]["permvalue"] = permvalue
-        return self._return_proxy("channeladdperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        uparams[0][u"permvalue"] = permvalue
+        return self._return_proxy(u"channeladdperm", cparams, uparams, options)
 
-    def channelclientaddperm(self, *, cid, cldbid,
-                             permvalue, permid=None, permsid=None):
-        """
+    def channelclientaddperm(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        permvalue = _3to2kwargs['permvalue']; del _3to2kwargs['permvalue']
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             channelclientaddperm cid={channelID} cldbid={clientDBID} ( permid={permID}|permsid={permName} permvalue={permValue} )...
@@ -298,17 +327,23 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cldbid"] = cldbid
+        cparams[u"cid"] = cid
+        cparams[u"cldbid"] = cldbid
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        uparams[0]["permvalue"] = permvalue
-        return self._return_proxy("channelclientaddperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        uparams[0][u"permvalue"] = permvalue
+        return self._return_proxy(u"channelclientaddperm", cparams, uparams, options)
 
-    def channelclientdelperm(self, *, cid, cldbid, permsid=None, permid=None):
-        """
+    def channelclientdelperm(self, **_3to2kwargs):
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             channelclientdelperm cid={channelID} cldbid={clientDBID} permid={permID}|permsid={permName}...
@@ -335,16 +370,20 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cldbid"] = cldbid
+        cparams[u"cid"] = cid
+        cparams[u"cldbid"] = cldbid
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        return self._return_proxy("channelclientdelperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        return self._return_proxy(u"channelclientdelperm", cparams, uparams, options)
 
-    def channelclientpermlist(self, *, cid, cldbid, permsid=False):
-        """
+    def channelclientpermlist(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = False
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             channelclientpermlist cid={channelID} cldbid={clientDBID} [-permsid]
@@ -368,15 +407,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cldbid"] = cldbid
+        cparams[u"cid"] = cid
+        cparams[u"cldbid"] = cldbid
 
         if permsid:
-            option.append("permsid")
-        return self._return_proxy("channelclientpermlist", cparams, uparams, options)
+            option.append(u"permsid")
+        return self._return_proxy(u"channelclientpermlist", cparams, uparams, options)
 
-    def channelcreate(self, *, channel_name, **channel_properties):
-        """
+    def channelcreate(self, **channel_properties):
+        channel_name = channel_properties['channel_name']; del channel_properties['channel_name']
+        u"""
         Usage::
 
             channelcreate channel_name={channelName} [channel_properties...]
@@ -399,12 +439,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["channel_name"] = channel_name
+        cparams[u"channel_name"] = channel_name
         cparams.update(channel_properties)
-        return self._return_proxy("channelcreate", cparams, uparams, options)
+        return self._return_proxy(u"channelcreate", cparams, uparams, options)
 
-    def channeldelete(self, *, cid, force):
-        """
+    def channeldelete(self, **_3to2kwargs):
+        force = _3to2kwargs['force']; del _3to2kwargs['force']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             channeldelete cid={channelID} force={1|0}
@@ -425,12 +467,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["force"] = force
-        return self._return_proxy("channeldelete", cparams, uparams, options)
+        cparams[u"cid"] = cid
+        cparams[u"force"] = force
+        return self._return_proxy(u"channeldelete", cparams, uparams, options)
 
-    def channeldelperm(self, *, cid, permsid=None, permid=None):
-        """
+    def channeldelperm(self, **_3to2kwargs):
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             channeldelperm cid=123 permid={permID}|permsid={permName}...
@@ -455,15 +502,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
+        cparams[u"cid"] = cid
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        return self._return_proxy("channeldelperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        return self._return_proxy(u"channeldelperm", cparams, uparams, options)
 
-    def channeledit(self, *, cid, **channel_properties):
-        """
+    def channeledit(self, **channel_properties):
+        cid = channel_properties['cid']; del channel_properties['cid']
+        u"""
         Usage::
 
             channeledit cid={channelID} [channel_properties...]
@@ -488,12 +536,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
+        cparams[u"cid"] = cid
         cparams.update(channel_properties)
-        return self._return_proxy("channeledit", cparams, uparams, options)
+        return self._return_proxy(u"channeledit", cparams, uparams, options)
 
-    def channelfind(self, *, pattern=None):
-        """
+    def channelfind(self, **_3to2kwargs):
+        if 'pattern' in _3to2kwargs: pattern = _3to2kwargs['pattern']; del _3to2kwargs['pattern']
+        else: pattern = None
+        u"""
         Usage::
 
             channelfind [pattern={channelName}]
@@ -515,11 +565,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["pattern"] = pattern
-        return self._return_proxy("channelfind", cparams, uparams, options)
+        cparams[u"pattern"] = pattern
+        return self._return_proxy(u"channelfind", cparams, uparams, options)
 
-    def channelgroupadd(self, *, name, type_=None):
-        """
+    def channelgroupadd(self, **_3to2kwargs):
+        if 'type_' in _3to2kwargs: type_ = _3to2kwargs['type_']; del _3to2kwargs['type_']
+        else: type_ = None
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        u"""
         Usage::
 
             channelgroupadd name={groupName} [type={groupDbType}]
@@ -543,13 +596,18 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["name"] = name
-        cparams["type"] = type_
-        return self._return_proxy("channelgroupadd", cparams, uparams, options)
+        cparams[u"name"] = name
+        cparams[u"type"] = type_
+        return self._return_proxy(u"channelgroupadd", cparams, uparams, options)
 
-    def channelgroupaddperm(self, *, cgid,
-                            permvalue, permid=None, permsid=None):
-        """
+    def channelgroupaddperm(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        permvalue = _3to2kwargs['permvalue']; del _3to2kwargs['permvalue']
+        cgid = _3to2kwargs['cgid']; del _3to2kwargs['cgid']
+        u"""
         Usage::
 
             channelgroupaddperm cgid={groupID} permid={permID} permvalue={permValue}
@@ -574,16 +632,22 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cgid"] = cgid
+        cparams[u"cgid"] = cgid
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        uparams[0]["permvalue"] = permvalue
-        return self._return_proxy("channelgroupaddperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        uparams[0][u"permvalue"] = permvalue
+        return self._return_proxy(u"channelgroupaddperm", cparams, uparams, options)
 
-    def channelgroupclientlist(self, *, cid=None, cldbid=None, cgid=None):
-        """
+    def channelgroupclientlist(self, **_3to2kwargs):
+        if 'cgid' in _3to2kwargs: cgid = _3to2kwargs['cgid']; del _3to2kwargs['cgid']
+        else: cgid = None
+        if 'cldbid' in _3to2kwargs: cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        else: cldbid = None
+        if 'cid' in _3to2kwargs: cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        else: cid = None
+        u"""
         Usage::
 
             channelgroupclientlist [cid={channelID}] [cldbid={clientDBID}] [cgid={groupID}]
@@ -607,13 +671,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cldbid"] = cldbid
-        cparams["cgid"] = cgid
-        return self._return_proxy("channelgroupclientlist", cparams, uparams, options)
+        cparams[u"cid"] = cid
+        cparams[u"cldbid"] = cldbid
+        cparams[u"cgid"] = cgid
+        return self._return_proxy(u"channelgroupclientlist", cparams, uparams, options)
 
-    def channelgroupcopy(self, *, scgid, tcgid, name, type_):
-        """
+    def channelgroupcopy(self, **_3to2kwargs):
+        type_ = _3to2kwargs['type_']; del _3to2kwargs['type_']
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        tcgid = _3to2kwargs['tcgid']; del _3to2kwargs['tcgid']
+        scgid = _3to2kwargs['scgid']; del _3to2kwargs['scgid']
+        u"""
         Usage::
 
             channelgroupcopy scgid={sourceGroupID} tcgid={targetGroupID} name={groupName} type={groupDbType}
@@ -641,14 +709,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["scgid"] = scgid
-        cparams["tcgid"] = tcgid
-        cparams["name"] = name
-        cparams["type"] = type_
-        return self._return_proxy("channelgroupcopy", cparams, uparams, options)
+        cparams[u"scgid"] = scgid
+        cparams[u"tcgid"] = tcgid
+        cparams[u"name"] = name
+        cparams[u"type"] = type_
+        return self._return_proxy(u"channelgroupcopy", cparams, uparams, options)
 
-    def channelgroupdel(self, *, cgid, force):
-        """
+    def channelgroupdel(self, **_3to2kwargs):
+        force = _3to2kwargs['force']; del _3to2kwargs['force']
+        cgid = _3to2kwargs['cgid']; del _3to2kwargs['cgid']
+        u"""
         Usage::
 
             channelgroupdel cgid={groupID} force={1|0}
@@ -670,12 +740,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cgid"] = cgid
-        cparams["force"] = force
-        return self._return_proxy("channelgroupdel", cparams, uparams, options)
+        cparams[u"cgid"] = cgid
+        cparams[u"force"] = force
+        return self._return_proxy(u"channelgroupdel", cparams, uparams, options)
 
-    def channelgroupdelperm(self, *, cgid, permid=None, permsid=None):
-        """
+    def channelgroupdelperm(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        cgid = _3to2kwargs['cgid']; del _3to2kwargs['cgid']
+        u"""
         Usage::
 
             channelgroupdelperm cgid={groupID} permid={permID}|...
@@ -700,15 +775,15 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cgid"] = cgid
+        cparams[u"cgid"] = cgid
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        return self._return_proxy("channelgroupdelperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        return self._return_proxy(u"channelgroupdelperm", cparams, uparams, options)
 
     def channelgrouplist(self):
-        """
+        u"""
         Usage::
 
             channelgrouplist
@@ -729,10 +804,13 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("channelgrouplist", cparams, uparams, options)
+        return self._return_proxy(u"channelgrouplist", cparams, uparams, options)
 
-    def channelgrouppermlist(self, *, cgid, permsid=False):
-        """
+    def channelgrouppermlist(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = False
+        cgid = _3to2kwargs['cgid']; del _3to2kwargs['cgid']
+        u"""
         Usage::
 
             channelgrouppermlist cgid={groupID} [-permsid]
@@ -755,14 +833,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cgid"] = cgid
+        cparams[u"cgid"] = cgid
 
         if permsid:
-            options.append("permsid")
-        return self._return_proxy("channelgrouppermlist", cparams, uparams, options)
+            options.append(u"permsid")
+        return self._return_proxy(u"channelgrouppermlist", cparams, uparams, options)
 
-    def channelgrouprename(self, *, cgid, name):
-        """
+    def channelgrouprename(self, **_3to2kwargs):
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        cgid = _3to2kwargs['cgid']; del _3to2kwargs['cgid']
+        u"""
         Usage::
 
             channelgrouprename cgid={groupID} name={groupName}
@@ -783,12 +863,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cgid"] = cgid
-        cparams["name"] = name
-        return self._return_proxy("channelgrouprename", cparams, uparams, options)
+        cparams[u"cgid"] = cgid
+        cparams[u"name"] = name
+        return self._return_proxy(u"channelgrouprename", cparams, uparams, options)
 
-    def channelinfo(self, *, cid):
-        """
+    def channelinfo(self, **_3to2kwargs):
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             channelinfo cid={channelID}
@@ -811,12 +892,23 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        return self._return_proxy("channelinfo", cparams, uparams, options)
+        cparams[u"cid"] = cid
+        return self._return_proxy(u"channelinfo", cparams, uparams, options)
 
-    def channellist(self, *, topic=False, flags=False, voice=False,
-                    limits=False, icon=False, secondsempty=False):
-        """
+    def channellist(self, **_3to2kwargs):
+        if 'secondsempty' in _3to2kwargs: secondsempty = _3to2kwargs['secondsempty']; del _3to2kwargs['secondsempty']
+        else: secondsempty = False
+        if 'icon' in _3to2kwargs: icon = _3to2kwargs['icon']; del _3to2kwargs['icon']
+        else: icon = False
+        if 'limits' in _3to2kwargs: limits = _3to2kwargs['limits']; del _3to2kwargs['limits']
+        else: limits = False
+        if 'voice' in _3to2kwargs: voice = _3to2kwargs['voice']; del _3to2kwargs['voice']
+        else: voice = False
+        if 'flags' in _3to2kwargs: flags = _3to2kwargs['flags']; del _3to2kwargs['flags']
+        else: flags = False
+        if 'topic' in _3to2kwargs: topic = _3to2kwargs['topic']; del _3to2kwargs['topic']
+        else: topic = False
+        u"""
         Usage::
 
             channellist [-topic] [-flags] [-voice] [-limits] [-icon] [-secondsempty]
@@ -840,21 +932,25 @@ class TS3Commands(object):
         options = list()
 
         if topic:
-            options.append("topic")
+            options.append(u"topic")
         if flags:
-            options.append("flags")
+            options.append(u"flags")
         if voice:
-            options.append("voice")
+            options.append(u"voice")
         if limits:
-            options.append("limits")
+            options.append(u"limits")
         if icon:
-            options.append("icon")
+            options.append(u"icon")
         if secondsempty:
-            options.append("secondsempty")
-        return self._return_proxy("channellist", cparams, uparams, options)
+            options.append(u"secondsempty")
+        return self._return_proxy(u"channellist", cparams, uparams, options)
 
-    def channelmove(self, *, cid, cpid, order=None):
-        """
+    def channelmove(self, **_3to2kwargs):
+        if 'order' in _3to2kwargs: order = _3to2kwargs['order']; del _3to2kwargs['order']
+        else: order = None
+        cpid = _3to2kwargs['cpid']; del _3to2kwargs['cpid']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             channelmove cid={channelID} cpid={channelParentID} [order={channelSortOrder}]
@@ -877,13 +973,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cpid"] = cpid
-        cparams["order"] = order
-        return self._return_proxy("channelmove", cparams, uparams, options)
+        cparams[u"cid"] = cid
+        cparams[u"cpid"] = cpid
+        cparams[u"order"] = order
+        return self._return_proxy(u"channelmove", cparams, uparams, options)
 
-    def channelpermlist(self, *, cid, permsid=False):
-        """
+    def channelpermlist(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = False
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             channelpermlist cid={channelID} [-permsid]
@@ -907,15 +1006,21 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
+        cparams[u"cid"] = cid
 
         if permsid:
-            options.append("permsid")
-        return self._return_proxy("channelpermlist", cparams, uparams, options)
+            options.append(u"permsid")
+        return self._return_proxy(u"channelpermlist", cparams, uparams, options)
 
-    def clientaddperm(self, *, cldbid, permvalue, permskip,
-                      permid=None, permsid=None):
-        """
+    def clientaddperm(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        permskip = _3to2kwargs['permskip']; del _3to2kwargs['permskip']
+        permvalue = _3to2kwargs['permvalue']; del _3to2kwargs['permvalue']
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        u"""
         Usage::
 
             clientaddperm cldbid={clientDBID} permid={permID} permvalue={permValue} permskip={1|0}|...
@@ -941,17 +1046,18 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
+        cparams[u"cldbid"] = cldbid
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        uparams[0]["permvalue"] = permvalue
-        uparams[0]["permskip"] = permskip
-        return self._return_proxy("clientaddperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        uparams[0][u"permvalue"] = permvalue
+        uparams[0][u"permskip"] = permskip
+        return self._return_proxy(u"clientaddperm", cparams, uparams, options)
 
-    def clientdbdelete(self, *, cldbid):
-        """
+    def clientdbdelete(self, **_3to2kwargs):
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        u"""
         Usage::
 
             clientdbdelete cldbid={clientDBID}
@@ -972,11 +1078,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("clientdbdelete", cparams, uparams, options)
+        cparams[u"cldbid"] = cldbid
+        return self._return_proxy(u"clientdbdelete", cparams, uparams, options)
 
-    def clientdbedit(self, *, cldbid, **client_properties):
-        """
+    def clientdbedit(self, **client_properties):
+        cldbid = client_properties['cldbid']; del client_properties['cldbid']
+        u"""
         Usage::
 
             clientdbedit cldbid={clientDBID} [client_properties...]
@@ -998,12 +1105,15 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
+        cparams[u"cldbid"] = cldbid
         cparams.update(client_properties)
-        return self._return_proxy("clientdbedit", cparams, uparams, options)
+        return self._return_proxy(u"clientdbedit", cparams, uparams, options)
 
-    def clientdbfind(self, *, pattern, uid=False):
-        """
+    def clientdbfind(self, **_3to2kwargs):
+        if 'uid' in _3to2kwargs: uid = _3to2kwargs['uid']; del _3to2kwargs['uid']
+        else: uid = False
+        pattern = _3to2kwargs['pattern']; del _3to2kwargs['pattern']
+        u"""
         Usage::
 
             clientdbfind pattern={clientName|clientUID} [-uid]
@@ -1029,14 +1139,15 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["pattern"] = pattern
+        cparams[u"pattern"] = pattern
 
         if uid:
-            options.append("uid")
-        return self._return_proxy("clientdbfind", cparams, uparams, options)
+            options.append(u"uid")
+        return self._return_proxy(u"clientdbfind", cparams, uparams, options)
 
-    def clientdbinfo(self, *, cldbid):
-        """
+    def clientdbinfo(self, **_3to2kwargs):
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        u"""
         Usage::
 
             clientdbinfo cldbid={clientDBID}
@@ -1058,11 +1169,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("clientdbinfo", cparams, uparams, options)
+        cparams[u"cldbid"] = cldbid
+        return self._return_proxy(u"clientdbinfo", cparams, uparams, options)
 
-    def clientdblist(self, *, start=None, duration=None, count=False):
-        """
+    def clientdblist(self, **_3to2kwargs):
+        if 'count' in _3to2kwargs: count = _3to2kwargs['count']; del _3to2kwargs['count']
+        else: count = False
+        if 'duration' in _3to2kwargs: duration = _3to2kwargs['duration']; del _3to2kwargs['duration']
+        else: duration = None
+        if 'start' in _3to2kwargs: start = _3to2kwargs['start']; del _3to2kwargs['start']
+        else: start = None
+        u"""
         Usage::
 
             clientdblist [start={offset}] [duration={limit}] [-count]
@@ -1088,15 +1205,20 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["start"] = start
-        cparams["duration"] = duration
+        cparams[u"start"] = start
+        cparams[u"duration"] = duration
 
         if count:
-            options.append("count")
-        return self._return_proxy("clientdblist", cparams, uparams, options)
+            options.append(u"count")
+        return self._return_proxy(u"clientdblist", cparams, uparams, options)
 
-    def clientdelperm(self, *, cldbid, permid=None, permsid=None):
-        """
+    def clientdelperm(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        u"""
         Usage::
 
             channeldelperm cldbid={clientDBID} permid={permID}|permsid={permName}...
@@ -1120,15 +1242,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
+        cparams[u"cldbid"] = cldbid
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        return self._return_proxy("clientdelperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        return self._return_proxy(u"clientdelperm", cparams, uparams, options)
 
-    def clientedit(self, *, clid, **client_properties):
-        """
+    def clientedit(self, **client_properties):
+        clid = client_properties['clid']; del client_properties['clid']
+        u"""
         Usage::
 
             clientedit clid={clientID} [client_properties...]
@@ -1149,12 +1272,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["clid"] = clid
+        cparams[u"clid"] = clid
         cparams.update(client_properties)
-        return self._return_proxy("clientedit", cparams, uparams, options)
+        return self._return_proxy(u"clientedit", cparams, uparams, options)
 
-    def clientfind(self, *, pattern):
-        """
+    def clientfind(self, **_3to2kwargs):
+        pattern = _3to2kwargs['pattern']; del _3to2kwargs['pattern']
+        u"""
         Usage::
 
             clientfind pattern={clientName}
@@ -1176,8 +1300,8 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["pattern"] = pattern
-        return self._return_proxy("clientfind", cparams, uparams, options)
+        cparams[u"pattern"] = pattern
+        return self._return_proxy(u"clientfind", cparams, uparams, options)
 
     ###########################################################################
     ###########################################################################
@@ -1198,8 +1322,9 @@ class TS3Commands(object):
     ###########################################################################
     ###########################################################################
 
-    def clientgetdbidfromuid(self, *, cluid):
-        """
+    def clientgetdbidfromuid(self, **_3to2kwargs):
+        cluid = _3to2kwargs['cluid']; del _3to2kwargs['cluid']
+        u"""
         Usage::
 
             clientgetdbidfromuid cluid={clientUID}
@@ -1221,11 +1346,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cluid"] = cluid
-        return self._return_proxy("clientgetdbidfromuid", cparams, uparams, options)
+        cparams[u"cluid"] = cluid
+        return self._return_proxy(u"clientgetdbidfromuid", cparams, uparams, options)
 
-    def clientgetids(self, *, cluid):
-        """
+    def clientgetids(self, **_3to2kwargs):
+        cluid = _3to2kwargs['cluid']; del _3to2kwargs['cluid']
+        u"""
         Usage::
 
             clientgetids cluid={clientUID}
@@ -1247,11 +1373,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cluid"] = cluid
-        return self._return_proxy("clientgetids", cparams, uparams, options)
+        cparams[u"cluid"] = cluid
+        return self._return_proxy(u"clientgetids", cparams, uparams, options)
 
-    def clientgetnamefromdbid(self, *, cldbid):
-        """
+    def clientgetnamefromdbid(self, **_3to2kwargs):
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        u"""
         Usage::
 
             clientgetnamefromdbid cldbid={clientDBID}
@@ -1274,11 +1401,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("clientgetnamefromdbid", cparams, uparams, options)
+        cparams[u"cldbid"] = cldbid
+        return self._return_proxy(u"clientgetnamefromdbid", cparams, uparams, options)
 
-    def clientgetnamefromuid(self, *, cluid):
-        """
+    def clientgetnamefromuid(self, **_3to2kwargs):
+        cluid = _3to2kwargs['cluid']; del _3to2kwargs['cluid']
+        u"""
         Usage::
 
             clientgetnamefromuid cluid={clientUID}
@@ -1302,11 +1430,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cluid"] = cluid
-        return self._return_proxy("clientgetnamefromuid", cparams, uparams, options)
+        cparams[u"cluid"] = cluid
+        return self._return_proxy(u"clientgetnamefromuid", cparams, uparams, options)
 
-    def clientgetuidfromclid(self, *, clid):
-        """
+    def clientgetuidfromclid(self, **_3to2kwargs):
+        clid = _3to2kwargs['clid']; del _3to2kwargs['clid']
+        u"""
         Usage::
 
             clientgetuidfromclid clid={clientID}
@@ -1328,11 +1457,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["clid"] = clid
-        return self._return_proxy("clientgetuidfromclid", cparams, uparams, options)
+        cparams[u"clid"] = clid
+        return self._return_proxy(u"clientgetuidfromclid", cparams, uparams, options)
 
-    def clientinfo(self, *, clid):
-        """
+    def clientinfo(self, **_3to2kwargs):
+        clid = _3to2kwargs['clid']; del _3to2kwargs['clid']
+        u"""
         Usage::
 
             clientinfo clid={clientID}
@@ -1356,11 +1486,15 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["clid"] = clid
-        return self._return_proxy("clientinfo", cparams, uparams, options)
+        cparams[u"clid"] = clid
+        return self._return_proxy(u"clientinfo", cparams, uparams, options)
 
-    def clientkick(self, *, clid, reasonid, reasonmsg=None):
-        """
+    def clientkick(self, **_3to2kwargs):
+        if 'reasonmsg' in _3to2kwargs: reasonmsg = _3to2kwargs['reasonmsg']; del _3to2kwargs['reasonmsg']
+        else: reasonmsg = None
+        reasonid = _3to2kwargs['reasonid']; del _3to2kwargs['reasonid']
+        clid = _3to2kwargs['clid']; del _3to2kwargs['clid']
+        u"""
         Usage::
 
             clientkick reasonid={4|5} [reasonmsg={text}] clid={clientID}...
@@ -1390,16 +1524,31 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["reasonid"] = reasonid
-        cparams["reasonmsg"] = reasonmsg
+        cparams[u"reasonid"] = reasonid
+        cparams[u"reasonmsg"] = reasonmsg
 
         uparams.append(OrderedDict())
-        uparams[0]["clid"] = clid
-        return self._return_proxy("clientkick", cparams, uparams, options)
+        uparams[0][u"clid"] = clid
+        return self._return_proxy(u"clientkick", cparams, uparams, options)
 
-    def clientlist(self, *, uid=False, away=False, voice=False, times=False,
-                   groups=False, info=False, country=False, ip=False):
-        """
+    def clientlist(self, **_3to2kwargs):
+        if 'ip' in _3to2kwargs: ip = _3to2kwargs['ip']; del _3to2kwargs['ip']
+        else: ip = False
+        if 'country' in _3to2kwargs: country = _3to2kwargs['country']; del _3to2kwargs['country']
+        else: country = False
+        if 'info' in _3to2kwargs: info = _3to2kwargs['info']; del _3to2kwargs['info']
+        else: info = False
+        if 'groups' in _3to2kwargs: groups = _3to2kwargs['groups']; del _3to2kwargs['groups']
+        else: groups = False
+        if 'times' in _3to2kwargs: times = _3to2kwargs['times']; del _3to2kwargs['times']
+        else: times = False
+        if 'voice' in _3to2kwargs: voice = _3to2kwargs['voice']; del _3to2kwargs['voice']
+        else: voice = False
+        if 'away' in _3to2kwargs: away = _3to2kwargs['away']; del _3to2kwargs['away']
+        else: away = False
+        if 'uid' in _3to2kwargs: uid = _3to2kwargs['uid']; del _3to2kwargs['uid']
+        else: uid = False
+        u"""
         Usage::
 
             clientlist [-uid] [-away] [-voice] [-times] [-groups] [-info] [-country] [-ip]
@@ -1426,25 +1575,29 @@ class TS3Commands(object):
         options = list()
 
         if uid:
-            options.append("uid")
+            options.append(u"uid")
         if away:
-            options.append("away")
+            options.append(u"away")
         if voice:
-            options.append("voice")
+            options.append(u"voice")
         if times:
-            options.append("times")
+            options.append(u"times")
         if groups:
-            options.append("groups")
+            options.append(u"groups")
         if info:
-            options.append("info")
+            options.append(u"info")
         if country:
-            options.append("country")
+            options.append(u"country")
         if ip:
-            options.append("ip")
-        return self._return_proxy("clientlist", cparams, uparams, options)
+            options.append(u"ip")
+        return self._return_proxy(u"clientlist", cparams, uparams, options)
 
-    def clientmove(self, *, clid, cid, cpw=None):
-        """
+    def clientmove(self, **_3to2kwargs):
+        if 'cpw' in _3to2kwargs: cpw = _3to2kwargs['cpw']; del _3to2kwargs['cpw']
+        else: cpw = None
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        clid = _3to2kwargs['clid']; del _3to2kwargs['clid']
+        u"""
         Usage::
 
             clientmove cid={channelID} [cpw={channelPassword}] clid={clientID}...
@@ -1469,15 +1622,18 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cpw"] = cpw
+        cparams[u"cid"] = cid
+        cparams[u"cpw"] = cpw
 
         uparams.append(OrderedDict())
-        uparams[0]["clid"] = clid
-        return self._return_proxy("clientmove", cparams, uparams, options)
+        uparams[0][u"clid"] = clid
+        return self._return_proxy(u"clientmove", cparams, uparams, options)
 
-    def clientpermlist(self, *, cldbid, permsid=False):
-        """
+    def clientpermlist(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = False
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        u"""
         Usage::
 
             clientpermlist cldbid={clientDBID} [-permsid]
@@ -1498,14 +1654,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
+        cparams[u"cldbid"] = cldbid
 
         if permsid:
-            options.append("permsid")
-        return self._return_proxy("clientpermlist", cparams, uparams, options)
+            options.append(u"permsid")
+        return self._return_proxy(u"clientpermlist", cparams, uparams, options)
 
-    def clientpoke(self, *, msg, clid):
-        """
+    def clientpoke(self, **_3to2kwargs):
+        clid = _3to2kwargs['clid']; del _3to2kwargs['clid']
+        msg = _3to2kwargs['msg']; del _3to2kwargs['msg']
+        u"""
         Usage::
 
             clientpoke msg={txt} clid={clientID}
@@ -1526,12 +1684,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["msg"] = msg
-        cparams["clid"] = clid
-        return self._return_proxy("clientpoke", cparams, uparams, options)
+        cparams[u"msg"] = msg
+        cparams[u"clid"] = clid
+        return self._return_proxy(u"clientpoke", cparams, uparams, options)
 
-    def clientsetserverquerylogin(self, *, client_login_name):
-        """
+    def clientsetserverquerylogin(self, **_3to2kwargs):
+        client_login_name = _3to2kwargs['client_login_name']; del _3to2kwargs['client_login_name']
+        u"""
         Usage::
 
             clientsetserverquerylogin client_login_name={username}
@@ -1554,11 +1713,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["client_login_name"] = client_login_name
-        return self._return_proxy("clientsetserverquerylogin", cparams, uparams, options)
+        cparams[u"client_login_name"] = client_login_name
+        return self._return_proxy(u"clientsetserverquerylogin", cparams, uparams, options)
 
     def clientupdate(self, **client_properties):
-        """
+        u"""
         Usage::
 
             clientupdate [client_properties...]
@@ -1580,10 +1739,12 @@ class TS3Commands(object):
         options = list()
 
         cparams.update(client_properties)
-        return self._return_proxy("clientupdate", cparams, uparams, options)
+        return self._return_proxy(u"clientupdate", cparams, uparams, options)
 
-    def complainadd(self, *, tcldbid, message):
-        """
+    def complainadd(self, **_3to2kwargs):
+        message = _3to2kwargs['message']; del _3to2kwargs['message']
+        tcldbid = _3to2kwargs['tcldbid']; del _3to2kwargs['tcldbid']
+        u"""
         Usage::
 
             complainadd tcldbid={targetClientDBID} message={text}
@@ -1604,12 +1765,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["tcldbid"] = tcldbid
-        cparams["message"] = message
-        return self._return_proxy("complainadd", cparams, uparams, options)
+        cparams[u"tcldbid"] = tcldbid
+        cparams[u"message"] = message
+        return self._return_proxy(u"complainadd", cparams, uparams, options)
 
-    def complaindel(self, *, tcldbid, fcldbid):
-        """
+    def complaindel(self, **_3to2kwargs):
+        fcldbid = _3to2kwargs['fcldbid']; del _3to2kwargs['fcldbid']
+        tcldbid = _3to2kwargs['tcldbid']; del _3to2kwargs['tcldbid']
+        u"""
         Usage::
 
             complaindel tcldbid={targetClientDBID} fcldbid={fromClientDBID}
@@ -1631,12 +1794,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["tcldbid"] = tcldbid
-        cparams["fcldbid"] = fcldbid
-        return self._return_proxy("complaindel", cparams, uparams, options)
+        cparams[u"tcldbid"] = tcldbid
+        cparams[u"fcldbid"] = fcldbid
+        return self._return_proxy(u"complaindel", cparams, uparams, options)
 
-    def complaindelall(self, *, tcldbid):
-        """
+    def complaindelall(self, **_3to2kwargs):
+        tcldbid = _3to2kwargs['tcldbid']; del _3to2kwargs['tcldbid']
+        u"""
         Usage::
 
             complaindelall tcldbid={targetClientDBID}
@@ -1658,11 +1822,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["tcldbid"] = tcldbid
-        return self._return_proxy("complaindelall", cparams, uparams, options)
+        cparams[u"tcldbid"] = tcldbid
+        return self._return_proxy(u"complaindelall", cparams, uparams, options)
 
-    def complainlist(self, *, tcldbid=None):
-        """
+    def complainlist(self, **_3to2kwargs):
+        if 'tcldbid' in _3to2kwargs: tcldbid = _3to2kwargs['tcldbid']; del _3to2kwargs['tcldbid']
+        else: tcldbid = None
+        u"""
         Usage::
 
             complainlist [tcldbid={targetClientDBID}]
@@ -1685,11 +1851,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["tcldbid"] = tcldbid
-        return self._return_proxy("complainlist", cparams, uparams, options)
+        cparams[u"tcldbid"] = tcldbid
+        return self._return_proxy(u"complainlist", cparams, uparams, options)
 
-    def custominfo(self, *, cldbid):
-        """
+    def custominfo(self, **_3to2kwargs):
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        u"""
         Usage::
 
             custominfo cldbid={clientDBID}
@@ -1711,11 +1878,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("custominfo", cparams, uparams, options)
+        cparams[u"cldbid"] = cldbid
+        return self._return_proxy(u"custominfo", cparams, uparams, options)
 
-    def customsearch(self, *, ident, pattern):
-        """
+    def customsearch(self, **_3to2kwargs):
+        pattern = _3to2kwargs['pattern']; del _3to2kwargs['pattern']
+        ident = _3to2kwargs['ident']; del _3to2kwargs['ident']
+        u"""
         Usage::
 
             customsearch ident={ident} pattern={pattern}
@@ -1738,12 +1907,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["ident"] = ident
-        cparams["pattern"] = pattern
-        return self._return_proxy("customsearch", cparams, uparams, options)
+        cparams[u"ident"] = ident
+        cparams[u"pattern"] = pattern
+        return self._return_proxy(u"customsearch", cparams, uparams, options)
 
-    def ftcreatedir(self, *, cid, dirname, cpw=None):
-        """
+    def ftcreatedir(self, **_3to2kwargs):
+        if 'cpw' in _3to2kwargs: cpw = _3to2kwargs['cpw']; del _3to2kwargs['cpw']
+        else: cpw = None
+        dirname = _3to2kwargs['dirname']; del _3to2kwargs['dirname']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             ftcreatedir cid={channelID} cpw={channelPassword} dirname={dirPath}
@@ -1764,13 +1937,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cpw"] = cpw if cpw is not None else ""
-        cparams["dirname"] = dirname
-        return self._return_proxy("ftcreatedir", cparams, uparams, options)
+        cparams[u"cid"] = cid
+        cparams[u"cpw"] = cpw if cpw is not None else u""
+        cparams[u"dirname"] = dirname
+        return self._return_proxy(u"ftcreatedir", cparams, uparams, options)
 
-    def ftdeletefile(self, *, cid, name, cpw=None):
-        """
+    def ftdeletefile(self, **_3to2kwargs):
+        if 'cpw' in _3to2kwargs: cpw = _3to2kwargs['cpw']; del _3to2kwargs['cpw']
+        else: cpw = None
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             ftdeletefile cid={channelID} cpw={channelPassword} name={filePath}...
@@ -1793,15 +1970,19 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cpw"] = cpw if cpw is not None else str()
+        cparams[u"cid"] = cid
+        cparams[u"cpw"] = cpw if cpw is not None else unicode()
 
         uparams.append(OrderedDict())
-        uparams[0]["name"] = name
-        return self._return_proxy("ftdeletefile", cparams, uparams, options)
+        uparams[0][u"name"] = name
+        return self._return_proxy(u"ftdeletefile", cparams, uparams, options)
 
-    def ftgetfileinfo(self, *, name, cid, cpw=None):
-        """
+    def ftgetfileinfo(self, **_3to2kwargs):
+        if 'cpw' in _3to2kwargs: cpw = _3to2kwargs['cpw']; del _3to2kwargs['cpw']
+        else: cpw = None
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        u"""
         Usage::
 
             ftgetfileinfo cid={channelID} cpw={channelPassword} name={filePath}...
@@ -1826,13 +2007,17 @@ class TS3Commands(object):
         options = list()
 
         uparams.append(OrderedDict())
-        uparams[0]["cid"] = cid
-        uparams[0]["cpw"] = cpw if cpw is not None else str()
-        uparams[0]["name"] = name
-        return self._return_proxy("ftgetfileinfo", cparams, uparams, options)
+        uparams[0][u"cid"] = cid
+        uparams[0][u"cpw"] = cpw if cpw is not None else unicode()
+        uparams[0][u"name"] = name
+        return self._return_proxy(u"ftgetfileinfo", cparams, uparams, options)
 
-    def ftgetfilelist(self, *, path, cid, cpw=None):
-        """
+    def ftgetfilelist(self, **_3to2kwargs):
+        if 'cpw' in _3to2kwargs: cpw = _3to2kwargs['cpw']; del _3to2kwargs['cpw']
+        else: cpw = None
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        path = _3to2kwargs['path']; del _3to2kwargs['path']
+        u"""
         Usage::
 
             ftgetfilelist cid={channelID} cpw={channelPassword} path={filePath}
@@ -1856,13 +2041,19 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cpw"] = cpw if cpw is not None else str()
-        cparams["path"] = path
-        return self._return_proxy("ftgetfilelist", cparams, uparams, options)
+        cparams[u"cid"] = cid
+        cparams[u"cpw"] = cpw if cpw is not None else unicode()
+        cparams[u"path"] = path
+        return self._return_proxy(u"ftgetfilelist", cparams, uparams, options)
 
-    def ftinitdownload(self, *, clientftfid, name, seekpos, cid, cpw=None):
-        """
+    def ftinitdownload(self, **_3to2kwargs):
+        if 'cpw' in _3to2kwargs: cpw = _3to2kwargs['cpw']; del _3to2kwargs['cpw']
+        else: cpw = None
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        seekpos = _3to2kwargs['seekpos']; del _3to2kwargs['seekpos']
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        clientftfid = _3to2kwargs['clientftfid']; del _3to2kwargs['clientftfid']
+        u"""
         Usage::
 
             ftinitdownload clientftfid={clientFileTransferID} name={filePath}
@@ -1890,16 +2081,23 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["clientftfid"] = clientftfid
-        cparams["name"] = name
-        cparams["cid"] = cid
-        cparams["cpw"] = cpw if cpw is not None else str()
-        cparams["seekpos"] = seekpos
-        return self._return_proxy("ftinitdownload", cparams, uparams, options)
+        cparams[u"clientftfid"] = clientftfid
+        cparams[u"name"] = name
+        cparams[u"cid"] = cid
+        cparams[u"cpw"] = cpw if cpw is not None else unicode()
+        cparams[u"seekpos"] = seekpos
+        return self._return_proxy(u"ftinitdownload", cparams, uparams, options)
 
-    def ftinitupload(self, *, clientftfid, name, cid, size, overwrite, resume,
-                     cpw=None):
-        """
+    def ftinitupload(self, **_3to2kwargs):
+        if 'cpw' in _3to2kwargs: cpw = _3to2kwargs['cpw']; del _3to2kwargs['cpw']
+        else: cpw = None
+        resume = _3to2kwargs['resume']; del _3to2kwargs['resume']
+        overwrite = _3to2kwargs['overwrite']; del _3to2kwargs['overwrite']
+        size = _3to2kwargs['size']; del _3to2kwargs['size']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        clientftfid = _3to2kwargs['clientftfid']; del _3to2kwargs['clientftfid']
+        u"""
         Usage::
 
             ftinitupload clientftfid={clientFileTransferID} name={filePath}
@@ -1928,17 +2126,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["clientftfid"] = clientftfid
-        cparams["name"] = name
-        cparams["cid"] = cid
-        cparams["cpw"] = cpw if cpw is not None else str()
-        cparams["size"] = size
-        cparams["overwrite"] = overwrite
-        cparams["resume"] = resume
-        return self._return_proxy("ftinitupload", cparams, uparams, options)
+        cparams[u"clientftfid"] = clientftfid
+        cparams[u"name"] = name
+        cparams[u"cid"] = cid
+        cparams[u"cpw"] = cpw if cpw is not None else unicode()
+        cparams[u"size"] = size
+        cparams[u"overwrite"] = overwrite
+        cparams[u"resume"] = resume
+        return self._return_proxy(u"ftinitupload", cparams, uparams, options)
 
     def ftlist(self):
-        """
+        u"""
         Usage::
 
             ftlist
@@ -1962,11 +2160,19 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("ftlist", cparams, uparams, options)
+        return self._return_proxy(u"ftlist", cparams, uparams, options)
 
-    def ftrenamefile(self, *, cid, oldname, newname, cpw=None, tcid=None,
-                     tcpw=None):
-        """
+    def ftrenamefile(self, **_3to2kwargs):
+        if 'tcpw' in _3to2kwargs: tcpw = _3to2kwargs['tcpw']; del _3to2kwargs['tcpw']
+        else: tcpw = None
+        if 'tcid' in _3to2kwargs: tcid = _3to2kwargs['tcid']; del _3to2kwargs['tcid']
+        else: tcid = None
+        if 'cpw' in _3to2kwargs: cpw = _3to2kwargs['cpw']; del _3to2kwargs['cpw']
+        else: cpw = None
+        newname = _3to2kwargs['newname']; del _3to2kwargs['newname']
+        oldname = _3to2kwargs['oldname']; del _3to2kwargs['oldname']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             ftrenamefile cid={channelID} cpw={channelPassword}
@@ -1992,16 +2198,18 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cpw"] = cpw if cpw is not None else str()
-        cparams["tcid"] = tcid
-        cparams["tcpw"] = tcpw
-        cparams["oldname"] = oldname
-        cparams["newname"] = newname
-        return self._return_proxy("ftrenamefile", cparams, uparams, options)
+        cparams[u"cid"] = cid
+        cparams[u"cpw"] = cpw if cpw is not None else unicode()
+        cparams[u"tcid"] = tcid
+        cparams[u"tcpw"] = tcpw
+        cparams[u"oldname"] = oldname
+        cparams[u"newname"] = newname
+        return self._return_proxy(u"ftrenamefile", cparams, uparams, options)
 
-    def ftstop(self, *, serverftfid, delete):
-        """
+    def ftstop(self, **_3to2kwargs):
+        delete = _3to2kwargs['delete']; del _3to2kwargs['delete']
+        serverftfid = _3to2kwargs['serverftfid']; del _3to2kwargs['serverftfid']
+        u"""
         Usage::
 
             ftstop serverftfid={serverFileTransferID} delete={1|0}
@@ -2022,12 +2230,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["serverftfid"] = serverftfid
-        cparams["delete"] = delete
-        return self._return_proxy("ftstop", cparams, uparams, options)
+        cparams[u"serverftfid"] = serverftfid
+        cparams[u"delete"] = delete
+        return self._return_proxy(u"ftstop", cparams, uparams, options)
 
-    def gm(self, *, msg):
-        """
+    def gm(self, **_3to2kwargs):
+        msg = _3to2kwargs['msg']; del _3to2kwargs['msg']
+        u"""
         Usage::
 
             gm msg={text}
@@ -2049,11 +2258,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["msg"] = msg
-        return self._return_proxy("gm", cparams, uparams, options)
+        cparams[u"msg"] = msg
+        return self._return_proxy(u"gm", cparams, uparams, options)
 
-    def help(self, *, cmd=None):
-        """
+    def help(self, **_3to2kwargs):
+        if 'cmd' in _3to2kwargs: cmd = _3to2kwargs['cmd']; del _3to2kwargs['cmd']
+        else: cmd = None
+        u"""
         TeamSpeak 3 Server :: ServerQuery
         (c) TeamSpeak Systems GmbH
 
@@ -2209,11 +2420,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams[""] = cmd
-        return self._return_proxy("help", cparams, uparams, options)
+        cparams[u""] = cmd
+        return self._return_proxy(u"help", cparams, uparams, options)
 
     def hostinfo(self):
-        """
+        u"""
         Usage::
 
             hostinfo
@@ -2235,10 +2446,10 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("hostinfo", cparams, uparams, options)
+        return self._return_proxy(u"hostinfo", cparams, uparams, options)
 
     def instanceedit(self, **instance_properties):
-        """
+        u"""
         Usage::
 
             instanceedit [instance_properties...]
@@ -2260,10 +2471,10 @@ class TS3Commands(object):
         options = list()
 
         cparams.update(instance_properties)
-        return self._return_proxy("instanceedit", cparams, uparams, options)
+        return self._return_proxy(u"instanceedit", cparams, uparams, options)
 
     def instanceinfo(self):
-        """
+        u"""
         Usage::
 
             instanceinfo
@@ -2286,10 +2497,12 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("instanceinfo", cparams, uparams, options)
+        return self._return_proxy(u"instanceinfo", cparams, uparams, options)
 
-    def logadd(self, *, loglevel, logmsg):
-        """
+    def logadd(self, **_3to2kwargs):
+        logmsg = _3to2kwargs['logmsg']; del _3to2kwargs['logmsg']
+        loglevel = _3to2kwargs['loglevel']; del _3to2kwargs['loglevel']
+        u"""
         Usage::
 
             logadd loglevel={1-4} logmsg={text}
@@ -2312,12 +2525,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["loglevel"] = loglevel
-        cparams["logmsg"] = logmsg
-        return self._return_proxy("logadd", cparams, uparams, options)
+        cparams[u"loglevel"] = loglevel
+        cparams[u"logmsg"] = logmsg
+        return self._return_proxy(u"logadd", cparams, uparams, options)
 
-    def login(self, *, client_login_name, client_login_password):
-        """
+    def login(self, **_3to2kwargs):
+        client_login_password = _3to2kwargs['client_login_password']; del _3to2kwargs['client_login_password']
+        client_login_name = _3to2kwargs['client_login_name']; del _3to2kwargs['client_login_name']
+        u"""
         Usage:
 
             login client_login_name={username} client_login_password={password}
@@ -2343,12 +2558,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["client_login_name"] = client_login_name
-        cparams["client_login_password"] = client_login_password
-        return self._return_proxy("login", cparams, uparams, options)
+        cparams[u"client_login_name"] = client_login_name
+        cparams[u"client_login_password"] = client_login_password
+        return self._return_proxy(u"login", cparams, uparams, options)
 
     def logout(self):
-        """
+        u"""
         Usage::
 
             logout
@@ -2368,11 +2583,18 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("logout", cparams, uparams, options)
+        return self._return_proxy(u"logout", cparams, uparams, options)
 
-    def logview(self, *, lines=None, reverse=None, instance=None,
-                begin_pos=None):
-        """
+    def logview(self, **_3to2kwargs):
+        if 'begin_pos' in _3to2kwargs: begin_pos = _3to2kwargs['begin_pos']; del _3to2kwargs['begin_pos']
+        else: begin_pos = None
+        if 'instance' in _3to2kwargs: instance = _3to2kwargs['instance']; del _3to2kwargs['instance']
+        else: instance = None
+        if 'reverse' in _3to2kwargs: reverse = _3to2kwargs['reverse']; del _3to2kwargs['reverse']
+        else: reverse = None
+        if 'lines' in _3to2kwargs: lines = _3to2kwargs['lines']; del _3to2kwargs['lines']
+        else: lines = None
+        u"""
         Usage::
 
             logview [lines={1-100}] [reverse={1|0}] [instance={1|0}] [begin_pos={n}]
@@ -2398,14 +2620,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["lines"] = lines
-        cparams["reverse"] = reverse
-        cparams["instance"] = instance
-        cparams["begin_pos"] = begin_pos
-        return self._return_proxy("logview", cparams, uparams, options)
+        cparams[u"lines"] = lines
+        cparams[u"reverse"] = reverse
+        cparams[u"instance"] = instance
+        cparams[u"begin_pos"] = begin_pos
+        return self._return_proxy(u"logview", cparams, uparams, options)
 
-    def messageadd(self, *, cluid, subject, message):
-        """
+    def messageadd(self, **_3to2kwargs):
+        message = _3to2kwargs['message']; del _3to2kwargs['message']
+        subject = _3to2kwargs['subject']; del _3to2kwargs['subject']
+        cluid = _3to2kwargs['cluid']; del _3to2kwargs['cluid']
+        u"""
         Usage::
 
             messageadd cluid={clientUID} subject={subject} message={text}
@@ -2428,13 +2653,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cluid"] = cluid
-        cparams["subject"] = subject
-        cparams["message"] = message
-        return self._return_proxy("messageadd", cparams, uparams, options)
+        cparams[u"cluid"] = cluid
+        cparams[u"subject"] = subject
+        cparams[u"message"] = message
+        return self._return_proxy(u"messageadd", cparams, uparams, options)
 
-    def messagedel(self, *, msgid):
-        """
+    def messagedel(self, **_3to2kwargs):
+        msgid = _3to2kwargs['msgid']; del _3to2kwargs['msgid']
+        u"""
         Usage::
 
             messagedel msgid={messageID}
@@ -2455,11 +2681,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["msgid"] = msgid
-        return self._return_proxy("messagedel", cparams, uparams, options)
+        cparams[u"msgid"] = msgid
+        return self._return_proxy(u"messagedel", cparams, uparams, options)
 
-    def messageget(self, *, msgid):
-        """
+    def messageget(self, **_3to2kwargs):
+        msgid = _3to2kwargs['msgid']; del _3to2kwargs['msgid']
+        u"""
         Usage::
 
             messageget msgid={messageID}
@@ -2482,11 +2709,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["msgid"] = msgid
-        return self._return_proxy("messageget", cparams, uparams, options)
+        cparams[u"msgid"] = msgid
+        return self._return_proxy(u"messageget", cparams, uparams, options)
 
     def messagelist(self):
-        """
+        u"""
         Usage::
 
             messagelist
@@ -2508,10 +2735,12 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("messagelist", cparams, uparams, options)
+        return self._return_proxy(u"messagelist", cparams, uparams, options)
 
-    def messageupdateflag(self, *, msgid, flag):
-        """
+    def messageupdateflag(self, **_3to2kwargs):
+        flag = _3to2kwargs['flag']; del _3to2kwargs['flag']
+        msgid = _3to2kwargs['msgid']; del _3to2kwargs['msgid']
+        u"""
         Usage::
 
             messageupdateflag msgid={messageID} flag={1|0}
@@ -2533,12 +2762,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["msgid"] = msgid
-        cparams["flag"] = flag
-        return self._return_proxy("messageupdateflag", cparams, uparams, options)
+        cparams[u"msgid"] = msgid
+        cparams[u"flag"] = flag
+        return self._return_proxy(u"messageupdateflag", cparams, uparams, options)
 
-    def permfind(self, *, permid):
-        """
+    def permfind(self, **_3to2kwargs):
+        permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        u"""
         Usage::
 
             permfind permid={permID}
@@ -2562,11 +2792,15 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["permid"] = permid
-        return self._return_proxy("permfind", cparams, uparams, options)
+        cparams[u"permid"] = permid
+        return self._return_proxy(u"permfind", cparams, uparams, options)
 
-    def permget(self, *, permid=None, permsid=None):
-        """
+    def permget(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        u"""
         Usage::
 
             permget permid={permID}
@@ -2597,12 +2831,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["permid"] = permid
-        cparams["permsid"] = permsid
-        return self._return_proxy("permget", cparams, uparams, options)
+        cparams[u"permid"] = permid
+        cparams[u"permsid"] = permsid
+        return self._return_proxy(u"permget", cparams, uparams, options)
 
-    def permidgetbyname(self, *, permsid=None):
-        """
+    def permidgetbyname(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        u"""
         Usage::
 
             permidgetbyname permsid={permName}|permsid={permName}|...
@@ -2625,11 +2861,11 @@ class TS3Commands(object):
         options = list()
 
         uparams.append(OrderedDict())
-        uparams[0]["permsid"] = permsid
-        return self._return_proxy("permidgetbyname", cparams, uparams, options)
+        uparams[0][u"permsid"] = permsid
+        return self._return_proxy(u"permidgetbyname", cparams, uparams, options)
 
     def permissionlist(self):
-        """
+        u"""
         Usage::
 
             permissionlist
@@ -2651,10 +2887,13 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("permissionlist", cparams, uparams, options)
+        return self._return_proxy(u"permissionlist", cparams, uparams, options)
 
-    def permoverview(self, *, cid, cldbid, permid):
-        """
+    def permoverview(self, **_3to2kwargs):
+        permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        u"""
         Usage::
 
             permoverview cid={channelID} cldbid={clientDBID} permid={permID}
@@ -2690,13 +2929,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cid"] = cid
-        cparams["cldbid"] = cldbid
-        cparams["permid"] = permid
-        return self._return_proxy("permoverview", cparams, uparams, options)
+        cparams[u"cid"] = cid
+        cparams[u"cldbid"] = cldbid
+        cparams[u"permid"] = permid
+        return self._return_proxy(u"permoverview", cparams, uparams, options)
 
     def permreset(self):
-        """
+        u"""
         Usage::
 
             permreset
@@ -2720,11 +2959,17 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("permreset", cparams, uparams, options)
+        return self._return_proxy(u"permreset", cparams, uparams, options)
 
-    def privilegekeyadd(self, *, tokentype, tokenid1, tokenid2,
-                        tokendescription=None, tokencustomset=None):
-        """
+    def privilegekeyadd(self, **_3to2kwargs):
+        if 'tokencustomset' in _3to2kwargs: tokencustomset = _3to2kwargs['tokencustomset']; del _3to2kwargs['tokencustomset']
+        else: tokencustomset = None
+        if 'tokendescription' in _3to2kwargs: tokendescription = _3to2kwargs['tokendescription']; del _3to2kwargs['tokendescription']
+        else: tokendescription = None
+        tokenid2 = _3to2kwargs['tokenid2']; del _3to2kwargs['tokenid2']
+        tokenid1 = _3to2kwargs['tokenid1']; del _3to2kwargs['tokenid1']
+        tokentype = _3to2kwargs['tokentype']; del _3to2kwargs['tokentype']
+        u"""
         Usage::
 
             privilegekeyadd tokentype={1|0} tokenid1={groupID}
@@ -2763,15 +3008,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["tokentype"] = tokentype
-        cparams["tokenid1"] = tokenid1
-        cparams["tokenid2"] = tokenid2
-        cparams["tokendescription"] = tokendescription
-        cparams["tokencustomset"] = tokencustomset
-        return self._return_proxy("privilegekeyadd", cparams, uparams, options)
+        cparams[u"tokentype"] = tokentype
+        cparams[u"tokenid1"] = tokenid1
+        cparams[u"tokenid2"] = tokenid2
+        cparams[u"tokendescription"] = tokendescription
+        cparams[u"tokencustomset"] = tokencustomset
+        return self._return_proxy(u"privilegekeyadd", cparams, uparams, options)
 
-    def privilegekeydelete(self, *, token):
-        """
+    def privilegekeydelete(self, **_3to2kwargs):
+        token = _3to2kwargs['token']; del _3to2kwargs['token']
+        u"""
         Usage::
 
             privilegekeydelete token={tokenKey}
@@ -2793,11 +3039,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["token"] = token
-        return self._return_proxy("privilegekeydelete", cparams, uparams, options)
+        cparams[u"token"] = token
+        return self._return_proxy(u"privilegekeydelete", cparams, uparams, options)
 
     def privilegekeylist(self):
-        """
+        u"""
         Usage::
 
             privilegekeylist
@@ -2824,10 +3070,11 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("privilegekeylist", cparams, uparams, options)
+        return self._return_proxy(u"privilegekeylist", cparams, uparams, options)
 
-    def privilegekeyuse(self, *, token):
-        """
+    def privilegekeyuse(self, **_3to2kwargs):
+        token = _3to2kwargs['token']; del _3to2kwargs['token']
+        u"""
         Usage::
 
             privilegekeyuse token={tokenKey}
@@ -2851,11 +3098,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["token"] = token
-        return self._return_proxy("privilegekeyuse", cparams, uparams, options)
+        cparams[u"token"] = token
+        return self._return_proxy(u"privilegekeyuse", cparams, uparams, options)
 
     def quit(self):
-        """
+        u"""
         Usage::
 
             quit
@@ -2875,10 +3122,13 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("quit", cparams, uparams, options)
+        return self._return_proxy(u"quit", cparams, uparams, options)
 
-    def sendtextmessage(self, *, targetmode, target, msg):
-        """
+    def sendtextmessage(self, **_3to2kwargs):
+        msg = _3to2kwargs['msg']; del _3to2kwargs['msg']
+        target = _3to2kwargs['target']; del _3to2kwargs['target']
+        targetmode = _3to2kwargs['targetmode']; del _3to2kwargs['targetmode']
+        u"""
         Usage::
 
             sendtextmessage targetmode={1-3}
@@ -2902,13 +3152,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["targetmode"] = targetmode
-        cparams["target"] = target
-        cparams["msg"] = msg
-        return self._return_proxy("sendtextmessage", cparams, uparams, options)
+        cparams[u"targetmode"] = targetmode
+        cparams[u"target"] = target
+        cparams[u"msg"] = msg
+        return self._return_proxy(u"sendtextmessage", cparams, uparams, options)
 
     def servercreate(self, **virtualserver_properties):
-        """
+        u"""
         Usage::
 
             servercreate [virtualserver_properties...]
@@ -2936,10 +3186,11 @@ class TS3Commands(object):
         options = list()
 
         cparams.update(virtualserver_properties)
-        return self._return_proxy("servercreate", cparams, uparams, options)
+        return self._return_proxy(u"servercreate", cparams, uparams, options)
 
-    def serverdelete(self, *, sid):
-        """
+    def serverdelete(self, **_3to2kwargs):
+        sid = _3to2kwargs['sid']; del _3to2kwargs['sid']
+        u"""
         Usage::
 
             serverdelete sid={serverID}
@@ -2961,11 +3212,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sid"] = sid
-        return self._return_proxy("serverdelete", cparams, uparams, options)
+        cparams[u"sid"] = sid
+        return self._return_proxy(u"serverdelete", cparams, uparams, options)
 
     def serveredit(self, **virtualserver_properties):
-        """
+        u"""
         Usage::
 
             serveredit [virtualserver_properties...]
@@ -2989,10 +3240,13 @@ class TS3Commands(object):
         options = list()
 
         cparams.update(virtualserver_properties)
-        return self._return_proxy("serveredit", cparams, uparams, options)
+        return self._return_proxy(u"serveredit", cparams, uparams, options)
 
-    def servergroupadd(self, *, name, type_=None):
-        """
+    def servergroupadd(self, **_3to2kwargs):
+        if 'type_' in _3to2kwargs: type_ = _3to2kwargs['type_']; del _3to2kwargs['type_']
+        else: type_ = None
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        u"""
         Usage::
 
             servergroupadd name={groupName} [type={groupDbType}]
@@ -3016,12 +3270,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["name"] = name
-        cparams["type"] = type_
-        return self._return_proxy("servergroupadd", cparams, uparams, options)
+        cparams[u"name"] = name
+        cparams[u"type"] = type_
+        return self._return_proxy(u"servergroupadd", cparams, uparams, options)
 
-    def servergroupaddclient(self, *, sgid, cldbid):
-        """
+    def servergroupaddclient(self, **_3to2kwargs):
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        sgid = _3to2kwargs['sgid']; del _3to2kwargs['sgid']
+        u"""
         Usage::
 
             servergroupaddclient sgid={groupID} cldbid={clientDBID}
@@ -3043,13 +3299,21 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sgid"] = sgid
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("servergroupaddclient", cparams, uparams, options)
+        cparams[u"sgid"] = sgid
+        cparams[u"cldbid"] = cldbid
+        return self._return_proxy(u"servergroupaddclient", cparams, uparams, options)
 
-    def servergroupaddperm(self, *, sgid, permnegated, permskip,
-                           permid=None, permsid=None, permvalue=None):
-        """
+    def servergroupaddperm(self, **_3to2kwargs):
+        if 'permvalue' in _3to2kwargs: permvalue = _3to2kwargs['permvalue']; del _3to2kwargs['permvalue']
+        else: permvalue = None
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        permskip = _3to2kwargs['permskip']; del _3to2kwargs['permskip']
+        permnegated = _3to2kwargs['permnegated']; del _3to2kwargs['permnegated']
+        sgid = _3to2kwargs['sgid']; del _3to2kwargs['sgid']
+        u"""
         Usage::
 
             servergroupaddperm sgid={groupID} permid={permID}
@@ -3090,17 +3354,24 @@ class TS3Commands(object):
         options = list()
 
         uparams.append(OrderedDict())
-        uparams[0]["sgid"] = sgid
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        uparams[0]["permvalue"] = permvalue
-        uparams[0]["permnegated"] = permnegated
-        uparams[0]["permskip"] = permskip
-        return self._return_proxy("servergroupaddperm", cparams, uparams, options)
+        uparams[0][u"sgid"] = sgid
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        uparams[0][u"permvalue"] = permvalue
+        uparams[0][u"permnegated"] = permnegated
+        uparams[0][u"permskip"] = permskip
+        return self._return_proxy(u"servergroupaddperm", cparams, uparams, options)
 
-    def servergroupautoaddperm(self, *, sgtype, permvalue, permnegated,
-                               permskip, permid=None, permsid=None):
-        """
+    def servergroupautoaddperm(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        permskip = _3to2kwargs['permskip']; del _3to2kwargs['permskip']
+        permnegated = _3to2kwargs['permnegated']; del _3to2kwargs['permnegated']
+        permvalue = _3to2kwargs['permvalue']; del _3to2kwargs['permvalue']
+        sgtype = _3to2kwargs['sgtype']; del _3to2kwargs['sgtype']
+        u"""
         Usage::
 
             servergroupautoaddperm sgtype={type} permid={permID}
@@ -3154,16 +3425,21 @@ class TS3Commands(object):
         options = list()
 
         uparams.append(OrderedDict())
-        uparams[0]["sgtype"] = sgtype
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        uparams[0]["permvalue"] = permvalue
-        uparams[0]["permnegated"] = permnegated
-        uparams[0]["permskip"] = permskip
-        return self._return_proxy("servergroupautoaddperm", cparams, uparams, options)
+        uparams[0][u"sgtype"] = sgtype
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        uparams[0][u"permvalue"] = permvalue
+        uparams[0][u"permnegated"] = permnegated
+        uparams[0][u"permskip"] = permskip
+        return self._return_proxy(u"servergroupautoaddperm", cparams, uparams, options)
 
-    def servergroupautodelperm(self, *, sgtype, permid=None, permsid=None):
-        """
+    def servergroupautodelperm(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        sgtype = _3to2kwargs['sgtype']; del _3to2kwargs['sgtype']
+        u"""
         Usage::
 
             servergroupautodelperm sgtype={type} permid={permID}|permid={permID}|...
@@ -3206,15 +3482,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sgtype"] = sgtype
+        cparams[u"sgtype"] = sgtype
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        return self._return_proxy("servergroupautodelperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        return self._return_proxy(u"servergroupautodelperm", cparams, uparams, options)
 
-    def servergroupbyclientid(self, *, cldbid):
-        """
+    def servergroupbyclientid(self, **_3to2kwargs):
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        u"""
         Usage::
 
             servergroupsbyclientid cldbid={clientDBID}
@@ -3237,11 +3514,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("servergroupbyclientid", cparams, uparams, options)
+        cparams[u"cldbid"] = cldbid
+        return self._return_proxy(u"servergroupbyclientid", cparams, uparams, options)
 
-    def servergroupclientlist(self, *, sgid, names=False):
-        """
+    def servergroupclientlist(self, **_3to2kwargs):
+        if 'names' in _3to2kwargs: names = _3to2kwargs['names']; del _3to2kwargs['names']
+        else: names = False
+        sgid = _3to2kwargs['sgid']; del _3to2kwargs['sgid']
+        u"""
         Usage::
 
             servergroupclientlist sgid={groupID} [-names]
@@ -3272,14 +3552,18 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sgid"] = sgid
+        cparams[u"sgid"] = sgid
 
         if names:
-            options.append("names")
-        return self._return_proxy("servergroupclientlist", cparams, uparams, options)
+            options.append(u"names")
+        return self._return_proxy(u"servergroupclientlist", cparams, uparams, options)
 
-    def servergroupcopy(self, *, ssgid, tsgid, name, type_):
-        """
+    def servergroupcopy(self, **_3to2kwargs):
+        type_ = _3to2kwargs['type_']; del _3to2kwargs['type_']
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        tsgid = _3to2kwargs['tsgid']; del _3to2kwargs['tsgid']
+        ssgid = _3to2kwargs['ssgid']; del _3to2kwargs['ssgid']
+        u"""
         Usage::
 
             servergroupcopy ssgid={sourceGroupID} tsgid={targetGroupID}
@@ -3308,14 +3592,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["ssgid"] = ssgid
-        cparams["tsgid"] = tsgid
-        cparams["name"] = name
-        cparams["type"] = type_
-        return self._return_proxy("servergroupcopy", cparams, uparams, options)
+        cparams[u"ssgid"] = ssgid
+        cparams[u"tsgid"] = tsgid
+        cparams[u"name"] = name
+        cparams[u"type"] = type_
+        return self._return_proxy(u"servergroupcopy", cparams, uparams, options)
 
-    def servergroupdel(self, *, sgid, force=False):
-        """
+    def servergroupdel(self, **_3to2kwargs):
+        if 'force' in _3to2kwargs: force = _3to2kwargs['force']; del _3to2kwargs['force']
+        else: force = False
+        sgid = _3to2kwargs['sgid']; del _3to2kwargs['sgid']
+        u"""
         Usage::
 
             servergroupdel sgid={groupID} force={1|0}
@@ -3342,12 +3629,14 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sgid"] = sgid
-        cparams["force"] = force
-        return self._return_proxy("servergroupdel", cparams, uparams, options)
+        cparams[u"sgid"] = sgid
+        cparams[u"force"] = force
+        return self._return_proxy(u"servergroupdel", cparams, uparams, options)
 
-    def servergroupdelclient(self, *, sgid, cldbid):
-        """
+    def servergroupdelclient(self, **_3to2kwargs):
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        sgid = _3to2kwargs['sgid']; del _3to2kwargs['sgid']
+        u"""
         Usage::
 
             servergroupdelclient sgid={groupID} cldbid={clientDBID}
@@ -3368,12 +3657,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sgid"] = sgid
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("servergroupdelclient", cparams, uparams, options)
+        cparams[u"sgid"] = sgid
+        cparams[u"cldbid"] = cldbid
+        return self._return_proxy(u"servergroupdelclient", cparams, uparams, options)
 
-    def servergroupdelperm(self, *, sgid, permid=None, permsid=None):
-        """
+    def servergroupdelperm(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = None
+        if 'permid' in _3to2kwargs: permid = _3to2kwargs['permid']; del _3to2kwargs['permid']
+        else: permid = None
+        sgid = _3to2kwargs['sgid']; del _3to2kwargs['sgid']
+        u"""
         Usage::
 
             servergroupdelperm sgid={groupID} permid={permID}|permid={permID}
@@ -3405,15 +3699,15 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sgid"] = sgid
+        cparams[u"sgid"] = sgid
 
         uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        return self._return_proxy("servergroupdelperm", cparams, uparams, options)
+        uparams[0][u"permid"] = permid
+        uparams[0][u"permsid"] = permsid
+        return self._return_proxy(u"servergroupdelperm", cparams, uparams, options)
 
     def servergrouplist(self):
-        """
+        u"""
         Usage::
 
             servergrouplist
@@ -3435,10 +3729,13 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("servergrouplist", cparams, uparams, options)
+        return self._return_proxy(u"servergrouplist", cparams, uparams, options)
 
-    def servergrouppermlist(self, *, sgid, permsid=False):
-        """
+    def servergrouppermlist(self, **_3to2kwargs):
+        if 'permsid' in _3to2kwargs: permsid = _3to2kwargs['permsid']; del _3to2kwargs['permsid']
+        else: permsid = False
+        sgid = _3to2kwargs['sgid']; del _3to2kwargs['sgid']
+        u"""
         Usage::
 
             servergrouppermlist sgid={groupID} [-permsid]
@@ -3467,14 +3764,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sgid"] = sgid
+        cparams[u"sgid"] = sgid
 
         if permsid:
-            options.append("permsid")
-        return self._return_proxy("servergrouppermlist", cparams, uparams, options)
+            options.append(u"permsid")
+        return self._return_proxy(u"servergrouppermlist", cparams, uparams, options)
 
-    def servergrouprename(self, *, sgid, name):
-        """
+    def servergrouprename(self, **_3to2kwargs):
+        name = _3to2kwargs['name']; del _3to2kwargs['name']
+        sgid = _3to2kwargs['sgid']; del _3to2kwargs['sgid']
+        u"""
         Usage::
 
             servergrouprename sgid={groupID} name={groupName}
@@ -3495,12 +3794,13 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sgid"] = sgid
-        cparams["name"] = name
-        return self._return_proxy("servergrouprename", cparams, uparams, options)
+        cparams[u"sgid"] = sgid
+        cparams[u"name"] = name
+        return self._return_proxy(u"servergrouprename", cparams, uparams, options)
 
-    def servergroupsbyclientid(self, *, cldbid):
-        """
+    def servergroupsbyclientid(self, **_3to2kwargs):
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        u"""
         Usage::
 
             servergroupsbyclientid cldbid={clientDBID}
@@ -3523,11 +3823,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("servergroupsbyclientid", cparams, uparams, options)
+        cparams[u"cldbid"] = cldbid
+        return self._return_proxy(u"servergroupsbyclientid", cparams, uparams, options)
 
-    def serveridgetbyport(self, *, virtualserver_port):
-        """
+    def serveridgetbyport(self, **_3to2kwargs):
+        virtualserver_port = _3to2kwargs['virtualserver_port']; del _3to2kwargs['virtualserver_port']
+        u"""
         Usage::
 
             serveridgetbyport virtualserver_port={serverPort}
@@ -3550,11 +3851,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["virtualserver_port"] = virtualserver_port
-        return self._return_proxy("serveridgetbyport", cparams, uparams, options)
+        cparams[u"virtualserver_port"] = virtualserver_port
+        return self._return_proxy(u"serveridgetbyport", cparams, uparams, options)
 
     def serverinfo(self):
-        """
+        u"""
         Usage::
 
             serverinfo
@@ -3576,11 +3877,18 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("serverinfo", cparams, uparams, options)
+        return self._return_proxy(u"serverinfo", cparams, uparams, options)
 
-    def serverlist(self, *, uid=False, all_=False, short=False,
-                   onlyoffline=False):
-        """
+    def serverlist(self, **_3to2kwargs):
+        if 'onlyoffline' in _3to2kwargs: onlyoffline = _3to2kwargs['onlyoffline']; del _3to2kwargs['onlyoffline']
+        else: onlyoffline = False
+        if 'short' in _3to2kwargs: short = _3to2kwargs['short']; del _3to2kwargs['short']
+        else: short = False
+        if 'all_' in _3to2kwargs: all_ = _3to2kwargs['all_']; del _3to2kwargs['all_']
+        else: all_ = False
+        if 'uid' in _3to2kwargs: uid = _3to2kwargs['uid']; del _3to2kwargs['uid']
+        else: uid = False
+        u"""
         Usage::
 
             serverlist [-uid] [-all] [-short] [-onlyoffline]
@@ -3617,17 +3925,20 @@ class TS3Commands(object):
         options = list()
 
         if uid:
-            options.append("uid")
+            options.append(u"uid")
         if all_:
-            options.append("all")
+            options.append(u"all")
         if short:
-            options.append("short")
+            options.append(u"short")
         if onlyoffline:
-            options.append("onlyoffline")
-        return self._return_proxy("serverlist", cparams, uparams, options)
+            options.append(u"onlyoffline")
+        return self._return_proxy(u"serverlist", cparams, uparams, options)
 
-    def servernotifyregister(self, *, event, id_=None):
-        """
+    def servernotifyregister(self, **_3to2kwargs):
+        if 'id_' in _3to2kwargs: id_ = _3to2kwargs['id_']; del _3to2kwargs['id_']
+        else: id_ = None
+        event = _3to2kwargs['event']; del _3to2kwargs['event']
+        u"""
         Usage::
 
             servernotifyregister [id={channelID}]
@@ -3659,12 +3970,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["id"] = id_
-        cparams["event"] = event
-        return self._return_proxy("servernotifyregister", cparams, uparams, options)
+        cparams[u"id"] = id_
+        cparams[u"event"] = event
+        return self._return_proxy(u"servernotifyregister", cparams, uparams, options)
 
     def servernotifyunregister(self):
-        """
+        u"""
         Usage::
 
             servernotifyunregister
@@ -3685,10 +3996,10 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("servernotifyunregister", cparams, uparams, options)
+        return self._return_proxy(u"servernotifyunregister", cparams, uparams, options)
 
     def serverprocessstop(self):
-        """
+        u"""
         Usage::
 
             serverprocessstop
@@ -3708,10 +4019,10 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("serverprocessstop", cparams, uparams, options)
+        return self._return_proxy(u"serverprocessstop", cparams, uparams, options)
 
     def serverrequestconnectioninfo(self):
-        """
+        u"""
         Usage::
 
             serverrequestconnectioninfo
@@ -3733,10 +4044,10 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("serverrequestconnectioninfo", cparams, uparams, options)
+        return self._return_proxy(u"serverrequestconnectioninfo", cparams, uparams, options)
 
     def serversnapshotcreate(self):
-        """
+        u"""
         Usage::
 
             serversnapshotcreate
@@ -3759,10 +4070,11 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("serversnapshotcreate", cparams, uparams, options)
+        return self._return_proxy(u"serversnapshotcreate", cparams, uparams, options)
 
-    def serversnapshotdeploy(self, *, virtualserver_snapshot):
-        """
+    def serversnapshotdeploy(self, **_3to2kwargs):
+        virtualserver_snapshot = _3to2kwargs['virtualserver_snapshot']; del _3to2kwargs['virtualserver_snapshot']
+        u"""
         Usage::
 
             serversnapshotdeploy {virtualserver_snapshot}
@@ -3787,11 +4099,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams[""] = virtualserver_snapshot
-        return self._return_proxy("serversnapshotdeploy", cparams, uparams, options)
+        cparams[u""] = virtualserver_snapshot
+        return self._return_proxy(u"serversnapshotdeploy", cparams, uparams, options)
 
-    def serverstart(self, *, sid):
-        """
+    def serverstart(self, **_3to2kwargs):
+        sid = _3to2kwargs['sid']; del _3to2kwargs['sid']
+        u"""
         Usage::
 
             serverstart sid={serverID}
@@ -3814,11 +4127,12 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sid"] = sid
-        return self._return_proxy("serverstart", cparams, uparams, options)
+        cparams[u"sid"] = sid
+        return self._return_proxy(u"serverstart", cparams, uparams, options)
 
-    def serverstop(self, *, sid):
-        """
+    def serverstop(self, **_3to2kwargs):
+        sid = _3to2kwargs['sid']; del _3to2kwargs['sid']
+        u"""
         Usage::
 
             serverstop sid={serverID}
@@ -3841,11 +4155,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sid"] = sid
-        return self._return_proxy("serverstop", cparams, uparams, options)
+        cparams[u"sid"] = sid
+        return self._return_proxy(u"serverstop", cparams, uparams, options)
 
-    def servertemppasswordadd(self, *, pw, desc, duration, tcid, tcpw):
-        """
+    def servertemppasswordadd(self, **_3to2kwargs):
+        tcpw = _3to2kwargs['tcpw']; del _3to2kwargs['tcpw']
+        tcid = _3to2kwargs['tcid']; del _3to2kwargs['tcid']
+        duration = _3to2kwargs['duration']; del _3to2kwargs['duration']
+        desc = _3to2kwargs['desc']; del _3to2kwargs['desc']
+        pw = _3to2kwargs['pw']; del _3to2kwargs['pw']
+        u"""
         Usage::
 
             servertemppasswordadd pw={password} desc={description}
@@ -3873,15 +4192,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["pw"] = pw
-        cparams["desc"] = desc
-        cparams["duration"] = duration
-        cparams["tcid"] = tcid
-        cparams["tcpw"] = tcpw
-        return self._return_proxy("servertemppasswordadd", cparams, uparams, options)
+        cparams[u"pw"] = pw
+        cparams[u"desc"] = desc
+        cparams[u"duration"] = duration
+        cparams[u"tcid"] = tcid
+        cparams[u"tcpw"] = tcpw
+        return self._return_proxy(u"servertemppasswordadd", cparams, uparams, options)
 
-    def servertemppassworddel(self, *, pw):
-        """
+    def servertemppassworddel(self, **_3to2kwargs):
+        pw = _3to2kwargs['pw']; del _3to2kwargs['pw']
+        u"""
         Usage::
 
             servertemppassworddel pw={password}
@@ -3902,11 +4222,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["pw"] = pw
-        return self._return_proxy("servertemppassworddel", cparams, uparams, options)
+        cparams[u"pw"] = pw
+        return self._return_proxy(u"servertemppassworddel", cparams, uparams, options)
 
     def servertemppasswordlist(self):
-        """
+        u"""
         Usage::
 
             servertemppasswordlist
@@ -3929,10 +4249,13 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("servertemppasswordlist", cparams, uparams, options)
+        return self._return_proxy(u"servertemppasswordlist", cparams, uparams, options)
 
-    def setclientchannelgroup(self, *, cgid, cid, cldbid):
-        """
+    def setclientchannelgroup(self, **_3to2kwargs):
+        cldbid = _3to2kwargs['cldbid']; del _3to2kwargs['cldbid']
+        cid = _3to2kwargs['cid']; del _3to2kwargs['cid']
+        cgid = _3to2kwargs['cgid']; del _3to2kwargs['cgid']
+        u"""
         Usage::
 
             setclientchannelgroup cgid={groupID} cid={channelID}
@@ -3954,14 +4277,20 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["cgid"] = cgid
-        cparams["cid"] = cid
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("setclientchannelgroup", cparams, uparams, options)
+        cparams[u"cgid"] = cgid
+        cparams[u"cid"] = cid
+        cparams[u"cldbid"] = cldbid
+        return self._return_proxy(u"setclientchannelgroup", cparams, uparams, options)
 
-    def tokenadd(self, *, tokentype, tokenid1, tokenid2, tokendescription=None,
-                 tokencustomset=None):
-        """
+    def tokenadd(self, **_3to2kwargs):
+        if 'tokencustomset' in _3to2kwargs: tokencustomset = _3to2kwargs['tokencustomset']; del _3to2kwargs['tokencustomset']
+        else: tokencustomset = None
+        if 'tokendescription' in _3to2kwargs: tokendescription = _3to2kwargs['tokendescription']; del _3to2kwargs['tokendescription']
+        else: tokendescription = None
+        tokenid2 = _3to2kwargs['tokenid2']; del _3to2kwargs['tokenid2']
+        tokenid1 = _3to2kwargs['tokenid1']; del _3to2kwargs['tokenid1']
+        tokentype = _3to2kwargs['tokentype']; del _3to2kwargs['tokentype']
+        u"""
         Usage::
 
             tokenadd tokentype={1|0} tokenid1={groupID} tokenid2={channelID}
@@ -4000,15 +4329,16 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["tokentype"] = tokentype
-        cparams["tokenid1"] = tokenid1
-        cparams["tokenid2"] = tokenid2
-        cparams["tokendescription"] = tokendescription
-        cparams["tokencustomset"] = tokencustomset
-        return self._return_proxy("tokenadd", cparams, uparams, options)
+        cparams[u"tokentype"] = tokentype
+        cparams[u"tokenid1"] = tokenid1
+        cparams[u"tokenid2"] = tokenid2
+        cparams[u"tokendescription"] = tokendescription
+        cparams[u"tokencustomset"] = tokencustomset
+        return self._return_proxy(u"tokenadd", cparams, uparams, options)
 
-    def tokendelete(self, *, token):
-        """
+    def tokendelete(self, **_3to2kwargs):
+        token = _3to2kwargs['token']; del _3to2kwargs['token']
+        u"""
         Usage::
 
             tokendelete token={tokenKey}
@@ -4030,11 +4360,11 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["token"] = token
-        return self._return_proxy("tokendelete", cparams, uparams, options)
+        cparams[u"token"] = token
+        return self._return_proxy(u"tokendelete", cparams, uparams, options)
 
     def tokenlist(self):
-        """
+        u"""
         Usage::
 
             tokenlist
@@ -4061,10 +4391,11 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("tokenlist", cparams, uparams, options)
+        return self._return_proxy(u"tokenlist", cparams, uparams, options)
 
-    def tokenuse(self, *, token):
-        """
+    def tokenuse(self, **_3to2kwargs):
+        token = _3to2kwargs['token']; del _3to2kwargs['token']
+        u"""
         Usage::
 
             tokenuse token={tokenKey}
@@ -4088,11 +4419,17 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["token"] = token
-        return self._return_proxy("tokenuse", cparams, uparams, options)
+        cparams[u"token"] = token
+        return self._return_proxy(u"tokenuse", cparams, uparams, options)
 
-    def use(self, *, sid=None, port=None, virtual=False):
-        """
+    def use(self, **_3to2kwargs):
+        if 'virtual' in _3to2kwargs: virtual = _3to2kwargs['virtual']; del _3to2kwargs['virtual']
+        else: virtual = False
+        if 'port' in _3to2kwargs: port = _3to2kwargs['port']; del _3to2kwargs['port']
+        else: port = None
+        if 'sid' in _3to2kwargs: sid = _3to2kwargs['sid']; del _3to2kwargs['sid']
+        else: sid = None
+        u"""
         Usage::
 
             use [sid={serverID}] [port={serverPort}] [-virtual]
@@ -4121,15 +4458,15 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams["sid"] = sid
-        cparams["port"] = port
+        cparams[u"sid"] = sid
+        cparams[u"port"] = port
 
         if virtual:
-            options.append("virtual")
-        return self._return_proxy("use", cparams, uparams, options)
+            options.append(u"virtual")
+        return self._return_proxy(u"use", cparams, uparams, options)
 
     def version(self):
-        """
+        u"""
         Usage::
 
             version
@@ -4150,10 +4487,10 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("version", cparams, uparams, options)
+        return self._return_proxy(u"version", cparams, uparams, options)
 
     def whoami(self):
-        """
+        u"""
         Usage::
 
             whoami
@@ -4175,4 +4512,4 @@ class TS3Commands(object):
         cparams = OrderedDict()
         uparams = list()
         options = list()
-        return self._return_proxy("whoami", cparams, uparams, options)
+        return self._return_proxy(u"whoami", cparams, uparams, options)

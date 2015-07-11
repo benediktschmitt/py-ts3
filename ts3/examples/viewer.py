@@ -24,20 +24,23 @@
 
 # Modules
 # ------------------------------------------------
+from __future__ import with_statement
+from __future__ import absolute_import
 from pprint import pprint
 import ts3
+from itertools import imap
 
 
 # Data
 # ------------------------------------------------
-__all__ = ["ChannelTreeNode",
-           "view"]
+__all__ = [u"ChannelTreeNode",
+           u"view"]
 
 
 # Classes
 # ------------------------------------------------
 class ChannelTreeNode(object):
-    """
+    u"""
     Represents a channel or the virtual server in the channel tree of a virtual
     server. Note, that this is a recursive data structure.
 
@@ -86,7 +89,7 @@ class ChannelTreeNode(object):
     """
 
     def __init__(self, info, parent, root, clients=None):
-        """
+        u"""
         Inits a new channel node.
 
         If root is None, root is set to *self*.
@@ -109,27 +112,27 @@ class ChannelTreeNode(object):
     
     @classmethod
     def init_root(cls, info):
-        """
+        u"""
         Creates a the root node of a channel tree.
         """
         return cls(info, None, None, None)
 
     def is_root(self):
-        """
+        u"""
         Returns true, if this node is the root of a channel tree (the virtual
         server).
         """
         return self.parent is None
 
     def is_channel(self):
-        """
+        u"""
         Returns true, if this node represents a real channel.
         """
         return self.parent is not None
 
     @classmethod
     def build_tree(cls, ts3conn, sid):
-        """
+        u"""
         Returns the channel tree from the virtual server identified with
         *sid*, using the *TS3Connection* ts3conn.
         """
@@ -144,32 +147,32 @@ class ChannelTreeNode(object):
         ts3conn.clientlist()
         clientlist = ts3conn.last_resp.parsed
         # channel id -> clients
-        clientlist = {cid: [client for client in clientlist \
-                            if client["cid"] == cid]
-                      for cid in map(lambda e: e["cid"], channellist)}
+        clientlist = dict((cid, [client for client in clientlist \
+                            if client[u"cid"] == cid])
+                      for cid in imap(lambda e: e[u"cid"], channellist))
 
         root = cls.init_root(serverinfo)
         for channel in channellist:
-            ts3conn.channelinfo(cid=channel["cid"])
+            ts3conn.channelinfo(cid=channel[u"cid"])
             channelinfo = ts3conn.last_resp.parsed[0]
             # This makes sure, that *cid* is in the dictionary.
             channelinfo.update(channel)
             
             channel = cls(
                 info=channelinfo, parent=root, root=root,
-                clients=clientlist[channel["cid"]])
+                clients=clientlist[channel[u"cid"]])
             root.insert(channel)
         return root
 
     def insert(self, channel):
-        """
+        u"""
         Inserts the channel in the tree.
         """
         self.root._insert(channel)
         return None
 
     def _insert(self, channel):
-        """
+        u"""
         Inserts the channel recursivly in the channel tree.
         Returns true, if the tree has been inserted.
         """
@@ -180,14 +183,14 @@ class ChannelTreeNode(object):
             i = 0
             while i < len(self.childs):
                 child = self.childs[i]
-                if channel.info["cid"] == child.info["pid"]:
+                if channel.info[u"cid"] == child.info[u"pid"]:
                     channel.childs.append(child)
                     self.childs.pop(i)
                 else:
                     i += 1
 
         # This is not the root and the channel is a direct child of this one. 
-        elif channel.info["pid"] == self.info["cid"]:
+        elif channel.info[u"pid"] == self.info[u"cid"]:
             self.childs.append(channel)
             return True
 
@@ -203,19 +206,19 @@ class ChannelTreeNode(object):
         return False
 
     def print(self, indent=0):
-        """
+        u"""
         Prints the channel and it's subchannels recursive. If restore_order is
         true, the child channels will be sorted before printing them.
         """            
         if self.is_root():
-            print(" "*(indent*3) + "|-", self.info["virtualserver_name"])
+            print u" "*(indent*3) + u"|-", self.info[u"virtualserver_name"]
         else:
-            print(" "*(indent*3) + "|-", self.info["channel_name"])
+            print u" "*(indent*3) + u"|-", self.info[u"channel_name"]
             for client in self.clients:
                 # Ignore query clients
-                if client["client_type"] == "1":
+                if client[u"client_type"] == u"1":
                     continue
-                print(" "*(indent*3+3) + "->", client["client_nickname"])
+                print u" "*(indent*3+3) + u"->", client[u"client_nickname"]
 
         for child in self.childs:
             child.print(indent=indent + 1)
@@ -223,7 +226,7 @@ class ChannelTreeNode(object):
 
 
 def view(ts3conn, sid=1):
-    """
+    u"""
     Prints the channel tree of the virtual server, including all clients.
     """
     tree = ChannelTreeNode.build_tree(ts3conn, sid)
@@ -233,7 +236,7 @@ def view(ts3conn, sid=1):
     
 # Main
 # ------------------------------------------------
-if __name__ == "__main__":
+if __name__ == u"__main__":
     # USER, PASS, HOST, ...
     from def_param import *
     

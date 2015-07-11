@@ -21,7 +21,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
+u"""
 This module contains classes and functions used to build valid query strings
 and to unescape responses.
 """
@@ -29,35 +29,35 @@ and to unescape responses.
 
 # Data
 # ------------------------------------------------
-__all__ = ["TS3Escape"]
+__all__ = [u"TS3Escape"]
 
 
 # Classes
 # ------------------------------------------------
 class TS3Escape(object):
-    """
+    u"""
     Provides methods to escape a string properly and to build query strings.
     """
 
     # Table with escape strings.
     # DO NOT CHANGE THE ORDER, IF YOU DON'T KNOW, WHAT YOU'RE DOING.
     _MAP = [
-        ("\\", r"\\"),
-        ("/", r"\/"),
-        (" ", r"\s"),
-        ("|", r"\p"),
-        ("\a", r"\a"),
-        ("\b", r"\b"),
-        ("\f", r"\f"),
-        ("\n", r"\n"),
-        ("\r", r"\r"),
-        ("\t", r"\t"),
-        ("\v", r"\v")
+        (u"\\", ur"\\"),
+        (u"/", ur"\/"),
+        (u" ", ur"\s"),
+        (u"|", ur"\p"),
+        (u"\a", ur"\a"),
+        (u"\b", ur"\b"),
+        (u"\f", ur"\f"),
+        (u"\n", ur"\n"),
+        (u"\r", ur"\r"),
+        (u"\t", ur"\t"),
+        (u"\v", ur"\v")
         ]
 
     @classmethod
     def escape(cls, raw):
-        """        
+        u"""        
         Escapes the value of *raw*.
 
         >>> TS3Escape.escape(None)
@@ -78,22 +78,22 @@ class TS3Escape(object):
         :raises TypeError: If *raw* has an unsupported type.
         """
         if raw is None:
-            return str()
+            return unicode()
         elif isinstance(raw, bool):
-            return "1" if raw else "0"
+            return u"1" if raw else u"0"
         elif isinstance(raw, int):
-            return str(raw)
-        elif isinstance(raw, str):            
+            return unicode(raw)
+        elif isinstance(raw, unicode):            
             # The order of the replacement is not trivial.
             for char, repl_char in cls._MAP:
                 raw = raw.replace(char, repl_char)
             return raw
         else:
-            raise TypeError("*raw* has to be a string.")
+            raise TypeError(u"*raw* has to be a string.")
 
     @classmethod
     def unescape(cls, txt):
-        """
+        u"""
         Unescapes the str *txt*.
 
         >>> TS3Escape.unescape('Hello\\sWorld')
@@ -104,17 +104,17 @@ class TS3Escape(object):
 
         :raises TypeError: If *txt* is not a string.
         """
-        if isinstance(txt, str):
+        if isinstance(txt, unicode):
             # Again, the order of the replacement is not trivial.
             for repl_char, char in reversed(cls._MAP):
                 txt = txt.replace(char, repl_char)
             return txt
         else:
-            raise TypeError("*txt* has to be a string.")
+            raise TypeError(u"*txt* has to be a string.")
 
     @classmethod
     def escape_parameters(cls, parameters):
-        """
+        u"""
         Escapes the parameters of a TS3 query and encodes it as a part
         of a valid ts3 query string.
         
@@ -138,7 +138,7 @@ class TS3Escape(object):
         :type parameters: dictionary
         """
         if parameters is None:
-            return str()
+            return unicode()
         
         tmp = list()
         for key, val in parameters.items():
@@ -148,13 +148,13 @@ class TS3Escape(object):
             # In other words: It's not necessairy to escape the key.
             key = key.lower()
             val = cls.escape(val)
-            tmp.append(key + "=" + val)
-        tmp = " ".join(tmp)
+            tmp.append(key + u"=" + val)
+        tmp = u" ".join(tmp)
         return tmp
 
     @classmethod
     def escape_parameterlist(cls, parameterslist):
-        """
+        u"""
         Escapes each parameter dictionary in the parameterslist and encodes
         the list as a part of a valid ts3 query string.
         
@@ -173,15 +173,15 @@ class TS3Escape(object):
         :type parameterslist: None or a list of dictionaries
         """
         if parameterslist is None:
-            return str()
+            return unicode()
 
-        tmp = "|".join(cls.escape_parameters(parameters) \
+        tmp = u"|".join(cls.escape_parameters(parameters) \
                        for parameters in parameterslist)
         return tmp
 
     @classmethod
     def escape_options(cls, options):
-        """
+        u"""
         Escapes the items in the *options* list and prepends a '-' if
         necessairy.
         If *options* is None, the empty string will be returned.
@@ -195,7 +195,7 @@ class TS3Escape(object):
         :type options: None or a list of strings.
         """
         if options is None:
-            return str()
+            return unicode()
 
         # Either an option is valid or not.
         # Escaping doesn't change this fact.
@@ -203,8 +203,8 @@ class TS3Escape(object):
         for i, e in enumerate(options):
             if e is None:
                 continue
-            elif not e.startswith("-"):
-                e = "-" + e
+            elif not e.startswith(u"-"):
+                e = u"-" + e
             tmp.append(e)
-        tmp = " ".join(tmp)
+        tmp = u" ".join(tmp)
         return tmp

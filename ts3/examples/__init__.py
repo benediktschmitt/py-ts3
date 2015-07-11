@@ -22,13 +22,14 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Make sure, that this package is in the include path and clean up.
+from __future__ import absolute_import
 try:
     import ts3
 except ImportError:
     import os
     import sys
     sys.path.append(
-        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))    
+        os.path.abspath(os.path.join(os.path.dirname(__file__), u"../../")))    
     import ts3
 
     del os

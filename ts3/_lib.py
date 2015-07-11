@@ -21,7 +21,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-"""
+u"""
 This module contains some small helpers for the ts3 package, which are not part
 of the API.
 """
@@ -31,7 +31,8 @@ of the API.
 # ------------------------------------------------
 
 # std
-import queue
+from __future__ import absolute_import
+import Queue
 import threading
 
 
@@ -39,7 +40,7 @@ import threading
 # ------------------------------------------------
 
 __all__ = [
-    "SignalDispatcher"
+    u"SignalDispatcher"
     ]
 
 
@@ -47,7 +48,7 @@ __all__ = [
 # ------------------------------------------------
 
 class SignalDispatcher(object):
-    """
+    u"""
     This is a simple worker thread which is dedicated to call *blinker* signals
     in a thread.
 
@@ -68,9 +69,9 @@ class SignalDispatcher(object):
     """
 
     def __init__(self):
+        u"""
         """
-        """
-        self.__signal_queue = queue.Queue()
+        self.__signal_queue = Queue.Queue()
 
         # Some events which allow us to stop the thread.
         self.__stop_event = threading.Event()
@@ -81,13 +82,13 @@ class SignalDispatcher(object):
         return None
 
     def is_running(self):
-        """
+        u"""
         Returns ``True`` if the worker thread is running. Otherwise ``False``.
         """
         return self.__thread is not None
 
     def send(self, signal, *sender, **kwargs):
-        """
+        u"""
         Puts the *signal* on the signal queue, so that it will be dispatched
         in the worker thread.
 
@@ -104,15 +105,15 @@ class SignalDispatcher(object):
             if the event dispatcher is not running.
         """
         if not self.is_running():
-            raise RuntimeError("event dispatcher has not been started.")
+            raise RuntimeError(u"event dispatcher has not been started.")
         if self.__waiting_for_stop:
-            raise RuntimeError("event dispatcher is about to stop.")
+            raise RuntimeError(u"event dispatcher is about to stop.")
         
         self.__signal_queue.put((signal, sender, kwargs))
         return None
 
     def stop(self):
-        """
+        u"""
         Stops the event dispatcher and blocks until the worker thread finished.
         """
         if self.is_running():
@@ -128,7 +129,7 @@ class SignalDispatcher(object):
         return None
 
     def start(self):
-        """
+        u"""
         Starts the event dispatcher.
         """
         if not self.is_running():
@@ -138,7 +139,7 @@ class SignalDispatcher(object):
         return None
 
     def _run(self):
-        """
+        u"""
         Waits for new signals to dispatch and dispatchs them until the stop
         flag is set.
         """
@@ -151,7 +152,7 @@ class SignalDispatcher(object):
                     block = True,
                     timeout = 0.1
                     )
-            except queue.Empty:
+            except Queue.Empty:
                 continue
             else:
                 signal.send(*sender, **kwargs)
