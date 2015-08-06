@@ -24,7 +24,7 @@
 
 # Modules
 # ------------------------------------------------
-from distutils.core import setup
+from setuptools import setup
 from ts3 import __version__
 
 
@@ -52,6 +52,7 @@ setup(
     packages = ["ts3", "ts3.examples"],
     data_files = [("", ["LICENSE.rst", "README.rst"])],
     license = license_,
+    install_requires = ["blinker"],
     classifiers = [
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta",
