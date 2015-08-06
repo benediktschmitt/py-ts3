@@ -52,6 +52,7 @@ setup(
     packages = ["ts3", "ts3.examples"],
     license = license_,
     install_requires = ["blinker"],
+    include_package_data = True,
     classifiers = [
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta",
