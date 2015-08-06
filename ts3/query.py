@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 # The MIT License (MIT)
-# 
+#
 # Copyright (c) 2013-2015 Benedikt Schmitt
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
 # the Software without restriction, including without limitation the rights to
 # use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 # the Software, and to permit persons to whom the Software is furnished to do so,
 # subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 # FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -34,9 +34,16 @@ import socket
 import telnetlib
 import logging
 import threading
+import warnings
 
 # third party
-import blinker
+try:
+    import blinker
+except ImportError:
+    blinker = None
+    warnings.warn(
+        "Please install blinker, if you want to use events with py-ts3"
+    )
 
 # local
 try:
@@ -59,7 +66,7 @@ try:
     TimeoutError
 except NameError:
     TimeoutError = OSError
-    
+
 
 # Data
 # ------------------------------------------------
@@ -99,7 +106,7 @@ class TS3ResponseRecvError(TS3Error, TimeoutError):
     def __str__(self):
         tmp = "Could not receive the response from the server."
         return tmp
-    
+
 
 # Classes
 # ------------------------------------------------
@@ -124,7 +131,7 @@ class TS3BaseConnection(object):
         ... finally:
         ...     ts3conn.close()
     """
-   
+
     def __init__(self, host=None, port=10011):
         """
         If *host* is provided, the connection will be established before
@@ -137,7 +144,7 @@ class TS3BaseConnection(object):
 
         # The last query id, that has been given.
         self._query_counter = 0
-        
+
         # The last query id, that has been fetched.
         self._query_id = 0
 
@@ -167,7 +174,7 @@ class TS3BaseConnection(object):
         # The dispatcher is started, as soon as the first event
         # is received and stopped, when the connection is closed.
         self.__event_dispatcher = _lib.SignalDispatcher()
-        
+
         if host is not None:
             self.open(host, port)
         return None
@@ -194,7 +201,7 @@ class TS3BaseConnection(object):
             bool
         """
         return self._telnet_conn is not None
-        
+
     @property
     def last_resp(self):
         """
@@ -223,10 +230,10 @@ class TS3BaseConnection(object):
             int
         """
         return self._query_counter - self._query_id
-        
+
     # Networking
     # ------------------------------------------------
-    
+
     def open(self, host, port=10011,
              timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         """
@@ -240,13 +247,13 @@ class TS3BaseConnection(object):
             If the connection can not be created.
         """
         if self.is_connected():
-             raise OSError("The client is already connected.") 
+             raise OSError("The client is already connected.")
         else:
             self._query_counter = 0
             self._query_id = 0
             self._responses = dict()
 
-            self._telnet_conn = telnetlib.Telnet(host, port, timeout)            
+            self._telnet_conn = telnetlib.Telnet(host, port, timeout)
             # Wait for the first and the second greeting:
             # b'TS3\n\r'
             # b'Welcome to the [...] on a specific command.\n\r'
@@ -273,7 +280,7 @@ class TS3BaseConnection(object):
                 self.stop_recv()
                 self.cancel_keepalive()
                 self._telnet_conn.close()
-                self._telnet_conn = None                
+                self._telnet_conn = None
                 _logger.debug("Disconnected client.")
         return None
 
@@ -299,7 +306,7 @@ class TS3BaseConnection(object):
 
     # Keep alive
     # -------------------------
-    
+
     def __send_keepalive_beacon(self):
         """
         Sends the keep alive beacon ``\n\r`` to the server and restarts the
@@ -309,7 +316,7 @@ class TS3BaseConnection(object):
 
             * :meth:`cancel_keepalive`
             * :meth:`keepalive`
-        """        
+        """
         # Send the beacon.
         with self._send_lock:
             self._telnet_conn.write(b"\n\r")
@@ -319,7 +326,7 @@ class TS3BaseConnection(object):
             self._keepalive_timer.cancel()
             self._keepalive_timer = None
 
-        if self._keepalive_interval is not None:            
+        if self._keepalive_interval is not None:
             self._keepalive_timer = threading.Timer(
                 interval = self._keepalive_interval,
                 function = self.__send_keepalive_beacon
@@ -340,7 +347,7 @@ class TS3BaseConnection(object):
             self._keepalive_timer = None
 
         self._keepalive_interval = None
-        return None            
+        return None
 
     def keepalive(self, interval=540):
         """
@@ -351,7 +358,7 @@ class TS3BaseConnection(object):
         :arg interval:
             Time between a beacon is sent to the server. This should be less than
             the maximum allowed idle time. Usually, this value is set to 600s on
-            a TS3 server. 
+            a TS3 server.
 
         .. seealso::
 
@@ -365,34 +372,38 @@ class TS3BaseConnection(object):
 
     # Receiving
     # -------------------------
-    
+
     #: This signal is emitted, whenever the server reported an event. Note,
     #: that you must use ``servernotifyregister`` to subscribe to ts3 server
     #: events.
-    #: 
+    #:
     #: You can easily subscribe to the signal:
-    #: 
+    #:
     #: >>> @TS3Connection.on_event.connect
     #: ... def my_handler(sender, event):
     #: ...     print("received event:")
     #: ...     print("  sender:", sender)
     #: ...     print("  event: ", event)
     #: ...     return None
-    #: 
+    #:
     #: If you want to use an handler only for one connection, you can use
     #: ``connect_via`` to filter the signals:
-    #: 
+    #:
     #: >>> ts3conn = TS3Connection()
     #: >>> @TS3Connection.on_event.connect_via(ts3conn)
     #: ... def my_handler(sender, event):
     #: ...     pass
-    #: 
+    #:
     #: The first argument is the ``TS3Connection`` that received the event
     #: and the second argument is the received event packed into a ``TS3Event``.
     #:
-    #: Note, that the events are dispatched in a dedicated **thread**. 
-    on_event = blinker.Signal()
-    
+    #: Note, that the events are dispatched in a dedicated **thread**.
+    #:
+    #: .. hint::
+    #:
+    #:    The signal is only available, if *blinker* is installed.
+    on_event = blinker.Signal() if blinker else None
+
     def wait_for_resp(self, query_id, timeout=None):
         """
         Waits for an response. This method will block untill the response to
@@ -412,9 +423,9 @@ class TS3BaseConnection(object):
 
         :raises TS3ResponseRecvError:
             If the response could not be received, because the connection has
-            been closed or the timeout has been exceeded.            
+            been closed or the timeout has been exceeded.
         :raises TS3QueryError:
-            If the *error id* of the query was not 0.               
+            If the *error id* of the query was not 0.
         """
         if timeout is None:
             end_time = None
@@ -425,12 +436,12 @@ class TS3BaseConnection(object):
             # We need to catch this case here, to avoid dead locks, when we
             # are not in threading mode.
             if query_id in self._responses:
-                break           
+                break
             if not self.is_connected():
                 break
             if timeout is not None and time.time() < end_time:
                 break
-            
+
             # Wait for a new response and try to find the
             # response corresponding to the query.
             with self._new_response_event:
@@ -442,7 +453,7 @@ class TS3BaseConnection(object):
         if resp.error["id"] != "0":
             raise TS3QueryError(resp)
         return resp
-    
+
     def stop_recv(self):
         """
         If :meth:`recv` has been called from another thread, it will be
@@ -473,12 +484,12 @@ class TS3BaseConnection(object):
         .. deprecated:: 0.6.0
             The *recv_forever* argument will be removed in future versions.
             Use :meth:`recv_in_thread` instead.
-            
+
         :arg recv_forever:
             If true, this method waits forever for a response and you have to
             call :meth:`stop_recv` from another thread, to stop it.
         :type recv_forever:
-            bool           
+            bool
 
         :arg poll_intervall:
             Seconds between checks for the stop request.
@@ -487,10 +498,10 @@ class TS3BaseConnection(object):
 
         :raises RuntimeError:
             When the client is already listening.
-        """           
+        """
         if self._is_listening:
             raise RuntimeError("Already receiving data!")
-        
+
         self._is_listening = True
         try:
             lines = list()
@@ -505,7 +516,7 @@ class TS3BaseConnection(object):
                 # Read one line
                 # 1.) An event (Note, that an event has no trailing error line)
                 # 2.) Query response
-                # 3.) The error line of the query response.                
+                # 3.) The error line of the query response.
                 data = self._telnet_conn.read_until(
                     b"\n\r", timeout=poll_intervall)
                 if not data:
@@ -521,24 +532,24 @@ class TS3BaseConnection(object):
                     self.__event_dispatcher.send(
                         self.on_event, self, event=event
                         )
-                    
+
                 # We received the end of a query response.
                 elif data.startswith(b"error"):
                     lines.append(data)
-                    
+
                     resp = TS3QueryResponse(lines)
                     lines = list()
-                    
+
                     self._query_id += 1
                     self._responses[self._query_id] = resp
 
                     with self._new_response_event:
                         self._new_response_event.notify_all()
-                        
+
                 # There's no keyword, so it must be a part of a query response.
                 else:
                     lines.append(data)
-                    
+
         # Catch socket and telnet errors
         except (OSError, EOFError) as err:
             # We need to set this flag here, to avoid dead locks while closing.
@@ -550,7 +561,7 @@ class TS3BaseConnection(object):
             self._waiting_for_stop = False
             self._is_listening = False
         return None
-    
+
     # Sending
     # -------------------------
 
@@ -584,12 +595,12 @@ class TS3BaseConnection(object):
         # Escape the command and build the final query command string.
         if not isinstance(command, str):
             raise TypeError("*command* has to be a string.")
-        
+
         command = command
         common_parameters = TS3Escape.escape_parameters(common_parameters)
         unique_parameters = TS3Escape.escape_parameterlist(unique_parameters)
         options = TS3Escape.escape_options(options)
-        
+
         query_command = command\
                         + " " + common_parameters\
                         + " " +  unique_parameters\
@@ -609,9 +620,9 @@ class TS3BaseConnection(object):
         try:
             self.recv()
         except RuntimeError:
-            pass                
+            pass
         return self.wait_for_resp(query_id, timeout)
-    
+
 
 class TS3Connection(TS3BaseConnection, TS3Commands):
     """

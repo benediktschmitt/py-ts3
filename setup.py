@@ -50,7 +50,6 @@ setup(
     url = "https://github.com/benediktschmitt/py-ts3",
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
     packages = ["ts3", "ts3.examples"],
-    data_files = [("", ["LICENSE.rst", "README.rst"])],
     license = license_,
     install_requires = ["blinker"],
     classifiers = [
