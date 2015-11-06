@@ -523,7 +523,7 @@ class TS3BaseConnection(object):
                     continue
 
                 # We received an event.
-                if data.startswith(b"notify"):
+                if data.startswith(b"notify") and self.on_event.receivers:
                     event = TS3Event([data])
 
                     # We start the event dispatcher as late as possible to
