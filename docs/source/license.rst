@@ -4,7 +4,7 @@ License
 =======
 
 .. hint::
-   
+
    Note, that the docstrings taken from the official TS3 Server Query Manual
    are the properties of the TeamSpeak System GmbH.
 
@@ -12,7 +12,7 @@ The PyTS3 package is licensed under the **MIT License**:
 
 .. code-block:: none
 
-   Copyright (c) 2013-2014 Benedikt Schmitt
+   Copyright (c) 2013-2016 Benedikt Schmitt
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -31,4 +31,3 @@ The PyTS3 package is licensed under the **MIT License**:
    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
    THE SOFTWARE
-   

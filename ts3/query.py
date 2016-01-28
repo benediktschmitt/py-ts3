@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 #
-# Copyright (c) 2013-2015 Benedikt Schmitt
+# Copyright (c) 2013-2016 Benedikt Schmitt
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -150,7 +150,11 @@ class TS3BaseConnection(object):
 
         # Maps the query id to the response.
         # query id => TS3Response
+        #
+        # This is only a temporary queue, until the response has been fetched
+        # from the receiving thread.  (see also issue #22)
         self._responses = dict()
+        self._last_response = None
 
         # Set to true, if a new response has been received.
         self._new_response_event = threading.Condition()
@@ -213,14 +217,10 @@ class TS3BaseConnection(object):
         :raises LookupError:
             If no response has been received yet.
         """
-        # Get the responses with the highest query id in the response
-        # dictionary.
-        try:
-            tmp = max(self._responses)
-        except ValueError:
+        tmp = self._last_response
+        if tmp is None:
             raise LookupError()
-        else:
-            return self._responses[tmp]
+        return tmp
 
     def remaining_responses(self):
         """
@@ -252,6 +252,7 @@ class TS3BaseConnection(object):
             self._query_counter = 0
             self._query_id = 0
             self._responses = dict()
+            self._last_response = None
 
             self._telnet_conn = telnetlib.Telnet(host, port, timeout)
             # Wait for the first and the second greeting:
@@ -426,6 +427,12 @@ class TS3BaseConnection(object):
             been closed or the timeout has been exceeded.
         :raises TS3QueryError:
             If the *error id* of the query was not 0.
+
+        .. versionchanged:: 0.7.0
+
+            After the response has been returned from this method, it will
+            be removed from the internal queue. This means, that you can only
+            wait for a response now **once**.
         """
         if timeout is None:
             end_time = None
@@ -447,7 +454,7 @@ class TS3BaseConnection(object):
             with self._new_response_event:
                 self._new_response_event.wait(timeout=0.1)
 
-        resp = self._responses.get(query_id)
+        resp = self._responses.pop(query_id, None)
         if resp is None or not self.is_connected():
             raise TS3ResponseRecvError()
         if resp.error["id"] != "0":
@@ -542,6 +549,7 @@ class TS3BaseConnection(object):
 
                     self._query_id += 1
                     self._responses[self._query_id] = resp
+                    self._last_response = resp
 
                     with self._new_response_event:
                         self._new_response_event.notify_all()
