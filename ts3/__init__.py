@@ -31,7 +31,7 @@ This package contains a thread-safe Python API for the:
 
 # Data
 # ------------------------------------------------
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 
 
 # Modules
