@@ -65,7 +65,7 @@ You can find more examples in the ``ts3.examples`` package.
 				print("Login failed:", err.resp.error["msg"])
 				exit(1)
 
-			ts3conn.use(1)
+			ts3conn.use(sid=1)
 
 			# Each query method will return a **TS3QueryResponse** instance,
 			# with the response.
