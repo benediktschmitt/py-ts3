@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 # The MIT License (MIT)
-# 
+#
 # Copyright (c) 2013-2016 Benedikt Schmitt <benedikt@benediktschmitt.de>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
 # the Software without restriction, including without limitation the rights to
 # use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 # the Software, and to permit persons to whom the Software is furnished to do so,
 # subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 # FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -68,7 +68,7 @@ class TS3ParserError(TS3Error, ValueError):
         tmp.format(self.exc)
         return tmp
 
-    
+
 # Exceptions
 # ------------------------------------------------
 class TS3Response(object):
@@ -82,17 +82,24 @@ class TS3Response(object):
 
     For convenience, this class supports container emualtion, so these
     calls are equal:
-    
+
         >>> ts3resp.parsed[0]["client_nickname"] == ts3resp[0]["client_nickname"]
         True
+
+    :arg bytes data:
+        The byte string received from the server.
     """
 
     # Matches the error *line* (with line ending)
-    _ERROR_LINE = re.compile(b"error id=(.)*? msg=(.)*?\n\r")    
-        
+    _ERROR_LINE = re.compile(b"error id=(.)*? msg=(.)*?")
+
     def __init__(self, data):
-        self._data = data
-        self._data_bytestr = None
+        self._data = data.split(b"\n\r")
+        if not self._data[-1]:
+            self._data.pop()
+
+        self._data_bytestr = data
+
         self._parsed = None
         self._is_parseable = True
         # Note, that the get methods for these attributes are implemented
@@ -112,15 +119,13 @@ class TS3Response(object):
         return self._data
 
     @property
-    def data_bytestr(self):        
+    def data_bytestr(self):
         """
         :getter:
             The raw response as bytestring.
         :type:
             bytes
         """
-        if self._data_bytestr is None:
-            self._data_bytestr = b"".join(self._data)
         return self._data_bytestr
 
     @property
@@ -139,7 +144,7 @@ class TS3Response(object):
     # ----------- LIST EMULATION ----------
 
     # Only rudimentary direct read-only support.
-    
+
     def __getitem__(self, index):
         return self.parsed[index]
 
@@ -150,37 +155,37 @@ class TS3Response(object):
         return iter(self.parsed)
 
     # ----------- PARSER ----------
-    
+
     """
     Syntaxdiagramm
-    --------------    
+    --------------
     Legend:
         Terminals: (b"A REGEX")
         Non-Terminals: [item]
 
     Syntaxdiagramm:
-               
+
         data
         ----> [event] ---> [itemlist] ---> [error] --->
-                          
+
         itemlist  +--------------+
         ----------|              |--->
                   +--> [item] ---+
                     ^            |
                     +---(b'|') <-+
-                    
+
         event
         -----> (b'[A-z]') ----->
 
         error  +----------------------------------------+
         -------|                                        |--->
                +--> (b'error id=(.)*? msg=(.)*?\n\r') --+
-               
+
         item
         ----> [property] --->
           ^               |
           +--  (b' ')  <--+
-              
+
         property           +-------------------------+
         --------> [key] ---|                         |-->
                            +--> (b'=') --> [value] --+
@@ -192,9 +197,9 @@ class TS3Response(object):
         -----> (b'[A-z]+') --->
 
     Output
-    ------    
+    ------
     The return value is then similar to this structure:
-    
+
         [{key00: val00, key01: val01, ...}, # item 0
          {key10: val10, key11: val11, ...}, # item 1
          ...
@@ -208,7 +213,7 @@ class TS3Response(object):
     def _parse_property(self, prop):
         """
         >>> parse_property(b'key=value')
-        ('key', 'value')        
+        ('key', 'value')
         >>> parse_property(b'foo')
         ('foo', '')
         >>> parse_property(b'client_unique_identifier=gZ7K[...]GIik=')
@@ -269,7 +274,7 @@ class TS3Response(object):
         """
         if not re.match(self._ERROR_LINE, line):
             raise TS3ParserError(self)
-        
+
         line = line.split()
         error = dict(self._parse_property(line[i]) \
                      for i in range(1, len(line)))
@@ -290,7 +295,7 @@ class TS3Response(object):
             line = self._data[i]
             tmp_parsed.extend(self._parse_itemlist(line))
         self._parsed = tmp_parsed
-            
+
         self._error = self._parse_error(self._data[-1])
         return None
 
@@ -305,7 +310,7 @@ class TS3Response(object):
             self._event = event.decode()
         except UnicodeDecodeError as err:
             raise TS3ParserError(self, err)
-        
+
         self._parsed = self._parse_itemlist(itemlist)
         return None
 
@@ -323,14 +328,15 @@ class TS3Response(object):
 
         try:
             has_error_line = re.match(self._ERROR_LINE, self._data[-1])
+
             # An event has only one line and no error line.
             if 1 == len(self._data) and not has_error_line:
-                self._parse_event()                
-            # A query has two lines an the last line is the error line.
+                self._parse_event()
+            # A query has two lines and the last line is the error line.
             elif has_error_line:
                 self._parse_query_response()
             else:
-                raise TS3ParseError(self)
+                raise TS3ParserError(self)
         except TS3ParserError:
             self._is_parseable = False
             raise
@@ -351,7 +357,7 @@ class TS3QueryResponse(TS3Response):
             A dictionary, that contains the error id and message.
         :type:
             dict
-        
+
         :raises TS3ParserError:
             If the response could not be parsed.
         """

@@ -31,5 +31,6 @@ max-idle-time
 ~~~~~~~~~~~~~
 
 The ts3 server closes idle connections after 10 minutes automatically. You can
-use the :meth:`~ts3.query.TS3BaseConnection.keepalive` method to send a beacon
-before the server closes the connection.
+use the :meth:`~query.TS3BaseConnection.send_keepalive` to sent an empty query
+to the server and thus avoid automatic disconnect. Make sure to call it at least
+once in 10 minutes.

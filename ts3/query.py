@@ -33,17 +33,6 @@ import time
 import socket
 import telnetlib
 import logging
-import threading
-import warnings
-
-# third party
-try:
-    import blinker
-except ImportError:
-    blinker = None
-    warnings.warn(
-        "Please install blinker, if you want to use events with py-ts3"
-    )
 
 # local
 try:
@@ -51,13 +40,11 @@ try:
     from common import TS3Error
     from escape import TS3Escape
     from response import TS3Response, TS3QueryResponse, TS3Event
-    import _lib
 except ImportError:
     from .commands import TS3Commands
     from .common import TS3Error
     from .escape import TS3Escape
     from .response import TS3Response, TS3QueryResponse, TS3Event
-    from . import _lib
 
 
 # Backward compatibility
@@ -72,7 +59,8 @@ except NameError:
 # ------------------------------------------------
 __all__ = [
     "TS3QueryError",
-    "TS3ResponseRecvError",
+    "TS3TimeoutError",
+    "TS3RecvError",
     "TS3BaseConnection",
     "TS3Connection"]
 
@@ -97,14 +85,24 @@ class TS3QueryError(TS3Error):
         return tmp
 
 
-class TS3ResponseRecvError(TS3Error, TimeoutError):
+class TS3TimeoutError(TS3Error, TimeoutError):
     """
-    Raised, if a response could not be received due to a *timeout* or
-    if the receive progress has been *canceled* by another thread.
+    Raised, if a response or event could not be received due to a *timeout*.
     """
 
     def __str__(self):
-        tmp = "Could not receive the response from the server."
+        tmp = "Could not receive data from the server within the timeout."
+        return tmp
+
+
+class TS3RecvError(TS3Error):
+    """
+    Raised if receiving data from the server failed, because the connection
+    was closed or for other reasons.
+    """
+
+    def __str__(self):
+        tmp = "Could not receive data from the server."
         return tmp
 
 
@@ -130,6 +128,10 @@ class TS3BaseConnection(object):
         ...     ts3conn.send(...)
         ... finally:
         ...     ts3conn.close()
+
+    .. warning::
+
+        This class is **not thread safe**!
     """
 
     def __init__(self, host=None, port=10011):
@@ -139,45 +141,14 @@ class TS3BaseConnection(object):
 
         .. seealso:: :meth:`open`
         """
-        # None, if the client is not connected.
         self._telnet_conn = None
 
-        # The last query id, that has been given.
-        self._query_counter = 0
+        # The number of queries for which we have not received a response yet.
+        self._num_pending_queries = 0
 
-        # The last query id, that has been fetched.
-        self._query_id = 0
-
-        # Maps the query id to the response.
-        # query id => TS3Response
-        #
-        # This is only a temporary queue, until the response has been fetched
-        # from the receiving thread.  (see also issue #22)
-        self._responses = dict()
-        self._last_response = None
-
-        # Set to true, if a new response has been received.
-        self._new_response_event = threading.Condition()
-
-        # Avoid sending data to the same time.
-        self._send_lock = threading.Lock()
-
-        # Needed to store a link to the keep alive thread
-        # and information about the keep alive intervall.
-        self._keepalive_timer = None
-        self._keepalive_interval = None
-
-        # To stop the receive progress, if we are waiting for events from
-        # another thread.
-        self._stop_event = threading.Event()
-        self._waiting_for_stop = False
-        self._is_listening = False
-
-        # Dispatches all received events in another thread to avoid
-        # dead locks.
-        # The dispatcher is started, as soon as the first event
-        # is received and stopped, when the connection is closed.
-        self.__event_dispatcher = _lib.SignalDispatcher()
+        # The undelivered events. These events are returned, the next time
+        # *wait_for_event()* is called.
+        self._event_queue = list()
 
         if host is not None:
             self.open(host, port)
@@ -206,31 +177,6 @@ class TS3BaseConnection(object):
         """
         return self._telnet_conn is not None
 
-    @property
-    def last_resp(self):
-        """
-        :getter:
-            The last received response.
-        :type:
-            :class:`~response.TS3Response`
-
-        :raises LookupError:
-            If no response has been received yet.
-        """
-        tmp = self._last_response
-        if tmp is None:
-            raise LookupError()
-        return tmp
-
-    def remaining_responses(self):
-        """
-        :return:
-            The number of unfetched responses.
-        :type:
-            int
-        """
-        return self._query_counter - self._query_id
-
     # Networking
     # ------------------------------------------------
 
@@ -249,17 +195,16 @@ class TS3BaseConnection(object):
         if self.is_connected():
              raise OSError("The client is already connected.")
         else:
-            self._query_counter = 0
-            self._query_id = 0
-            self._responses = dict()
-            self._last_response = None
-
             self._telnet_conn = telnetlib.Telnet(host, port, timeout)
+
             # Wait for the first and the second greeting:
             # b'TS3\n\r'
             # b'Welcome to the [...] on a specific command.\n\r'
             self._telnet_conn.read_until(b"\n\r")
             self._telnet_conn.read_until(b"\n\r")
+
+            self._num_pending_queries = 0
+            self._event_queue = list()
 
             _logger.info("Created connection to {}:{}.".format(host, port))
         return None
@@ -267,21 +212,18 @@ class TS3BaseConnection(object):
     def close(self):
         """
         Sends the ``quit`` command and closes the telnet connection.
-
-        If you are receiving data from another thread, this method will
-        call :meth:`stop_recv` and therefore block, until the the receive
-        thread stopped.
         """
-        if self.is_connected():
+        if self._telnet_conn is not None:
             try:
-                # We need to send the quit command directly to avoid
-                # dead locks.
+                # Sent it directly, to avoid a recursive call of this method.
                 self._telnet_conn.write(b"quit\n\r")
             finally:
-                self.stop_recv()
-                self.cancel_keepalive()
                 self._telnet_conn.close()
                 self._telnet_conn = None
+
+                self._event_queue.clear()
+                self._num_pending_queries = 0
+
                 _logger.debug("Disconnected client.")
         return None
 
@@ -305,273 +247,135 @@ class TS3BaseConnection(object):
         self.close()
         return None
 
-    # Keep alive
-    # -------------------------
-
-    def __send_keepalive_beacon(self):
-        """
-        Sends the keep alive beacon ``\n\r`` to the server and restarts the
-        keep alive timer :attr:`_keepalive_timer`.
-
-        .. seealso::
-
-            * :meth:`cancel_keepalive`
-            * :meth:`keepalive`
-        """
-        # Send the beacon.
-        with self._send_lock:
-            self._telnet_conn.write(b"\n\r")
-
-        # Restart the timer.
-        if self._keepalive_timer is not None:
-            self._keepalive_timer.cancel()
-            self._keepalive_timer = None
-
-        if self._keepalive_interval is not None:
-            self._keepalive_timer = threading.Timer(
-                interval = self._keepalive_interval,
-                function = self.__send_keepalive_beacon
-                )
-            self._keepalive_timer.start()
-        return None
-
-    def cancel_keepalive(self):
-        """
-        Cancels the *keepalive* beacon started using :meth:`keepalive`.
-
-        .. seealso::
-
-            * :meth:`keepalive`
-        """
-        if self._keepalive_timer is not None:
-            self._keepalive_timer.cancel()
-            self._keepalive_timer = None
-
-        self._keepalive_interval = None
-        return None
-
-    def keepalive(self, interval=540):
-        """
-        Starts or restarts a timer which sends each *interval* seconds a beacon
-        to the ts3 server to prevent closing the connection due to the max idle
-        time.
-
-        :arg interval:
-            Time between a beacon is sent to the server. This should be less than
-            the maximum allowed idle time. Usually, this value is set to 600s on
-            a TS3 server.
-
-        .. seealso::
-
-            * :meth:`cancel_keepalive`
-        """
-        # Sending a beacon now, will create a new timer
-        # or restart the timer with the new intervall.
-        self._keepalive_interval = interval
-        self.__send_keepalive_beacon()
-        return None
-
     # Receiving
     # -------------------------
 
-    #: This signal is emitted, whenever the server reported an event. Note,
-    #: that you must use ``servernotifyregister`` to subscribe to ts3 server
-    #: events.
-    #:
-    #: You can easily subscribe to the signal:
-    #:
-    #: >>> @TS3Connection.on_event.connect
-    #: ... def my_handler(sender, event):
-    #: ...     print("received event:")
-    #: ...     print("  sender:", sender)
-    #: ...     print("  event: ", event)
-    #: ...     return None
-    #:
-    #: If you want to use an handler only for one connection, you can use
-    #: ``connect_via`` to filter the signals:
-    #:
-    #: >>> ts3conn = TS3Connection()
-    #: >>> @TS3Connection.on_event.connect_via(ts3conn)
-    #: ... def my_handler(sender, event):
-    #: ...     pass
-    #:
-    #: The first argument is the ``TS3Connection`` that received the event
-    #: and the second argument is the received event packed into a ``TS3Event``.
-    #:
-    #: Note, that the events are dispatched in a dedicated **thread**.
-    #:
-    #: .. hint::
-    #:
-    #:    The signal is only available, if *blinker* is installed.
-    on_event = blinker.Signal() if blinker else None
-
-    def wait_for_resp(self, query_id, timeout=None):
+    def _recv(self, timeout=None):
         """
-        Waits for an response. This method will block untill the response to
-        the query has been received, when *timeout* exceeds or when the
-        connection is closed.
+        Blocks, until a message (response or event) has been received.
 
-        :arg query_id:
-            The id of the query internally used to identify the corresponding
-            response.
-        :type query_id:
-            int
+        If an event is received it is appended to the :attr:`_event_queue` and
+        returned.
+
+        If a query response is received, it is only returned (but not cachd).
+
+        :arg float timeout:
+            The maximum time in seconds waited for a response a event.
+        :type timeout:
+            None or float
+
+        :rtype: TS3Event or TS3QueryResponse
+        :returns:
+            A TS3Event or TS3QueryResponse
+
+        :raises TS3TimeoutError:
+        :raises TS3RecvError:
+        """
+        # This re describes either a complete query response or event.
+        event_re = re.compile(b"(?P<event>notify.*?\n\r)")
+        resp_re = re.compile(b"(?P<resp>)(.*?\n\r)?error id=.*?\n\r", re.MULTILINE)
+
+        try:
+            re_index, match, data = self._telnet_conn.expect(
+                [event_re, resp_re], timeout
+            )
+
+            # We received neither an event, nor a response. So raise a timeout error.
+            if re_index == -1:
+                raise TS3TimeoutError()
+
+            # We received an event.
+            if re_index == 0:
+                event = TS3Event(data)
+                self._event_queue.append(event)
+                return event
+
+            # We received the end of a query response.
+            else:
+                assert re_index == 1
+
+                resp = TS3QueryResponse(data)
+                self._num_pending_queries -= 1
+                return resp
+
+        # Catch socket and telnet errors
+        except (OSError, EOFError) as err:
+            self.close()
+            raise
+
+    def wait_for_event(self, timeout=None):
+        """
+        Blocks until an event is received or the *timeout* exceeds. The next
+        received event is returned.
 
         :arg timeout:
-            Maximum time in seconds waited for the response.
+            The maximum number of seconds waited for the next event.
+        :type timeout:
+            None or float
+
+        :rtype: TS3Event
+        :returns:
+            The next received ts3 event.
+
+        :raises TS3TimeoutError:
+        :raises TS3RecvError:
+        """
+        start_time = time.time()
+        while not self._event_queue:
+
+            if timeout is not None:
+                remaining_time = timeout - (time.time() - start_time)
+                if remaining_time <= 0:
+                    raise TS3TimeoutError()
+            else:
+                remaining_time = None
+
+            self._recv(timeout=remaining_time)
+
+        return self._event_queue.pop(0) if self._event_queue else None
+
+    def _wait_for_resp(self, timeout=None):
+        """
+        Waits for the response to the last issued query.
+
+        :arg timeout:
+            The maximum number of seconds waited for the query response.
         :type timeout:
             None or int
 
+        :raises TS3TimeoutError:
         :raises TS3ResponseRecvError:
-            If the response could not be received, because the connection has
-            been closed or the timeout has been exceeded.
         :raises TS3QueryError:
-            If the *error id* of the query was not 0.
-
-        .. versionchanged:: 0.7.0
-
-            After the response has been returned from this method, it will
-            be removed from the internal queue. This means, that you can only
-            wait for a response now **once**.
         """
-        if timeout is None:
-            end_time = None
-        else:
-            end_time = time.time() + timeout
+        assert self._num_pending_queries
 
-        while True:
-            # We need to catch this case here, to avoid dead locks, when we
-            # are not in threading mode.
-            if query_id in self._responses:
-                break
-            if not self.is_connected():
-                break
-            if timeout is not None and time.time() < end_time:
-                break
+        start_time = time.time()
+        resp = None
+        while not (isinstance(resp, TS3QueryResponse) and self._num_pending_queries == 0):
 
-            # Wait for a new response and try to find the
-            # response corresponding to the query.
-            with self._new_response_event:
-                self._new_response_event.wait(timeout=0.1)
+            if timeout is not None:
+                remaining_time = timeout - (time.time() - start_time)
+                if remaining_time <= 0:
+                    raise TS3TimeoutError()
+            else:
+                remaining_time = None
 
-        resp = self._responses.pop(query_id, None)
-        if resp is None or not self.is_connected():
-            raise TS3ResponseRecvError()
+            resp = self._recv(timeout=remaining_time)
+
         if resp.error["id"] != "0":
             raise TS3QueryError(resp)
         return resp
 
-    def stop_recv(self):
-        """
-        If :meth:`recv` has been called from another thread, it will be
-        told to stop.
-        This method blocks, until :meth:`recv` has terminated.
-        """
-        if self._is_listening:
-            self._stop_event.clear()
-            self._waiting_for_stop = True
-            self.__event_dispatcher.stop()
-            self._stop_event.wait()
-        return None
-
-    def recv_in_thread(self):
-        """
-        Calls :meth:`recv` in a thread. This is useful,
-        if you used ``servernotifyregister`` and you expect to receive events.
-        """
-        thread = threading.Thread(target=self.recv, args=(True,))
-        thread.start()
-        return None
-
-    def recv(self, recv_forever=False, poll_intervall=0.5):
-        """
-        Blocks untill all unfetched responses have been received or
-        forever, if *recv_forever* is true.
-
-        .. deprecated:: 0.6.0
-            The *recv_forever* argument will be removed in future versions.
-            Use :meth:`recv_in_thread` instead.
-
-        :arg recv_forever:
-            If true, this method waits forever for a response and you have to
-            call :meth:`stop_recv` from another thread, to stop it.
-        :type recv_forever:
-            bool
-
-        :arg poll_intervall:
-            Seconds between checks for the stop request.
-        :type poll_intervall:
-            float
-
-        :raises RuntimeError:
-            When the client is already listening.
-        """
-        if self._is_listening:
-            raise RuntimeError("Already receiving data!")
-
-        self._is_listening = True
-        try:
-            lines = list()
-            # Stop, when
-            # * the client is disconnected.
-            # * the stop flag is set.
-            # * we don't recv forever and we don't wait for responses.
-            while self.is_connected() \
-                  and (not self._waiting_for_stop) \
-                  and (self.remaining_responses() or recv_forever):
-
-                # Read one line
-                # 1.) An event (Note, that an event has no trailing error line)
-                # 2.) Query response
-                # 3.) The error line of the query response.
-                data = self._telnet_conn.read_until(
-                    b"\n\r", timeout=poll_intervall)
-                if not data:
-                    continue
-
-                # We received an event.
-                if data.startswith(b"notify") and self.on_event.receivers:
-                    event = TS3Event([data])
-
-                    # We start the event dispatcher as late as possible to
-                    # avoid unnecessairy threads.
-                    self.__event_dispatcher.start()
-                    self.__event_dispatcher.send(
-                        self.on_event, self, event=event
-                        )
-
-                # We received the end of a query response.
-                elif data.startswith(b"error"):
-                    lines.append(data)
-
-                    resp = TS3QueryResponse(lines)
-                    lines = list()
-
-                    self._query_id += 1
-                    self._responses[self._query_id] = resp
-                    self._last_response = resp
-
-                    with self._new_response_event:
-                        self._new_response_event.notify_all()
-
-                # There's no keyword, so it must be a part of a query response.
-                else:
-                    lines.append(data)
-
-        # Catch socket and telnet errors
-        except (OSError, EOFError) as err:
-            # We need to set this flag here, to avoid dead locks while closing.
-            self._is_listening = False
-            self.close()
-            raise
-        finally:
-            self._stop_event.set()
-            self._waiting_for_stop = False
-            self._is_listening = False
-        return None
-
     # Sending
     # -------------------------
+
+    def send_keepalive(self):
+        """
+        Sends an empty query to the server to prevent automatic disconnect.
+        Make sure to call it at least once in 10 minutes.
+        """
+        self._telnet_conn.write(b"\n\r")
+        return None
 
     def send(self, command, common_parameters=None, unique_parameters=None,
              options=None, timeout=None):
@@ -615,21 +419,16 @@ class TS3BaseConnection(object):
                         + " " + options \
                         + "\n\r"
         query_command = query_command.encode()
+        print(repr(query_command))
+        print()
 
         # Send the command.
-        with self._send_lock:
-            self._telnet_conn.write(query_command)
-            # To identify the response when we receive it.
-            self._query_counter += 1
-            query_id = self._query_counter
+        self._telnet_conn.write(query_command)
 
-        # Make sure, that we receive the command if we are not in
-        # threading mode.
-        try:
-            self.recv()
-        except RuntimeError:
-            pass
-        return self.wait_for_resp(query_id, timeout)
+        # To identify the response when we receive it.
+        self._num_pending_queries += 1
+
+        return self._wait_for_resp(timeout=timeout)
 
 
 class TS3Connection(TS3BaseConnection, TS3Commands):
@@ -656,9 +455,7 @@ class TS3Connection(TS3BaseConnection, TS3Commands):
 
     def quit(self):
         """
-        Calls :meth:`TS3BaseConnection.close()`, to make sure we leave the
-        TS3BaseConnection (pending queries, ...) in a consitent state and that
-        running threads are terminated properly.
+        Closes the connection.
         """
         self.close()
         return None

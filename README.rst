@@ -109,19 +109,6 @@ You can find more examples in the ``ts3.examples`` package.
 		import time
 		import ts3
 
-		def my_event_handler(sender, event):
-			"""
-			*sender* is the TS3Connection instance, that received the event.
-
-			*event* is a ts3.response.TS3Event instance, that contains the name
-			of the event and the data.
-			"""
-			print("Event:")
-			print("  sender:", sender)
-			print("  event.event:", event.event)
-			print("  event.parsed:", event.parsed)
-			return None
-
 		with ts3.query.TS3Connection("localhost") as ts3conn:
 			ts3conn.login(
 				client_login_name="serveradmin",
@@ -129,31 +116,16 @@ You can find more examples in the ``ts3.examples`` package.
 			)
 			ts3conn.use(sid=1)
 
-			# Connect the signal. This is a **blinker.Signal** instance, shared
-			# by all TS3Connections.
-			ts3conn.on_event.connect(my_event_handler)
-
-			# If you only want to connect the handler to a specifc ts3
-			# connection, use:
-			# ts3conn.on_event.connect(my_event_handler, sender=ts3conn)
-
 			# Register for events
 			ts3conn.servernotifyregister(event="server")
 
-			# Start the recv loop to catch all events.
-			ts3conn.recv_in_thread()
+			while True:
+				event = ts3conn.wait_for_event()
 
-			# Note, that you can still use the ts3conn to send queries:
-			ts3conn.clientlist()
-
-			# The recv thread can be stopped with:
-			# >>> ts3conn.stop_recv()
-			# Note, that the thread will be stopped automatically when the
-			# client disconnects.
-
-			# Block to avoid leaving the *with* statement and therefore closing
-			# the connection.
-			input("> Hit enter to finish.")
+				# Greet new clients.
+				if event[0]["reasonid"] == "0":
+					print("client connected")
+					ts3conn.clientpoke(clid=event[0]["clid"], msg="Hello :)")
 
 *	A simple TS3 viewer:
 
@@ -188,7 +160,6 @@ You can find more examples in the ``ts3.examples`` package.
 				client_login_name="serveradmin",
 				client_login_password="FoOBa9"
 			)
-			view(ts3conn, sid=1)
 
 			# Create a new TS3FileTransfer instance associated with the
 			# TS3Connection.

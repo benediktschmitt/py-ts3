@@ -22,7 +22,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
-This package contains a thread-safe Python API for the:
+This package contains a Python API for the:
     * TeamSpeak 3 Server Query
     * TeamSpeak 3 Filetransfer Interface
     * TeamSpeak 3 Query Events
@@ -31,7 +31,7 @@ This package contains a thread-safe Python API for the:
 
 # Data
 # ------------------------------------------------
-__version__ = "0.7.2"
+__version__ = "1.0.0"
 
 
 # Modules

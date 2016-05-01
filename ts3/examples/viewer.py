@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 # The MIT License (MIT)
-# 
+#
 # Copyright (c) 2013-2016 Benedikt Schmitt <benedikt@benediktschmitt.de>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
 # the Software without restriction, including without limitation the rights to
 # use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 # the Software, and to permit persons to whom the Software is furnished to do so,
 # subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 # FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -43,7 +43,7 @@ class ChannelTreeNode(object):
 
     Common
     ------
-    
+
     self.childs = List with the child *Channels*.
 
     self.root = The *Channel* object, that is the root of the whole channel
@@ -51,9 +51,9 @@ class ChannelTreeNode(object):
 
     Channel
     -------
-    
+
     Represents a real channel.
-    
+
     self.info =  Dictionary with all informations about the channel obtained by
                  ts3conn.channelinfo
 
@@ -64,24 +64,24 @@ class ChannelTreeNode(object):
 
     Root Channel
     ------------
-    
+
     Represents the virtual server itself.
 
     self.info = Dictionary with all informations about the virtual server
                 obtained by ts3conn.serverinfo
 
     self.parent = None
-    
+
     self.clients = None
 
     Usage
     -----
-    
+
     >>> tree = ChannelTreeNode.build_tree(ts3conn, sid=1)
 
     Todo
     ----
-    
+
     * It's not sure, that the tree is always correct sorted.
     """
 
@@ -93,20 +93,20 @@ class ChannelTreeNode(object):
         """
         self.info = info
         self.childs = list()
-        
+
         # Init a root channel
         if root is None:
             self.parent = None
             self.clients = None
             self.root = self
-            
+
         # Init a real channel
         else:
             self.parent = parent
             self.root = root
             self.clients = clients if clients is not None else list()
         return None
-    
+
     @classmethod
     def init_root(cls, info):
         """
@@ -135,14 +135,14 @@ class ChannelTreeNode(object):
         """
         ts3conn.use(sid=sid, virtual=True)
 
-        ts3conn.serverinfo()
-        serverinfo = ts3conn.last_resp.parsed[0]
-        
-        ts3conn.channellist()
-        channellist = ts3conn.last_resp.parsed
+        resp = ts3conn.serverinfo()
+        serverinfo = resp.parsed[0]
 
-        ts3conn.clientlist()
-        clientlist = ts3conn.last_resp.parsed
+        resp = ts3conn.channellist()
+        channellist = resp.parsed
+
+        resp = ts3conn.clientlist()
+        clientlist = resp.parsed
         # channel id -> clients
         clientlist = {cid: [client for client in clientlist \
                             if client["cid"] == cid]
@@ -150,11 +150,11 @@ class ChannelTreeNode(object):
 
         root = cls.init_root(serverinfo)
         for channel in channellist:
-            ts3conn.channelinfo(cid=channel["cid"])
-            channelinfo = ts3conn.last_resp.parsed[0]
+            resp = ts3conn.channelinfo(cid=channel["cid"])
+            channelinfo = resp.parsed[0]
             # This makes sure, that *cid* is in the dictionary.
             channelinfo.update(channel)
-            
+
             channel = cls(
                 info=channelinfo, parent=root, root=root,
                 clients=clientlist[channel["cid"]])
@@ -186,7 +186,7 @@ class ChannelTreeNode(object):
                 else:
                     i += 1
 
-        # This is not the root and the channel is a direct child of this one. 
+        # This is not the root and the channel is a direct child of this one.
         elif channel.info["pid"] == self.info["cid"]:
             self.childs.append(channel)
             return True
@@ -206,7 +206,7 @@ class ChannelTreeNode(object):
         """
         Prints the channel and it's subchannels recursive. If restore_order is
         true, the child channels will be sorted before printing them.
-        """            
+        """
         if self.is_root():
             print(" "*(indent*3) + "|-", self.info["virtualserver_name"])
         else:
@@ -230,13 +230,13 @@ def view(ts3conn, sid=1):
     tree.print()
     return None
 
-    
+
 # Main
 # ------------------------------------------------
 if __name__ == "__main__":
     # USER, PASS, HOST, ...
     from def_param import *
-    
+
     with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
         ts3conn.login(client_login_name=USER, client_login_password=PASS)
         view(ts3conn, sid=1)

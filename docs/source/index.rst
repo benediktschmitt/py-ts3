@@ -6,14 +6,15 @@ Content
 
 .. toctree::
    :maxdepth: 1
-   
+
    installation
    api/index
    examples/index
+   changelog
    faq
    contribute
    license
-   
+
 Indices and tables
 ------------------
 
@@ -24,7 +25,7 @@ Indices and tables
 What is PyTS3?
 --------------
 
-It's a small package that contains a *thread-safe* Python 3.2+ API for:
+It's a small package that contains a Python 3.2+ API for:
 
    * TS3 query connections
    * TS3 query events
