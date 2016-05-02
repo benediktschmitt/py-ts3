@@ -178,10 +178,9 @@ You can find more examples in the ``ts3.examples`` package.
 Bugs
 ----
 
-This project is in an early state, so you'll probably find a bug. Please report
-it or fork this repo, fix the bug and create a pull request.
+If you found a bug please report it or sent a pull request.
 
-If you found a grammar or spelling error, please report it too.
+Please report grammar or spelling errors too.
 
 Versioning
 ----------
