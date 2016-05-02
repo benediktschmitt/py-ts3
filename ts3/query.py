@@ -419,8 +419,6 @@ class TS3BaseConnection(object):
                         + " " + options \
                         + "\n\r"
         query_command = query_command.encode()
-        print(repr(query_command))
-        print()
 
         # Send the command.
         self._telnet_conn.write(query_command)
