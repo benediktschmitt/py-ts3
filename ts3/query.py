@@ -285,7 +285,7 @@ class TS3BaseConnection(object):
                 raise TS3TimeoutError()
 
             # We received an event.
-            if re_index == 0:
+            elif re_index == 0:
                 event = TS3Event(data)
                 self._event_queue.append(event)
                 return event
