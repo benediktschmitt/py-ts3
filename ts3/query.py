@@ -221,7 +221,7 @@ class TS3BaseConnection(object):
                 self._telnet_conn.close()
                 self._telnet_conn = None
 
-                self._event_queue.clear()
+                del self._event_queue[:]
                 self._num_pending_queries = 0
 
                 _logger.debug("Disconnected client.")
