@@ -39,12 +39,20 @@ def hello_bot(ts3conn, msg=None):
     ts3conn.servernotifyregister(event="server")
 
     while True:
-        event = ts3conn.wait_for_event()
+        ts3conn.send_keepalive()
 
-        # Greet new clients.
-        if event[0]["reasonid"] == "0":
-            print("Client '{}' connected.".format(event[0]["client_nickname"]))
-            ts3conn.clientpoke(clid=event[0]["clid"], msg=msg)
+        try:
+            # This method blocks, but we must sent the keepalive message at
+            # least once in 10 minutes. So we set the timeout parameter to
+            # 9 minutes.
+            event = ts3conn.wait_for_event(timeout=550)
+        except ts3.query.TS3TimeoutError:
+            pass
+        else:
+            # Greet new clients.
+            if event[0]["reasonid"] == "0":
+                print("Client '{}' connected.".format(event[0]["client_nickname"]))
+                ts3conn.clientpoke(clid=event[0]["clid"], msg=msg)
     return None
 
 

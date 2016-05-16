@@ -279,7 +279,12 @@ class TS3BaseConnection(object):
             re_index, match, data = self._telnet_conn.expect(
                 [event_re, resp_re], timeout
             )
-
+        # Catch socket and telnet errors
+        except (OSError, EOFError) as err:
+            self.close()
+            raise
+        # Handle the receives message.
+        else:
             # We received neither an event, nor a response. So raise a timeout error.
             if re_index == -1:
                 raise TS3TimeoutError()
@@ -297,11 +302,7 @@ class TS3BaseConnection(object):
                 resp = TS3QueryResponse(data)
                 self._num_pending_queries -= 1
                 return resp
-
-        # Catch socket and telnet errors
-        except (OSError, EOFError) as err:
-            self.close()
-            raise
+        return None
 
     def wait_for_event(self, timeout=None):
         """
