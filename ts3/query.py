@@ -309,6 +309,20 @@ class TS3BaseConnection(object):
         Blocks until an event is received or the *timeout* exceeds. The next
         received event is returned.
 
+        A simple event loop looks like this:
+
+        .. code-block:: python3
+
+            ts3conn.servernotifyregister(event="server")
+            while True:
+                ts3conn.send_keepalive()
+                try:
+                    event = ts3conn.wait_for_event(timeout=540)
+                except TS3TimeoutError:
+                    pass
+                else:
+                    # Handle the received event here ...
+
         :arg timeout:
             The maximum number of seconds waited for the next event.
         :type timeout:
