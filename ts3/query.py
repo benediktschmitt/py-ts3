@@ -280,7 +280,7 @@ class TS3BaseConnection(object):
             timeout = end_time - time.time() if end_time is not None else None
 
             try:
-                data = self._telnet_conn.read_until(b"\n\r")
+                data = self._telnet_conn.read_until(b"\n\r", timeout=timeout)
             # Catch socket and telnet errors
             except (OSError, EOFError) as err:
                 self.close()
