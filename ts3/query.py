@@ -142,6 +142,7 @@ class TS3BaseConnection(object):
         .. seealso:: :meth:`open`
         """
         self._telnet_conn = None
+        self._telnet_queue = None
 
         # The number of queries for which we have not received a response yet.
         self._num_pending_queries = 0
@@ -196,6 +197,7 @@ class TS3BaseConnection(object):
              raise OSError("The client is already connected.")
         else:
             self._telnet_conn = telnetlib.Telnet(host, port, timeout)
+            self._telnet_queue = list()
 
             # Wait for the first and the second greeting:
             # b'TS3\n\r'
@@ -220,6 +222,7 @@ class TS3BaseConnection(object):
             finally:
                 self._telnet_conn.close()
                 self._telnet_conn = None
+                self._telnet_queue = None
 
                 del self._event_queue[:]
                 self._num_pending_queries = 0
@@ -271,37 +274,38 @@ class TS3BaseConnection(object):
         :raises TS3TimeoutError:
         :raises TS3RecvError:
         """
-        # This re describes either a complete query response or event.
-        event_re = re.compile(b"(?P<event>notify.*?\n\r)")
-        resp_re = re.compile(b"(?P<resp>)(.*?\n\r)?error id=.*?\n\r", re.MULTILINE)
+        end_time = timeout + time.time() if timeout is not None else None
 
-        try:
-            re_index, match, data = self._telnet_conn.expect(
-                [event_re, resp_re], timeout
-            )
-        # Catch socket and telnet errors
-        except (OSError, EOFError) as err:
-            self.close()
-            raise
-        # Handle the receives message.
-        else:
-            # We received neither an event, nor a response. So raise a timeout error.
-            if re_index == -1:
-                raise TS3TimeoutError()
+        while True:
+            timeout = end_time - time.time() if end_time is not None else None
 
-            # We received an event.
-            elif re_index == 0:
-                event = TS3Event(data)
-                self._event_queue.append(event)
-                return event
-
-            # We received the end of a query response.
+            try:
+                data = self._telnet_conn.read_until(b"\n\r")
+            # Catch socket and telnet errors
+            except (OSError, EOFError) as err:
+                self.close()
+                raise
+            # Handle the receives message.
             else:
-                assert re_index == 1
+                if not data:
+                    raise TS3TimeoutError()
+                elif data.startswith(b"notify"):
+                    assert not self._telnet_queue
 
-                resp = TS3QueryResponse(data)
-                self._num_pending_queries -= 1
-                return resp
+                    event = TS3Event(data)
+                    self._event_queue.append(event)
+                    return event
+
+                elif data.startswith(b"error"):
+                    self._telnet_queue.append(data)
+                    data = b"".join(self._telnet_queue)
+                    self._telnet_queue = list()
+
+                    resp = TS3QueryResponse(data)
+                    self._num_pending_queries -= 1
+                    return resp
+                else:
+                    self._telnet_queue.append(data)
         return None
 
     def wait_for_event(self, timeout=None):
