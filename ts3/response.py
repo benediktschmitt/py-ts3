@@ -231,7 +231,7 @@ class TS3Response(object):
 
         try:
             key = key.decode()
-            val = val.decode()
+            val = val.decode(errors="ignore")
         except UnicodeDecodeError as err:
             # Todo: - Should we simply ignore decode errors?
             #       - Is decoding reasonable?
