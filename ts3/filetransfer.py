@@ -188,11 +188,11 @@ class TS3FileTransfer(object):
             query_resp_hook(resp)
         return self.download_by_resp(
             output_file=output_file, ftinitdownload_resp=resp,
-            seekpos=seekpos, reporthook=reporthook)
+            seekpos=seekpos, reporthook=reporthook, fallbackhost=self.ts3conn.telnet_conn.host)
 
     @classmethod
     def download_by_resp(cls, output_file, ftinitdownload_resp,
-                         seekpos=0, reporthook=None):
+                         seekpos=0, reporthook=None, fallbackhost=None):
         """
         This is *almost* a shortcut for:
 
@@ -208,7 +208,12 @@ class TS3FileTransfer(object):
         Note, that the value of ``resp[0]["ip"]`` is a csv list and needs
         to be parsed.
         """
-        ip = cls._ip_from_resp(ftinitdownload_resp[0]["ip"])
+        if "ip" in ftinitdownload_resp[0]:
+            ip = cls._ip_from_resp(ftinitdownload_resp[0]["ip"])
+        elif not fallbackhost:
+            raise TS3DownloadError(0, "The response did not contain an ip.")
+        else:
+            ip = fallbackhost
         port = int(ftinitdownload_resp[0]["port"])
         adr = (ip, port)
 
@@ -326,11 +331,11 @@ class TS3FileTransfer(object):
             query_resp_hook(resp)
         return self.upload_by_resp(
             input_file=input_file, ftinitupload_resp=resp,
-            reporthook=reporthook)
+            reporthook=reporthook, fallbackhost=self.ts3conn.telnet_conn.host)
 
     @classmethod
     def upload_by_resp(cls, input_file, ftinitupload_resp,
-                       reporthook=None):
+                       reporthook=None, fallbackhost=None):
         """
         This is *almost* a shortcut for:
 
@@ -348,7 +353,12 @@ class TS3FileTransfer(object):
 
         For the final upload, :meth:`upload` is called.
         """
-        ip = cls._ip_from_resp(ftinitupload_resp[0]["ip"])
+        if "ip" in ftinitupload_resp[0]:
+            ip = cls._ip_from_resp(ftinitupload_resp[0]["ip"])
+        elif not fallbackhost:
+            raise TS3UploadError(0, "The response did not contain an ip.")
+        else:
+            ip = fallbackhost
         port = int(ftinitupload_resp[0]["port"])
         adr = (ip, port)
 
