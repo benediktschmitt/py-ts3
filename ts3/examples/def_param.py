@@ -33,7 +33,7 @@ Default settings for the examples.
 USER = "serveradmin"
 
 # Login password
-PASS = "yziSNxeD"
+PASS = "MzI4M8GK"
 
 # TS3 query address
 HOST = "127.0.0.1"
