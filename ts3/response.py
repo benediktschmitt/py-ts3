@@ -30,6 +30,7 @@ and to structure the data.
 # Modules
 # ------------------------------------------------
 import re
+import logging
 
 # local
 try:
@@ -46,6 +47,9 @@ __all__ = ["TS3Response",
            "TS3ParserError",
            "TS3QueryResponse",
            "TS3Event"]
+
+
+LOG = logging.getLogger(__file__)
 
 
 # Exceptions
@@ -229,13 +233,19 @@ class TS3Response(object):
             key = prop[0]
             val = b"=".join(prop[1:])
 
+        # Take a look at https://github.com/benediktschmitt/py-ts3/issues/34
+        # to find out, why we simply ignore the decode errors.
         try:
             key = key.decode()
+        except UnicodeDecodeError as err:
+            LOG.warning("Failed to decode the key part properly: '%s'.", err)
+            key = key.decode(errors="ignore")
+
+        try:
             val = val.decode()
         except UnicodeDecodeError as err:
-            # Todo: - Should we simply ignore decode errors?
-            #       - Is decoding reasonable?
-            raise TS3ParserError(self, err)
+            LOG.warning("Failed to decode the value part properly: '%s'.", err)
+            val = val.decode(errors="ignore")
 
         key = TS3Escape.unescape(key)
         val = TS3Escape.unescape(val)
