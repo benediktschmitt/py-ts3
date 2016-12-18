@@ -180,7 +180,6 @@ class TS3FileTransfer(object):
             * :func:`~urllib.request.urlretrieve`
         """
         ftid = self.get_ftid()
-        print("FT ID:", ftid)
         resp = self.ts3conn.ftinitdownload(
             clientftfid=ftid, name=name, cid=cid, cpw=cpw, seekpos=seekpos)
 
@@ -188,7 +187,8 @@ class TS3FileTransfer(object):
             query_resp_hook(resp)
         return self.download_by_resp(
             output_file=output_file, ftinitdownload_resp=resp,
-            seekpos=seekpos, reporthook=reporthook, fallbackhost=self.ts3conn.telnet_conn.host)
+            seekpos=seekpos, reporthook=reporthook,
+            fallbackhost=self.ts3conn.telnet_conn.host)
 
     @classmethod
     def download_by_resp(cls, output_file, ftinitdownload_resp,
@@ -210,10 +210,11 @@ class TS3FileTransfer(object):
         """
         if "ip" in ftinitdownload_resp[0]:
             ip = cls._ip_from_resp(ftinitdownload_resp[0]["ip"])
-        elif not fallbackhost:
-            raise TS3DownloadError(0, "The response did not contain an ip.")
-        else:
+        elif fallbackhost:
             ip = fallbackhost
+        else:
+            raise TS3DownloadError(0, "The response did not contain an ip.")
+
         port = int(ftinitdownload_resp[0]["port"])
         adr = (ip, port)
 
@@ -355,10 +356,11 @@ class TS3FileTransfer(object):
         """
         if "ip" in ftinitupload_resp[0]:
             ip = cls._ip_from_resp(ftinitupload_resp[0]["ip"])
-        elif not fallbackhost:
-            raise TS3UploadError(0, "The response did not contain an ip.")
-        else:
+        elif fallbackhost:
             ip = fallbackhost
+        else:
+            raise TS3UploadError(0, "The response did not contain an ip.")
+
         port = int(ftinitupload_resp[0]["port"])
         adr = (ip, port)
 
