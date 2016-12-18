@@ -1,7 +1,14 @@
-.. _changelog;
+.. _changelog:
 
 Changelog
 =========
+
+*   **1.0.4**
+
+    *   **added** fallbackhost parameter to some TS3FileTransfer methods
+    *   **fixed** UnicodeDecodeError caused by Android clients
+
+        https://github.com/benediktschmitt/py-ts3/issues/34
 
 *   **1.0.0**
 
