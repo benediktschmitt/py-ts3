@@ -40,3 +40,5 @@ nosetests.xml
 ts3-testserver
 docs/build
 sandbox/*
+
+.idea

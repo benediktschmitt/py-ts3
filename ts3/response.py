@@ -256,9 +256,7 @@ class TS3Response(object):
         >>> parse_item(b'key0=val0 key1=val1')
         {'key0': 'val0', 'key1': 'val1'}
         """
-        properties = item.split()
-        properties = dict(self._parse_property(p) for p in properties)
-        return properties
+        return dict(self._parse_property(p) for p in item.split())
 
     def _parse_itemlist(self, itemlist):
         """
@@ -268,9 +266,7 @@ class TS3Response(object):
         >>> parse_itemlist(b'key0=val0 key1=val1)
         [{'key0': 'val0', 'key1': 'val1'}]
         """
-        itemlist = itemlist.split(b"|")
-        itemlist = [self._parse_item(item) for item in itemlist]
-        return itemlist
+        return [self._parse_item(item) for item in itemlist.split(b"|")]
 
     def _parse_error(self, line):
         """
@@ -300,12 +296,7 @@ class TS3Response(object):
         # I assume, that this is a real query response.
 
         # Store the parsed data only, if it the whole data can be parsed.
-        tmp_parsed = list()
-        for i in range(len(self._data) - 1):
-            line = self._data[i]
-            tmp_parsed.extend(self._parse_itemlist(line))
-        self._parsed = tmp_parsed
-
+        self._parsed = [self._parse_itemlist(_) for _ in self._data]
         self._error = self._parse_error(self._data[-1])
         return None
 
