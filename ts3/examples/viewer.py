@@ -208,14 +208,14 @@ class ChannelTreeNode(object):
         true, the child channels will be sorted before printing them.
         """
         if self.is_root():
-            print(" "*(indent*3) + "|-", self.info["virtualserver_name"])
+            print(" "*(indent*3) + "|-", self.info["virtualserver_name"].encode('utf-8'))
         else:
-            print(" "*(indent*3) + "|-", self.info["channel_name"])
+            print(" "*(indent*3) + "|-", self.info["channel_name"].encode('utf-8'))
             for client in self.clients:
                 # Ignore query clients
                 if client["client_type"] == "1":
                     continue
-                print(" "*(indent*3+3) + "->", client["client_nickname"])
+                print(" "*(indent*3+3) + "->", client["client_nickname"].encode('utf-8'))
 
         for child in self.childs:
             child.print(indent=indent + 1)
