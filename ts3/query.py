@@ -290,8 +290,6 @@ class TS3BaseConnection(object):
                 if not data:
                     raise TS3TimeoutError()
                 elif data.startswith(b"notify"):
-                    assert not self._telnet_queue
-
                     event = TS3Event(data)
                     self._event_queue.append(event)
                     return event
