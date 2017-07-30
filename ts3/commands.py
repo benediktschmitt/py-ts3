@@ -29,7 +29,10 @@ from collections import OrderedDict
 
 # Data
 # ------------------------------------------------
-__all__ = ["TS3Commands"]
+__all__ = [
+    "TS3Commands",
+    "TS3ServerCommands",
+    "TS3ClientCommands"]
 
 
 # Classes
@@ -52,6 +55,11 @@ class TS3Commands(object):
         All methods in this class accept only **keyword arguments** to improve
         the readability and to avoid wrong parameter orders compared to the
         official documentation.
+
+    .. seealso::
+
+        :class:`TS3ServerQueryCommands`
+        :class:`TS3ClientQueryCommands`
     """
 
     def _return_proxy(self, command, cparameters, uparameters, options):
@@ -75,6 +83,16 @@ class TS3Commands(object):
         :type options: None or a list of strings.
         """
         return (command, cparameters, uparameters, options)
+
+
+class TS3ServerCommands(TS3Commands):
+    """A convenient interface for all Server Query commands.
+
+    .. seealso::
+
+        The command set for the Client Query Plugin is implemented in the
+        :class:`TS3ClientQueryCommands` class.
+    """
 
     def banadd(self, *, ip=None, name=None, uid=None, time=None, banreason=None):
         """
@@ -4176,3 +4194,9 @@ class TS3Commands(object):
         uparams = list()
         options = list()
         return self._return_proxy("whoami", cparams, uparams, options)
+
+
+class TS3ClientCommands(TS3Commands):
+    """
+    :todo: Implemet this command set.
+    """

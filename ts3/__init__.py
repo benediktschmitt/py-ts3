@@ -24,6 +24,7 @@
 """
 This package contains a Python API for the:
     * TeamSpeak 3 Server Query
+    * TeamSpeak 3 Client Query
     * TeamSpeak 3 Filetransfer Interface
     * TeamSpeak 3 Query Events
 """
@@ -31,7 +32,7 @@ This package contains a Python API for the:
 
 # Data
 # ------------------------------------------------
-__version__ = "1.0.6"
+__version__ = "2.0.0"
 
 
 # Modules

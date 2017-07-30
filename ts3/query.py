@@ -22,7 +22,17 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
-This module contains a high-level API for the TeamSpeak 3 Server Query.
+This module contains a high-level API for the TeamSpeak 3 *Server Query* and
+*Client Query plugin*.
+
+.. versionchanged:: 2.0.0
+
+    The :class:`TS3Connection` class has been renamed to
+    :class:`TS3ServerConnection`.
+
+.. versionadded:: 2.0.0
+
+    The :class:`TS3ClientConnection` class has been added.
 """
 
 
@@ -36,12 +46,12 @@ import logging
 
 # local
 try:
-    from commands import TS3Commands
+    from commands import TS3ServerCommands, TS3ClientCommands
     from common import TS3Error
     from escape import TS3Escape
     from response import TS3Response, TS3QueryResponse, TS3Event
 except ImportError:
-    from .commands import TS3Commands
+    from .commands import TS3ServerCommands, TS3ClientCommands
     from .common import TS3Error
     from .escape import TS3Escape
     from .response import TS3Response, TS3QueryResponse, TS3Event
@@ -62,7 +72,8 @@ __all__ = [
     "TS3TimeoutError",
     "TS3RecvError",
     "TS3BaseConnection",
-    "TS3Connection"]
+    "TS3ServerConnection"
+    "TS3ClientConnection"]
 
 _logger = logging.getLogger(__name__)
 
@@ -113,8 +124,8 @@ class TS3BaseConnection(object):
     The TS3 query client.
 
     This class provides only the methods to **handle** the connection to a
-    TeamSpeak 3 Server. For a more convenient interface, use the
-    :class:`TS3Connection` class.
+    TeamSpeak 3 query service. For a more convenient interface, use the
+    :class:`TS3ServerConnection` or :class:`TS3ClientConnection` class.
 
     Note, that this class supports the ``with`` statement:
 
@@ -134,10 +145,22 @@ class TS3BaseConnection(object):
         This class is **not thread safe**!
     """
 
-    def __init__(self, host=None, port=10011):
+    #: The default port to use when no port is specified.
+    DEFAULT_PORT = None
+
+    #: The length of the greeting. This is the number of lines returned by
+    #: the query service after successful connection.
+    #:
+    #: For example, the TS3 Server Query returns these lines upon connection::
+    #:
+    #:      b'TS3\n\r'
+    #:      b'Welcome to the [...] on a specific command.\n\r'
+    GREETING_LENGTH = None
+
+    def __init__(self, host=None, port=None):
         """
-        If *host* is provided, the connection will be established before
-        the constructor returns.
+        If *host* and *port* are provided, the connection will be established
+        before the constructor returns.
 
         .. seealso:: :meth:`open`
         """
@@ -181,29 +204,37 @@ class TS3BaseConnection(object):
     # Networking
     # ------------------------------------------------
 
-    def open(self, host, port=10011,
+    def open(self, host, port=None,
              timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         """
-        Connect to the TS3 Server listening on the address given by the
-        *host* and *port* parmeters. If *timeout* is provided, this is the
-        maximum time in seconds for the connection attempt.
+        Connect to the TS3 query service listening on the address given by the
+        *host* and *port* parameters. If *timeout* is provided, this is the
+        maximum time in seconds for the connection attempt. If no *port* is
+        provided, then the :attr:`DEFAULT_PORT` is used.
 
         :raises OSError:
             If the client is already connected.
         :raises TimeoutError:
             If the connection can not be created.
+
+        .. versionchanged:: 2.0.0
+
+            This method does not consume the greeting anymore::
+
+                b'TS3\n\r'
+                b'Welcome to the [...] on a specific command.\n\r'
         """
+        port = port or self.DEFAULT
+
         if self.is_connected():
              raise OSError("The client is already connected.")
         else:
             self._telnet_conn = telnetlib.Telnet(host, port, timeout)
             self._telnet_queue = list()
 
-            # Wait for the first and the second greeting:
-            # b'TS3\n\r'
-            # b'Welcome to the [...] on a specific command.\n\r'
-            self._telnet_conn.read_until(b"\n\r")
-            self._telnet_conn.read_until(b"\n\r")
+            # Skip the greeting.
+            for i in range(self.GREETING_LENGTH):
+                self._telnet_conn.read_until(b"\n\r")
 
             self._num_pending_queries = 0
             self._event_queue = list()
@@ -388,8 +419,8 @@ class TS3BaseConnection(object):
 
     def send_keepalive(self):
         """
-        Sends an empty query to the server to prevent automatic disconnect.
-        Make sure to call it at least once in 10 minutes.
+        Sends an empty query to the query service in order to prevent automatic
+        disconnect. Make sure to call it at least once in 10 minutes.
         """
         self._telnet_conn.write(b"\n\r")
         return None
@@ -446,19 +477,71 @@ class TS3BaseConnection(object):
         return self._wait_for_resp(timeout=timeout)
 
 
-class TS3Connection(TS3BaseConnection, TS3Commands):
+class TS3ServerConnection(TS3BaseConnection, TS3ServerCommands):
     """
-    TS3 server query client.
+    TS3 Server Query client.
 
     This class provides the command wrapper capabilities
-    :class:`~commands.TS3Commands` and the ability to handle a
+    :class:`~commands.TS3ServerCommands` and the ability to handle a
     connection to a TeamSpeak 3 server of :class:`TS3BaseConnection`.
 
-    >>> with TS3Connection("localhost") as tsconn:
-    ...     # From the TS3Commands class:
+    Use this class to connect to a TS3 Server.
+
+    >>> with TS3ServerConnection("localhost") as tsconn:
+    ...     ts3conn.login("serveradmin", "MyStupidPassword")
+    ...     ts3conn.clientkick(1)
+    """
+
+    #: The default port of the server query service.
+    DEFAULT_SERVER_PORT = 10011
+
+    #: The typical TS3 Server greeting::
+    #:
+    #:      b'TS3\n\r'
+    #:      b'Welcome to the [...] on a specific command.\n\r'
+    GREETING_LENGTH = 2
+
+    def _return_proxy(self, command, common_parameters, unique_parameters,
+                      options):
+        """
+        Executes the command created with a method of TS3Commands directly.
+        """
+        return TS3BaseConnection.send(
+            self, command, common_parameters, unique_parameters, options)
+
+    def quit(self):
+        """
+        Closes the connection.
+        """
+        self.close()
+        return None
+
+
+class TS3ClientConnection(TS3BaseConnection, TS3ClientCommands):
+    """
+    TS3 Client Query client.
+
+    This class provides the command wrapper capabilities
+    :class:`~commands.TS3ClientCommands` and the ability to handle a
+    connection to a TeamSpeak 3 server of :class:`TS3BaseConnection`.
+
+    Use this class if you want to connect to a TS3 Client.
+
+    >>> with TS3ClientConnection("localhost") as tsconn:
     ...     ts3conn.login("serveradmin", "FooBar")
     ...     ts3conn.clientkick(1)
     """
+
+    #: The default port of the server query service.
+    DEFAULT_SERVER_PORT = 10011
+
+    #: The typical TS3 Server greeting::
+    #:
+    #:      b'TS3 Client\n\r'
+    #:      b'Welcome to the TeamSpeak 3 ClientQuery interface [...].\n\r'
+    #:      b'Use the "auth" command to authenticate yourself. [...].\n\r'
+    #:      b'selected schandlerid=1\n\r'
+    GREETING_LENGTH = 4
 
     def _return_proxy(self, command, common_parameters, unique_parameters,
                       options):
