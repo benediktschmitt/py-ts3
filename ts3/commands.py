@@ -21,6 +21,23 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+"""
+Each TS3 query service has its own set of commands. These command sets
+are represented by
+
+*   :class:`TS3Commands`
+    Defines the interface for a command set.
+
+*   :class:`TS3CommonCommands`
+    Contains all commands shared by the Server Query and Client query
+    protocoll.
+
+*   :class:`TS3ServerCommands`
+    Contains the Server Query command set.
+
+*   :class:`TS3ClientCommands`
+    Contains the Client Query command set.
+"""
 
 # Modules
 # ------------------------------------------------
@@ -31,6 +48,7 @@ from collections import OrderedDict
 # ------------------------------------------------
 __all__ = [
     "TS3Commands",
+    "TS3CommonCommands",
     "TS3ServerCommands",
     "TS3ClientCommands"]
 
@@ -85,7 +103,13 @@ class TS3Commands(object):
         return (command, cparameters, uparameters, options)
 
 
-class TS3ServerCommands(TS3Commands):
+class TS3CommonCommands(TS3Commands):
+    """
+    All commands shared by the Server Query and Client Query API.
+    """
+
+
+class TS3ServerCommands(TS3CommonCommands):
     """A convenient interface for all Server Query commands.
 
     .. seealso::
@@ -4196,7 +4220,32 @@ class TS3ServerCommands(TS3Commands):
         return self._return_proxy("whoami", cparams, uparams, options)
 
 
-class TS3ClientCommands(TS3Commands):
+class TS3ClientCommands(TS3CommonCommands):
     """
-    :todo: Implemet this command set.
+    :todo: Implement the full command set.
     """
+
+    def auth(self, *, apikey):
+        """
+        Usage::
+
+            auth apikey={string}
+
+        Authenticates connecting application with API key of user.
+
+        Example::
+
+           auth apikey=AAAA-BBBB-CCCC-DDDD-EEEE
+           error id=0 msg=ok
+
+         Example::
+
+            >>> ts3cmd.auth(apikey="AAAA-BBBB-CCCC-DDDD-EEEE")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["apikey"] = apikey
+        return self._return_proxy("auth", cparams, uparams, options)
