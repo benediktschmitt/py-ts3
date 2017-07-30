@@ -96,7 +96,7 @@ if __name__ == "__main__":
     # USER, PASS, HOST, ...
     from def_param import *
 
-    with ts3.query.TS3Connection(HOST, PORT) as ts3conn:
+    with ts3.query.TS3ServerConnection(HOST, PORT) as ts3conn:
         ts3conn.login(client_login_name=USER, client_login_password=PASS)
         ts3conn.use(sid=SID)
         whirlpool(ts3conn)
