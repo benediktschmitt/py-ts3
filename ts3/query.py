@@ -528,8 +528,8 @@ class TS3ClientConnection(TS3BaseConnection, TS3ClientCommands):
     Use this class if you want to connect to a TS3 Client.
 
     >>> with TS3ClientConnection("localhost") as tsconn:
-    ...     ts3conn.login("serveradmin", "FooBar")
-    ...     ts3conn.clientkick(1)
+    ...     ts3conn.auth(apikey="AAAA-BBBB-CCCC-DDDD-EEEE")
+    ...     ts3conn.use()
     """
 
     #: The default port of the server query service.
