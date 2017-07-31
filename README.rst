@@ -1,11 +1,13 @@
 PyTS3
 =====
 
-This package provides a **Python 3 API** for:
+This package provides a **Python 3 API** for
 
-* TS3 query connections
-* TS3 query events
-* TS3 file transfers
+* TS3 query connections,
+* TS3 query events,
+* TS3 file transfers,
+* the TS3 client query interface,
+* and TS3 client events.
 
 You can find a complete API documentation
 `here <http://py-ts3.readthedocs.org>`_.
@@ -100,7 +102,7 @@ You can find more examples in the ``ts3.examples`` package.
 				msg = "Hi {}".format(client["client_nickname"])
 				ts3conn.clientpoke(clid=client["clid"], msg=msg)
 
-*	Event handling:
+*	Event handling (*Server Query*):
 
 	.. code-block:: python
 
@@ -174,6 +176,26 @@ You can find more examples in the ``ts3.examples`` package.
 			# Download the file into *baz1.png*.
 			with open("baz1.png", "wb") as file:
 				ts3ft.init_download(output_file=file, name="/baz.png", cid=2)
+
+*	Event handling (*Client Query*):
+
+	.. code-block:: python
+
+		#!/usr/bin/python3
+
+		import time
+		import ts3
+
+		with ts3.query.TS3ClientConnection("localhost") as ts3conn:
+			ts3conn.auth(apikey="AAAA-....-EEEE")
+			ts3conn.use()
+
+			# Register for events
+			ts3conn.clientnotifyregister(event="any")
+
+			while True:
+				event = ts3conn.wait_for_event()
+				print(event.parsed)
 
 Bugs
 ----
