@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 #
-# Copyright (c) 2013-2016 Benedikt Schmitt
+# Copyright (c) 2013-2017 Benedikt Schmitt
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -43,7 +43,7 @@ except OSError:
 setup(
     name = "ts3",
     version = __version__,
-    description = "TS3 Server Query API",
+    description = "TS3 Server Query API and TS3 Client Query API",
     long_description = long_description,
     author = "Benedikt Schmitt",
     author_email = "benedikt@benediktschmitt.de",
