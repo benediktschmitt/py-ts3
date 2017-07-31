@@ -537,8 +537,8 @@ class TS3CommonCommands(TS3Commands):
         """
         Usage::
 
-        channelgroupaddperm cgid={groupID} permid={permID} permvalue={permValue}
-        channelgroupaddperm cgid={groupID} permsid={permName} permvalue={permValue}
+            channelgroupaddperm cgid={groupID} permid={permID} permvalue={permValue}
+            channelgroupaddperm cgid={groupID} permsid={permName} permvalue={permValue}
 
         Adds a set of specified permissions to a channel group. Multiple permissions
         can be added by providing the two parameters of each permission. A permission

@@ -55,7 +55,7 @@ You can find more examples in the ``ts3.examples`` package.
 
 		import ts3
 
-		with ts3.query.TS3Connection("localhost") as ts3conn:
+		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
 			# Note, that the client will wait for the response and raise a
 			# **TS3QueryError** if the error id of the response is not 0.
 			try:
@@ -91,7 +91,7 @@ You can find more examples in the ``ts3.examples`` package.
 
 		import ts3
 
-		with ts3.query.TS3Connection("localhost") as ts3conn:
+		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
 			ts3conn.login(
 				client_login_name="serveradmin",
 				client_login_password="FoOBa9"
@@ -111,7 +111,7 @@ You can find more examples in the ``ts3.examples`` package.
 		import time
 		import ts3
 
-		with ts3.query.TS3Connection("localhost") as ts3conn:
+		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
 			ts3conn.login(
 				client_login_name="serveradmin",
 				client_login_password="FoOBa9"
@@ -142,7 +142,7 @@ You can find more examples in the ``ts3.examples`` package.
 		# build a complete channel tree of a virtual server: ChannelTreeNode
 		from ts3.examples.viewer import view
 
-		with ts3.query.TS3Connection("localhost") as ts3conn:
+		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
 			ts3conn.login(
 				client_login_name="serveradmin",
 				client_login_password="FoOBa9"
@@ -157,14 +157,14 @@ You can find more examples in the ``ts3.examples`` package.
 
 		import ts3
 
-		with ts3.query.TS3Connection("localhost") as ts3conn:
+		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
 			ts3conn.login(
 				client_login_name="serveradmin",
 				client_login_password="FoOBa9"
 			)
 
 			# Create a new TS3FileTransfer instance associated with the
-			# TS3Connection.
+			# TS3ServerConnection.
 			ts3ft = ts3.filetransfer.TS3FileTransfer(ts3conn)
 
 			# Upload the image *baz.png* to the channel with the id 2 on the

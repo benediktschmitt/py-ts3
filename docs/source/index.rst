@@ -25,8 +25,9 @@ Indices and tables
 What is PyTS3?
 --------------
 
-It's a small package that contains a Python 3.2+ API for:
+It's a small package that contains a Python 3.2+ API for
 
-   * TS3 query connections
-   * TS3 query events
-   * TS3 file transfers
+   * **TS3 Server Query Events**,
+   * the **TS3 Server Queries API**
+   * the **TS3 File Transfer Interface**,
+   * the **TS3 Client Query API**.

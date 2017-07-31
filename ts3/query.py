@@ -72,7 +72,7 @@ __all__ = [
     "TS3TimeoutError",
     "TS3RecvError",
     "TS3BaseConnection",
-    "TS3ServerConnection"
+    "TS3ServerConnection",
     "TS3ClientConnection"]
 
 _logger = logging.getLogger(__name__)

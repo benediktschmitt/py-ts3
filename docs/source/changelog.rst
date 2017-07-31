@@ -3,6 +3,18 @@
 Changelog
 =========
 
+*   **2.0.0**
+
+    *   **added** Support for the TS3 Client Query API
+
+        https://github.com/benediktschmitt/py-ts3/issues/48
+
+    *   **renamed** :class:`TS3Connection` to :class:`TS3ServerConnection`
+    *   **added** :class:`TS3ClientConnection`
+    *   **renamed** :class:`TS3Commands` to :class:`TS3ServerCommands`
+    *   **added** :class:`TS3ClientCommands`
+    *   **added** *properties* parameter to :meth:`TS3Connection.send`    
+
 *   **1.0.4**
 
     *   **added** fallbackhost parameter to some TS3FileTransfer methods
