@@ -224,7 +224,7 @@ class TS3BaseConnection(object):
                 b'TS3\n\r'
                 b'Welcome to the [...] on a specific command.\n\r'
         """
-        port = port or self.DEFAULT
+        port = port or self.DEFAULT_PORT
 
         if self.is_connected():
              raise OSError("The client is already connected.")
@@ -493,7 +493,7 @@ class TS3ServerConnection(TS3BaseConnection, TS3ServerCommands):
     """
 
     #: The default port of the server query service.
-    DEFAULT_SERVER_PORT = 10011
+    DEFAULT_PORT = 10011
 
     #: The typical TS3 Server greeting::
     #:
@@ -533,7 +533,7 @@ class TS3ClientConnection(TS3BaseConnection, TS3ClientCommands):
     """
 
     #: The default port of the server query service.
-    DEFAULT_SERVER_PORT = 10011
+    DEFAULT_PORT = 25639
 
     #: The typical TS3 Server greeting::
     #:
