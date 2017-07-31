@@ -4328,7 +4328,7 @@ class TS3ClientCommands(TS3CommonCommands):
             >>> ts3cmd.help()
             ...
         """
-        return self._return_proxy("help", OrderedDict(), list(), list())
+        return self._return_proxy("help")
 
     def quit(self):
         """
@@ -4348,7 +4348,7 @@ class TS3ClientCommands(TS3CommonCommands):
             >>> ts3cmd.quit()
             ...
         """
-        return self._return_proxy("quit", OrderedDict(), list(), list())
+        return self._return_proxy("quit")
 
     def use(self, *, schandlerid=None):
         """
@@ -4376,11 +4376,8 @@ class TS3ClientCommands(TS3CommonCommands):
             >>> ts3cmd.use(schandlerid=2)
         """
         cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
         cparams["schandlerid"] = schandlerid
-        return self._return_proxy("auth", cparams, uparams, options)
+        return self._return_proxy("use", cparams)
 
     def auth(self, *, apikey):
         """
@@ -4401,11 +4398,8 @@ class TS3ClientCommands(TS3CommonCommands):
             ...
         """
         cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
         cparams["apikey"] = apikey
-        return self._return_proxy("auth", cparams, uparams, options)
+        return self._return_proxy("auth", cparams)
 
     def channelclientlist(self, *, cid, uid=False, away=False, voice=False,
         groups=False, icon=False, country=False):
@@ -4564,8 +4558,6 @@ class TS3ClientCommands(TS3CommonCommands):
             ...     cid=5,
             ...     properties=["channel_topic", "channel_flag_permanent"]
             ... )
-
-        :todo: Escape the properties correct.
         """
         cparams = OrderedDict()
         uparams = list()
@@ -4711,20 +4703,12 @@ class TS3ClientCommands(TS3CommonCommands):
         options = list()
         return self._return_proxy("clientnotifyunregister", cparams, uparams, options)
 
-    def clientupdate(self):
-        """
-
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("clientupdate", cparams, uparams, options)
-
-    def clientvariable(self, *, client_nickname=None, client_away=None,
-        client_away_message=None, client_input_muted=None,
-        client_output_muted=None, client_input_deactivated=None,
-        client_is_channel_commander=None, client_flag_avatar=None,
-        client_meta_data=None, client_default_token=None
+    def clientupdate(self, *, client_nickname=None, client_away=None,
+            client_away_message=None, client_input_muted=None,
+            client_output_muted=None, client_input_deactivated=None,
+            client_is_channel_commander=None, client_nickname_phonetic=None,
+            client_flag_avatar=None, client_meta_data=None,
+            client_default_token=None
         ):
         """
         Usage::
@@ -4775,76 +4759,316 @@ class TS3ClientCommands(TS3CommonCommands):
         cparams["client_flag_avatar"] = client_flag_avatar
         cparams["client_meta_data"] = client_meta_data
         cparams["client_default_token"] = client_default_token
-        return self._return_proxy("clientvariable", cparams, uparams, options)
+        return self._return_proxy("clientupdate", cparams, uparams, options)
+
+    def clientvariable(self, *, clid, properties=None):
+        """
+        Usage::
+
+            clientvariable ( clid={clientID} properties )...
+
+        Retrieves client variables from the client (no network usage). For each client
+        you can specify one or more properties that should be queried, and this whole
+        block of clientID and properties can be repeated to get information about
+        multiple clients with one call of clientvariable.
+
+        Available properties are::
+
+            client_unique_identifier
+            client_nickname
+            client_input_muted
+            client_output_muted
+            client_outputonly_muted
+            client_input_hardware
+            client_output_hardware
+            client_meta_data
+            client_is_recording
+            client_database_id
+            client_channel_group_id
+            client_servergroups
+            client_away
+            client_away_message
+            client_type
+            client_flag_avatar
+            client_talk_power
+            client_talk_request
+            client_talk_request_msg
+            client_description
+            client_is_talker
+            client_is_priority_speaker
+            client_unread_messages
+            client_nickname_phonetic
+            client_needed_serverquery_view_power
+            client_icon_id
+            client_is_channel_commander
+            client_country
+            client_channel_group_inherited_channel_id
+            client_flag_talking
+            client_is_muted
+            client_volume_modificator
+
+        These properties are always available for yourself, but need to be requested
+        for other clients. Currently you cannot request these variables via
+        clientquery::
+
+            client_version
+            client_platform
+            client_login_name
+            client_created
+            client_lastconnected
+            client_totalconnections
+            client_month_bytes_uploaded
+            client_month_bytes_downloaded
+            client_total_bytes_uploaded
+            client_total_bytes_downloaded
+
+        These properties are available only for yourself:
+        client_input_deactivated
+
+        Example::
+
+            clientvariable clid=4 client_nickname client_input_muted
+            clid=4 client_nickname=ScP client_input_muted=0
+            error id=0 msg=ok
+
+            clientvariable clid=1449 client_country|clid=83 client_country
+            clid=1449 client_country=DE|clid=83 client_country=IT
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientvariable(
+            ...     clid=4, properties=["client_nickname", "client_input_muted"]
+            ... )
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["clid"] = clid
+        return self._return_proxy("clientvariable", cparams, uparams, options, properties)
 
     def currentschandlerid(self):
         """
+        Usage::
 
+            currentschandlerid
+
+        Get server connection handler ID of current server tab.
+
+        Example::
+
+            currentschandlerid
+            schandlerid=1
+            error id=0 msg=ok
+        """
+        return self._return_proxy("currentschandlerid")
+
+    def hashpassword(self, *, password):
+        """
+        Usage::
+
+            hashpassword password={unhashed password}
+
+        returns a passwordhash
+
+        Example::
+
+            hashpassword password=roger
+            passwordhash=phoa3XHa3HQDeuXkTuMHE9uadFE=
+            error id=0 msg=ok
         """
         cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("currentschandlerid", cparams, uparams, options)
-
-    def hashpassword(self):
-        """
-
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("hashpassword", cparams, uparams, options)
+        cparams["password"] = password
+        return self._return_proxy("hashpassword", cparams)
 
     def serverconnectinfo(self):
         """
+        Usage::
 
+            serverconnectinfo
+
+        Get server connection information for the currently selected server connection
+        handler.
+
+        Example::
+
+           serverconnectinfo
+           ip=localhost port=9987 password=secret
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.serverconnectinfo()
+            ...
         """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("serverconnectinfo", cparams, uparams, options)
+        return self._return_proxy("serverconnectinfo")
 
     def serverconnectionhandlerlist(self):
         """
+        Usage::
 
+            serverconnectionhandlerlist
+
+        Displays a list of all currently active server connection handlers.
+
+        Example::
+
+           serverconnectionhandlerlist
+           schandlerid=2|schandlerid=3|schandlerid=4
+           error id=0 msg=ok
+        """
+        return self._return_proxy("serverconnectionhandlerlist")
+
+    def servervariable(self, *, properties):
+        """
+        Usage::
+
+            servervariable properties
+
+        Retrieves server variables from the client (no network usage). You can specify
+        multiple properties that should be queried.
+
+        Available properties are::
+
+            virtualserver_name
+            virtualserver_platform
+            virtualserver_version
+            virtualserver_created
+            virtualserver_codec_encryption_mode
+            virtualserver_default_server_group
+            virtualserver_default_channel_group
+            virtualserver_hostbanner_url
+            virtualserver_hostbanner_gfx_url
+            virtualserver_hostbanner_gfx_interval
+            virtualserver_priority_speaker_dimm_modificator
+            virtualserver_id
+            virtualserver_hostbutton_tooltip
+            virtualserver_hostbutton_url
+            virtualserver_hostbutton_gfx_url
+            virtualserver_name_phonetic
+            virtualserver_icon_id
+            virtualserver_ip
+            virtualserver_ask_for_privilegekey
+            virtualserver_hostbanner_mode
+
+        These properties are available, but need to be requested. Currently
+        you cannot request these variables via clientquery::
+
+            virtualserver_clientsonline
+            virtualserver_channelsonline
+            virtualserver_uptime
+            virtualserver_flag_password
+            virtualserver_default_channel_admin_group
+            virtualserver_max_download_total_bandwidth
+            virtualserver_max_upload_total_bandwidth
+            virtualserver_complain_autoban_count
+            virtualserver_complain_autoban_time
+            virtualserver_complain_remove_time
+            virtualserver_min_clients_in_channel_before_forced_silence
+            virtualserver_antiflood_points_tick_reduce
+            virtualserver_antiflood_points_needed_command_block
+            virtualserver_antiflood_points_needed_ip_block
+            virtualserver_client_connections
+            virtualserver_query_client_connections
+            virtualserver_queryclientsonline
+            virtualserver_download_quota
+            virtualserver_upload_quota
+            virtualserver_month_bytes_downloaded
+            virtualserver_month_bytes_uploaded
+            virtualserver_total_bytes_downloaded
+            virtualserver_total_bytes_uploaded
+            virtualserver_port
+            virtualserver_autostart
+            virtualserver_machine_id
+            virtualserver_needed_identity_security_level
+            virtualserver_log_client
+            virtualserver_log_query
+            virtualserver_log_channel
+            virtualserver_log_permissions
+            virtualserver_log_server
+            virtualserver_log_filetransfer
+            virtualserver_min_client_version
+            virtualserver_reserved_slots
+            virtualserver_total_packetloss_speech
+            virtualserver_total_packetloss_keepalive
+            virtualserver_total_packetloss_control
+            virtualserver_total_packetloss_total
+            virtualserver_total_ping
+            virtualserver_weblist_enabled
+
+        Example::
+
+           servervariable virtualserver_name virtualserver_platform
+           virtualserver_name=TS\s\s\s\s\s3.0. virtualserver_platform=Linux
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.servervariable(properties=[
+            ...     "virtualserver_name", "virtualserver_total_ping"
+            ... ])
+        """
+        return self._return_proxy("servervariable", properties=properties)
+
+    def verifychannelpassword(self, *, cid, password):
+        """
+        Usage::
+
+            verifychannelpassword cid={channelID} password={channelPassword}
+
+        Returns ERROR_ok if the password is correct, or ERROR_channel_invalid_password
+        if it is not.
+
+        Example::
+
+           verifychannelpassword cid=17 password=carrot
+           error id=0 msg=ok
         """
         cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("serverconnectionhandlerlist", cparams, uparams, options)
+        cparams["cid"] = cid
+        cparams["password"] = password
+        return self._return_proxy("verifychannelpassword", cparams)
 
-    def servervariable(self):
+    def verifyserverpassword(self, *, password):
         """
+        Usage::
 
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("servervariable", cparams, uparams, options)
+            verifyserverpassword password={serverPassword}
 
-    def verifychannelpassword(self):
-        """
+        Returns ERROR_ok if the password is correct, or ERROR_server_invalid_password
+        if it is not.
 
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("verifychannelpassword", cparams, uparams, options)
+        Example::
 
-    def verifyserverpassword(self):
-        """
-
+           verifyserverpassword password=carrot
+           error id=0 msg=ok
         """
         cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("verifyserverpassword", cparams, uparams, options)
+        cparams["password"] = password
+        return self._return_proxy("verifyserverpassword", cparams)
 
     def whoami(self):
         """
+        Usage::
 
+            whoami
+
+        Retrieves information about ourself:
+
+        - ClientID (if connected)
+        - ChannelID of the channel we are in (if connected)
+
+        If not connected, an error is returned.
+
+        Example::
+
+            whoami
+            clid=56 cid=1
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.whoami()
         """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("whoami", cparams, uparams, options)
+        return self._return_proxy("whoami")

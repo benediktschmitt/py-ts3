@@ -426,44 +426,51 @@ class TS3BaseConnection(object):
         return None
 
     def send(self, command, common_parameters=None, unique_parameters=None,
-             options=None, timeout=None):
+             options=None, properties=None, timeout=None):
         """
         The general structure of a query command is::
 
             <command> <options> <common parameters> <unique parameters>|<unique parameters>|...
+            <command> <options> <common parameter> <properties>
 
-        Examples are here worth a thousand words:
+        Example::
 
-        >>> # clientaddperm cldbid=16 permid=17276 permvalue=50 permskip=1|permid=21415 permvalue=20 permskip=0
-        >>> ts3conn.send(
-        ...     command = "clientaddperm",
-        ...     common_paramters = {"cldbid": 16},
-        ...     parameterlist = [
-        ...         {"permid": 17276, "permvalue": 50, "permskip": 1},
-        ...         {"permid": 21415, "permvalue": 20, "permskip": 0}
-        ...         ]
-        ...     )
-        >>> # clientlist -uid -away
-        >>> ts3conn.send(
-        ...     command = "clientlist",
-        ...     options = ["uid", "away"]
-        ...     )
+            >>> # clientaddperm cldbid=16 permid=17276 permvalue=50 permskip=1|permid=21415 permvalue=20 permskip=0
+            >>> ts3conn.send(
+            ...     command = "clientaddperm",
+            ...     common_paramters = {"cldbid": 16},
+            ...     parameterlist = [
+            ...         {"permid": 17276, "permvalue": 50, "permskip": 1},
+            ...         {"permid": 21415, "permvalue": 20, "permskip": 0}
+            ...         ]
+            ...     )
+            >>> # clientlist -uid -away
+            >>> ts3conn.send(
+            ...     command = "clientlist",
+            ...     options = ["uid", "away"]
+            ...     )
+
+        .. versionadded:: 2.0.0
+
+            *   The *properties* parameter
 
         .. seealso::
+
             :meth:`recv`, :meth:`wait_for_resp`
         """
         # Escape the command and build the final query command string.
         if not isinstance(command, str):
             raise TypeError("*command* has to be a string.")
 
-        command = command
         common_parameters = TS3Escape.escape_parameters(common_parameters)
         unique_parameters = TS3Escape.escape_parameterlist(unique_parameters)
         options = TS3Escape.escape_options(options)
+        properties = " ".join(properties or [])
 
         query_command = command\
                         + " " + common_parameters\
-                        + " " +  unique_parameters\
+                        + " " + properties\
+                        + " " + unique_parameters\
                         + " " + options \
                         + "\n\r"
         query_command = query_command.encode()
@@ -501,13 +508,16 @@ class TS3ServerConnection(TS3BaseConnection, TS3ServerCommands):
     #:      b'Welcome to the [...] on a specific command.\n\r'
     GREETING_LENGTH = 2
 
-    def _return_proxy(self, command, common_parameters, unique_parameters,
-                      options):
+    def _return_proxy(
+            self, command, common_parameters=None, unique_parameters=None,
+            options=None, properties=None
+        ):
         """
         Executes the command created with a method of TS3Commands directly.
         """
         return TS3BaseConnection.send(
-            self, command, common_parameters, unique_parameters, options)
+            self, command, common_parameters, unique_parameters, options,
+            properties)
 
     def quit(self):
         """
@@ -543,13 +553,16 @@ class TS3ClientConnection(TS3BaseConnection, TS3ClientCommands):
     #:      b'selected schandlerid=1\n\r'
     GREETING_LENGTH = 4
 
-    def _return_proxy(self, command, common_parameters, unique_parameters,
-                      options):
+    def _return_proxy(
+            self, command, common_parameters=None, unique_parameters=None,
+            options=None, properties=None
+        ):
         """
         Executes the command created with a method of TS3Commands directly.
         """
         return TS3BaseConnection.send(
-            self, command, common_parameters, unique_parameters, options)
+            self, command, common_parameters, unique_parameters, options,
+            properties)
 
     def quit(self):
         """

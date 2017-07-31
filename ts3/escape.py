@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 # The MIT License (MIT)
-# 
+#
 # Copyright (c) 2013-2016 Benedikt Schmitt <benedikt@benediktschmitt.de>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
 # the Software without restriction, including without limitation the rights to
 # use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 # the Software, and to permit persons to whom the Software is furnished to do so,
 # subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 # FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -57,7 +57,7 @@ class TS3Escape(object):
 
     @classmethod
     def escape(cls, raw):
-        """        
+        """
         Escapes the value of *raw*.
 
         >>> TS3Escape.escape(None)
@@ -74,7 +74,7 @@ class TS3Escape(object):
 
         :return: The escaped value of *raw*
         :rtype: string
-        
+
         :raises TypeError: If *raw* has an unsupported type.
         """
         if raw is None:
@@ -83,7 +83,7 @@ class TS3Escape(object):
             return "1" if raw else "0"
         elif isinstance(raw, int):
             return str(raw)
-        elif isinstance(raw, str):            
+        elif isinstance(raw, str):
             # The order of the replacement is not trivial.
             for char, repl_char in cls._MAP:
                 raw = raw.replace(char, repl_char)
@@ -117,10 +117,10 @@ class TS3Escape(object):
         """
         Escapes the parameters of a TS3 query and encodes it as a part
         of a valid ts3 query string.
-        
+
         >>> # None
         >>> TS3Escape.escape_parameters(None)
-        ''        
+        ''
         >>> # key -> str
         >>> TS3Escape.escape_parameters({'virtualserver_name': 'foo bar'})
         'virtualserver_name=foo\\\sbar'
@@ -139,11 +139,11 @@ class TS3Escape(object):
         """
         if parameters is None:
             return str()
-        
+
         tmp = list()
         for key, val in parameters.items():
             if val is None:
-                continue            
+                continue
             # Note, that escaping a key will never make it valid or invalid.
             # In other words: It's not necessairy to escape the key.
             key = key.lower()
@@ -157,7 +157,7 @@ class TS3Escape(object):
         """
         Escapes each parameter dictionary in the parameterslist and encodes
         the list as a part of a valid ts3 query string.
-        
+
         >>> TS3Escape.escape_parameterlist(None)
         ''
         >>> TS3Escape.escape_parameterlist(
