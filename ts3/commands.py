@@ -80,7 +80,9 @@ class TS3Commands(object):
         :class:`TS3ClientQueryCommands`
     """
 
-    def _return_proxy(self, command, cparameters, uparameters, options):
+    def _return_proxy(
+        self, command, cparameters=None, uparameters=None, options=None,
+        properties=None):
         """
         Each method ends with::
 
@@ -99,8 +101,11 @@ class TS3Commands(object):
 
         :arg options: The options of the command.
         :type options: None or a list of strings.
+
+        :arg properties: Properties of the command (e.g. *clientvariable*)
+        :type properties: None or a list of strings.
         """
-        return (command, cparameters, uparameters, options)
+        return (command, cparameters, uparameters, options, properties)
 
 
 class TS3CommonCommands(TS3Commands):
