@@ -108,16 +108,6 @@ class TS3CommonCommands(TS3Commands):
     All commands shared by the Server Query and Client Query API.
     """
 
-
-class TS3ServerCommands(TS3CommonCommands):
-    """A convenient interface for all Server Query commands.
-
-    .. seealso::
-
-        The command set for the Client Query Plugin is implemented in the
-        :class:`TS3ClientQueryCommands` class.
-    """
-
     def banadd(self, *, ip=None, name=None, uid=None, time=None, banreason=None):
         """
         Usage::
@@ -183,6 +173,29 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["banreason"] = banreason
         return self._return_proxy("banclient", cparams, uparams, options)
 
+    def bandelall(self):
+        """
+        Usage::
+
+            bandelall
+
+        Deletes all active ban rules from the server.
+
+        Example::
+
+           bandelall
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.bandelall()
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("bandelall", cparams, uparams, options)
+
     def bandel(self, *, banid):
         """
         Usage::
@@ -208,29 +221,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["banid"] = banid
         return self._return_proxy("bandel", cparams, uparams, options)
 
-    def bandelall(self):
-        """
-        Usage::
-
-            bandelall
-
-        Deletes all active ban rules from the server.
-
-        Example::
-
-           bandelall
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.bandelall()
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("bandelall", cparams, uparams, options)
-
     def banlist(self):
         """
         Usage::
@@ -255,31 +245,6 @@ class TS3ServerCommands(TS3CommonCommands):
         uparams = list()
         options = list()
         return self._return_proxy("banlist", cparams, uparams, options)
-
-    def bindinglist(self):
-        """
-        Usage::
-
-            bindinglist
-
-        Displays a list of IP addresses used by the server instance on multi-homed
-        machines.
-
-        Example::
-
-           bindinglist
-           ip=0.0.0.0
-           error id=0 msg=ok
-
-        Example:
-
-            >>> ts3cmd.bindinglist()
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("bindinglist", cparams, uparams, options)
 
     def channeladdperm(self, *, cid, permvalue, permid=None, permsid=None):
         """
@@ -534,32 +499,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams.update(channel_properties)
         return self._return_proxy("channeledit", cparams, uparams, options)
 
-    def channelfind(self, *, pattern=None):
-        """
-        Usage::
-
-            channelfind [pattern={channelName}]
-
-        Displays a list of channels matching a given name pattern.
-
-        Example::
-
-           channelfind pattern=default
-           cid=15 channel_name=Default\sChannel
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.channelfind(pattern="default")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["pattern"] = pattern
-        return self._return_proxy("channelfind", cparams, uparams, options)
-
     def channelgroupadd(self, *, name, type_=None):
         """
         Usage::
@@ -589,13 +528,12 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["type"] = type_
         return self._return_proxy("channelgroupadd", cparams, uparams, options)
 
-    def channelgroupaddperm(self, *, cgid,
-                            permvalue, permid=None, permsid=None):
+    def channelgroupaddperm(self, *, cgid, permvalue, permid=None, permsid=None):
         """
         Usage::
 
-            channelgroupaddperm cgid={groupID} permid={permID} permvalue={permValue}
-            channelgroupaddperm cgid={groupID} permsid={permName} permvalue={permValue}
+        channelgroupaddperm cgid={groupID} permid={permID} permvalue={permValue}
+        channelgroupaddperm cgid={groupID} permsid={permName} permvalue={permValue}
 
         Adds a set of specified permissions to a channel group. Multiple permissions
         can be added by providing the two parameters of each permission. A permission
@@ -603,8 +541,8 @@ class TS3ServerCommands(TS3CommonCommands):
 
         Example::
 
-           channelgroupaddperm cgid=78 permsid=b_icon_manage permvalue=1
-           error id=0 msg=ok
+            channelgroupaddperm cgid=78 permsid=b_icon_manage permvalue=1
+            error id=0 msg=ok
 
         Example::
 
@@ -653,41 +591,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["cldbid"] = cldbid
         cparams["cgid"] = cgid
         return self._return_proxy("channelgroupclientlist", cparams, uparams, options)
-
-    def channelgroupcopy(self, *, scgid, tcgid, name, type_):
-        """
-        Usage::
-
-            channelgroupcopy scgid={sourceGroupID} tcgid={targetGroupID} name={groupName} type={groupDbType}
-
-        Creates a copy of the channel group specified with ssgid. If tsgid is set to 0,
-        the server will create a new group. To overwrite an existing group, simply set
-        tsgid to the ID of a designated target group. If a target group is set, the
-        name parameter will be ignored.
-
-        The type parameter can be used to create ServerQuery and template groups.
-
-        Example::
-
-           channelgroupcopy scgid=4 tcgid=0 name=My\sGroup\s(Copy) type=1
-           cgid=13
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.channelgroupcopy(
-            ...     scgid=4, tcgid=0, name="My Group (Copy)", type_=1)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["scgid"] = scgid
-        cparams["tcgid"] = tcgid
-        cparams["name"] = name
-        cparams["type"] = type_
-        return self._return_proxy("channelgroupcopy", cparams, uparams, options)
 
     def channelgroupdel(self, *, cgid, force):
         """
@@ -803,59 +706,6 @@ class TS3ServerCommands(TS3CommonCommands):
             options.append("permsid")
         return self._return_proxy("channelgrouppermlist", cparams, uparams, options)
 
-    def channelgrouprename(self, *, cgid, name):
-        """
-        Usage::
-
-            channelgrouprename cgid={groupID} name={groupName}
-
-        Changes the name of a specified channel group.
-
-        Example::
-
-           channelgrouprename cgid=13 name=New\sName
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.channelgrouprename(cgid=13, name="New name")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["cgid"] = cgid
-        cparams["name"] = name
-        return self._return_proxy("channelgrouprename", cparams, uparams, options)
-
-    def channelinfo(self, *, cid):
-        """
-        Usage::
-
-            channelinfo cid={channelID}
-
-        Displays detailed configuration information about a channel including ID,
-        topic, description, etc.
-
-        Example::
-
-           channelinfo cid=1
-           channel_name=Default\sChannel channel_topic=No\s[b]topic[\/b]\shere channel_description=Welcome ...
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.channelinfo(cid=1)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["cid"] = cid
-        return self._return_proxy("channelinfo", cparams, uparams, options)
-
     def channellist(self, *, topic=False, flags=False, voice=False,
                     limits=False, icon=False, secondsempty=False):
         """
@@ -907,6 +757,7 @@ class TS3ServerCommands(TS3CommonCommands):
         the new parent.
 
         Example::
+
            channelmove cid=16 cpid=1 order=0
            error id=0 msg=ok
 
@@ -1044,65 +895,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams.update(client_properties)
         return self._return_proxy("clientdbedit", cparams, uparams, options)
 
-    def clientdbfind(self, *, pattern, uid=False):
-        """
-        Usage::
-
-            clientdbfind pattern={clientName|clientUID} [-uid]
-
-        Displays a list of client database IDs matching a given pattern. You can either
-        search for a clients last known nickname or his unique identity by using the
-        -uid option.
-
-        Example::
-
-           clientdbfind pattern=sven
-           cldbid=56
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.clientdbfind("sven")
-            ...
-            >>> ts3cmd.clientdbfind("sven", uid=True)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["pattern"] = pattern
-
-        if uid:
-            options.append("uid")
-        return self._return_proxy("clientdbfind", cparams, uparams, options)
-
-    def clientdbinfo(self, *, cldbid):
-        """
-        Usage::
-
-            clientdbinfo cldbid={clientDBID}
-
-        Displays detailed database information about a client including unique ID, creation date, etc.
-
-        Example::
-
-            clientdbinfo cldbid=2
-            client_unique_identifier=5rRxyxEjd+Kk/MvPRfqZdSI0teA= client_nickname=dante696 client_database_id=2 client_created=1279002103 ...
-            error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.clientdbinfo(cldbid=2)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("clientdbinfo", cparams, uparams, options)
-
     def clientdblist(self, *, start=None, duration=None, count=False):
         """
         Usage::
@@ -1168,77 +960,6 @@ class TS3ServerCommands(TS3CommonCommands):
         uparams[0]["permid"] = permid
         uparams[0]["permsid"] = permsid
         return self._return_proxy("clientdelperm", cparams, uparams, options)
-
-    def clientedit(self, *, clid, **client_properties):
-        """
-        Usage::
-
-            clientedit clid={clientID} [client_properties...]
-
-        Changes a clients settings using given properties.
-
-        Example::
-
-           clientedit clid=10 client_description=Best\sguy\sever!
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.clientedit(clid=10, client_description="Best guy ever!")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["clid"] = clid
-        cparams.update(client_properties)
-        return self._return_proxy("clientedit", cparams, uparams, options)
-
-    def clientfind(self, *, pattern):
-        """
-        Usage::
-
-            clientfind pattern={clientName}
-
-        Displays a list of clients matching a given name pattern.
-
-        Example::
-
-           clientfind pattern=sven
-           clid=7 client_nickname=Sven
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.clientfind(pattern="sven")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["pattern"] = pattern
-        return self._return_proxy("clientfind", cparams, uparams, options)
-
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
-    ###########################################################################
 
     def clientgetdbidfromuid(self, *, cluid):
         """
@@ -1373,34 +1094,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["clid"] = clid
         return self._return_proxy("clientgetuidfromclid", cparams, uparams, options)
 
-    def clientinfo(self, *, clid):
-        """
-        Usage::
-
-            clientinfo clid={clientID}
-
-        Displays detailed configuration information about a client including unique ID,
-        nickname, client version, etc.
-
-        Example::
-
-           clientinfo clid=6
-           client_unique_identifier=P5H2hrN6+gpQI4n\/dXp3p17vtY0= client_nickname=Rabe
-           client_version=3.0.0-alpha24\s[Build:\s8785]...
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.clientinfo(clid=6)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["clid"] = clid
-        return self._return_proxy("clientinfo", cparams, uparams, options)
-
     def clientkick(self, *, clid, reasonid, reasonmsg=None):
         """
         Usage::
@@ -1413,8 +1106,9 @@ class TS3ServerCommands(TS3CommonCommands):
         and may only have a maximum of 40 characters.
 
         Available reasonid values are:
-            * 4: Kick the client from his current channel into the default channel
-            * 5: Kick the client from the server
+
+        * 4: Kick the client from his current channel into the default channel
+        * 5: Kick the client from the server
 
         Example::
 
@@ -1527,6 +1221,7 @@ class TS3ServerCommands(TS3CommonCommands):
         Displays a list of permissions defined for a client.
 
         Example::
+
            clientpermlist cldbid=2
            cldbid=2 permid=4353 permvalue=1 permnegated=0 permskip=0|permid=17276...
            error id=0 msg=ok
@@ -1572,58 +1267,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["clid"] = clid
         return self._return_proxy("clientpoke", cparams, uparams, options)
 
-    def clientsetserverquerylogin(self, *, client_login_name):
-        """
-        Usage::
-
-            clientsetserverquerylogin client_login_name={username}
-
-        Updates your own ServerQuery login credentials using a specified username. The
-        password will be auto-generated.
-
-        Example::
-
-           clientsetserverquerylogin client_login_name=admin
-           client_login_password=+r\/TQqvR
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.clientsetserverquerylogin(client_login_name="admin")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["client_login_name"] = client_login_name
-        return self._return_proxy("clientsetserverquerylogin", cparams, uparams, options)
-
-    def clientupdate(self, **client_properties):
-        """
-        Usage::
-
-            clientupdate [client_properties...]
-
-        Change your ServerQuery clients settings using given properties.
-
-        Example::
-
-           clientupdate client_nickname=ScP\s(query)
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.clientupdate(client_nickname="ScP (query)")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams.update(client_properties)
-        return self._return_proxy("clientupdate", cparams, uparams, options)
-
     def complainadd(self, *, tcldbid, message):
         """
         Usage::
@@ -1649,6 +1292,32 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["tcldbid"] = tcldbid
         cparams["message"] = message
         return self._return_proxy("complainadd", cparams, uparams, options)
+
+    def complaindelall(self, *, tcldbid):
+        """
+        Usage::
+
+            complaindelall tcldbid={targetClientDBID}
+
+        Deletes all complaints about the client with database ID tcldbid from
+        the server.
+
+        Example::
+
+           complaindelall tcldbid=3
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.complaindelall(tcldbid=3)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["tcldbid"] = tcldbid
+        return self._return_proxy("complaindelall", cparams, uparams, options)
 
     def complaindel(self, *, tcldbid, fcldbid):
         """
@@ -1677,32 +1346,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["fcldbid"] = fcldbid
         return self._return_proxy("complaindel", cparams, uparams, options)
 
-    def complaindelall(self, *, tcldbid):
-        """
-        Usage::
-
-            complaindelall tcldbid={targetClientDBID}
-
-        Deletes all complaints about the client with database ID tcldbid from
-        the server.
-
-        Example::
-
-           complaindelall tcldbid=3
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.complaindelall(tcldbid=3)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["tcldbid"] = tcldbid
-        return self._return_proxy("complaindelall", cparams, uparams, options)
-
     def complainlist(self, *, tcldbid=None):
         """
         Usage::
@@ -1729,60 +1372,6 @@ class TS3ServerCommands(TS3CommonCommands):
 
         cparams["tcldbid"] = tcldbid
         return self._return_proxy("complainlist", cparams, uparams, options)
-
-    def custominfo(self, *, cldbid):
-        """
-        Usage::
-
-            custominfo cldbid={clientDBID}
-
-        Displays a list of custom properties for the client specified with cldbid.
-
-        Example::
-
-           custominfo cldbid=3
-           cldbid=3 ident=forum_account value=ScP|ident=forum_id value=123
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.custominfo(cldbid=3)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("custominfo", cparams, uparams, options)
-
-    def customsearch(self, *, ident, pattern):
-        """
-        Usage::
-
-            customsearch ident={ident} pattern={pattern}
-
-        Searches for custom client properties specified by ident and value. The value
-        parameter can include regular characters and SQL wildcard characters (e.g. %).
-
-        Example::
-
-           customsearch ident=forum_account pattern=%ScP%
-           cldbid=2 ident=forum_account value=ScP
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.customsearch(ident="forum_account", pattern="%ScP")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["ident"] = ident
-        cparams["pattern"] = pattern
-        return self._return_proxy("customsearch", cparams, uparams, options)
 
     def ftcreatedir(self, *, cid, dirname, cpw=None):
         """
@@ -2067,6 +1656,1096 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["serverftfid"] = serverftfid
         cparams["delete"] = delete
         return self._return_proxy("ftstop", cparams, uparams, options)
+
+    def messageadd(self, *, cluid, subject, message):
+        """
+        Usage::
+
+            messageadd cluid={clientUID} subject={subject} message={text}
+
+        Sends an offline message to the client specified by cluid.
+
+        Example::
+
+           messageadd cluid=oHhi9WzXLNEFQOwAu4JYKGU+C+c= subject=Hi! message=Hello?!?
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.messageadd(
+            ...     cluid="oHhi9WzXLNEFQOwAu4JYKGU+C+c=", subject="Hi!",
+            ...     message="Hello?!?")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cluid"] = cluid
+        cparams["subject"] = subject
+        cparams["message"] = message
+        return self._return_proxy("messageadd", cparams, uparams, options)
+
+    def messagedel(self, *, msgid):
+        """
+        Usage::
+
+            messagedel msgid={messageID}
+
+        Deletes an existing offline message with ID msgid from your inbox.
+
+        Example::
+
+           messagedel msgid=4
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.messagedel(msgid=4)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["msgid"] = msgid
+        return self._return_proxy("messagedel", cparams, uparams, options)
+
+    def messageget(self, *, msgid):
+        """
+        Usage::
+
+            messageget msgid={messageID}
+
+        Displays an existing offline message with ID msgid from your inbox. Please note
+        that this does not automatically set the flag_read property of the message.
+
+        Example::
+
+           messageget msgid=4
+           msgid=4 cluid=xwEzb5ENOaglVHu9oelK++reUyE= subject=Hi! message=Hello?!?
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.messageget(msgid=4)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["msgid"] = msgid
+        return self._return_proxy("messageget", cparams, uparams, options)
+
+    def messagelist(self):
+        """
+        Usage::
+
+            messagelist
+
+        Displays a list of offline messages you've received. The output contains the
+        senders unique identifier, the messages subject, etc.
+
+        Example::
+
+           messagelist
+           msgid=4 cluid=xwEzb5ENOaglVHu9oelK++reUyE= subject=Test flag_read=0...
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.messagelist()
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("messagelist", cparams, uparams, options)
+
+    def messageupdateflag(self, *, msgid, flag):
+        """
+        Usage::
+
+            messageupdateflag msgid={messageID} flag={1|0}
+
+        Updates the flag_read property of the offline message specified with msgid. If
+        flag is set to 1, the message will be marked as read.
+
+        Example::
+
+           messageupdateflag msgid=4 flag=1
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.messageupdateflag(msgid=4, flag=1)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["msgid"] = msgid
+        cparams["flag"] = flag
+        return self._return_proxy("messageupdateflag", cparams, uparams, options)
+
+    def permoverview(self, *, cid, cldbid, permid):
+        """
+        Usage::
+
+            permoverview cid={channelID} cldbid={clientDBID} permid={permID}
+
+        Displays all permissions assigned to a client for the channel specified with
+        cid. If permid is set to 0, all permissions will be displayed. The output
+        follows the following format:
+
+            t={permType} id1={id1} id2={id2} p={permID} v={permValue} n={permNegated}
+            s={permSkip}|t={permType} id1={id1} id2={id2} p={permID} v={permValue}
+            n={permNegated} s={permSkip}|...
+
+        The possible values for t, id1 and id2 are:
+
+            0: Server Group;    => id1={serverGroupID}, id2=0
+            1: Global Client;   => id1={clientDBID},    id2=0
+            2: Channel;         => id1={channelID},     id2=0
+            3: Channel Group;   => id1={channelID},     id2={channelGroupID}
+            4: Channel Client;  => id1={channelID},     id2={clientDBID}
+
+        Example::
+
+           permoverview cldbid=57 cid=74 permid=0
+           t=0 id1=5 id2=0 p=37 v=1 n=0 s=0|t=0 id1=5 id2=0 p=38 v=1 n=0 s=0|...
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.permoverview(cldbid=57, cid=74, permid=0)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cid"] = cid
+        cparams["cldbid"] = cldbid
+        cparams["permid"] = permid
+        return self._return_proxy("permoverview", cparams, uparams, options)
+
+    def sendtextmessage(self, *, targetmode, target, msg):
+        """
+        Usage::
+
+            sendtextmessage targetmode={1-3}
+                            target={serverID|channelID|clientID} msg={text}
+
+        Sends a text message a specified target. The type of the target is determined
+        by targetmode while target specifies the ID of the recipient, whether it be a
+        virtual server, a channel or a client.
+
+        Example::
+
+           sendtextmessage targetmode=2 target=1 msg=Hello\sWorld!
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.sendtextmessage(
+            ...     targetmode=2, target=1, msg="Hello World!")
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["targetmode"] = targetmode
+        cparams["target"] = target
+        cparams["msg"] = msg
+        return self._return_proxy("sendtextmessage", cparams, uparams, options)
+
+    def servergroupaddclient(self, *, sgid, cldbid):
+        """
+        Usage::
+
+            servergroupaddclient sgid={groupID} cldbid={clientDBID}
+
+        Adds a client to the server group specified with sgid. Please note that a
+        client cannot be added to default groups or template groups.
+
+        Example::
+
+           servergroupaddclient sgid=16 cldbid=3
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.servergroupaddclient(sgid=16, cldbid=3)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["sgid"] = sgid
+        cparams["cldbid"] = cldbid
+        return self._return_proxy("servergroupaddclient", cparams, uparams, options)
+
+    def servergroupadd(self, *, name, type_=None):
+        """
+        Usage::
+
+            servergroupadd name={groupName} [type={groupDbType}]
+
+        Creates a new server group using the name specified with name and displays
+        its ID. The optional type parameter can be used to create ServerQuery groups
+        and template groups.
+
+        Example::
+
+           servergroupadd name=Server\sAdmin
+           sgid=13
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.servergroupadd(name="Server Admin")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["name"] = name
+        cparams["type"] = type_
+        return self._return_proxy("servergroupadd", cparams, uparams, options)
+
+    def servergroupaddperm(self, *, sgid, permnegated, permskip,
+                           permid=None, permsid=None, permvalue=None):
+        """
+        Usage::
+
+            servergroupaddperm sgid={groupID} permid={permID}
+                               permvalue={permValue} permnegated={1|0}
+                               permskip={1|0}|...
+            servergroupaddperm sgid={groupID} permsid={permName}
+                               permvalue={permValue} permnegated={1|0}
+                               permskip={1|0}|...
+
+        Adds a set of specified permissions to the server group specified with sgid.
+        Multiple permissions can be added by providing the four parameters of each
+        permission. A permission can be specified by permid or permsid.
+
+        Example::
+
+           servergroupaddperm sgid=13 permid=8470 permvalue=1 permnegated=0
+            permskip=0|permid=8475 permvalue=0 permnegated=1 permskip=0
+           error id=0 msg=ok
+
+           servergroupaddperm sgid=13 permsid=i_icon_id permvalue=123
+            permnegated=0 permskip=0|permsid=b_virtualserver_stop permvalue=0
+            permnegated=1 permskip=0
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.servergroupaddperm(
+            ...     sgid=13, permid=8470, permvalue=1, permnegated=0,
+            ...     permskip=0)
+            ...
+            >>> ts3cmd.servergroupaddperm(
+            ...     sgid=13, permsid="i_icon_id", permvalue=123, permnegated=0,
+            ...     permskip=0)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        uparams.append(OrderedDict())
+        uparams[0]["sgid"] = sgid
+        uparams[0]["permid"] = permid
+        uparams[0]["permsid"] = permsid
+        uparams[0]["permvalue"] = permvalue
+        uparams[0]["permnegated"] = permnegated
+        uparams[0]["permskip"] = permskip
+        return self._return_proxy("servergroupaddperm", cparams, uparams, options)
+
+    def servergroupclientlist(self, *, sgid, names=False):
+        """
+        Usage::
+
+            servergroupclientlist sgid={groupID} [-names]
+
+        Displays the IDs of all clients currently residing in the server group
+        specified with sgid. If you're using the -names option, the output will
+        also contain the last known nickname and the unique identifier of the
+        clients.
+
+        Example::
+
+           servergroupclientlist sgid=16
+           cldbid=7|cldbid=8|cldbid=9|cldbid=11|cldbid=13|cldbid=16|cldbid=18|...
+           error id=0 msg=ok
+
+           servergroupclientlist sgid=8 -names
+           cldbid=4 client_nickname=ScP client_unique_identifier=FPMPSC6MXqXq7...
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.servergroupclientlist(sgid=16)
+            ...
+            >>> ts3cmd.servergroupclientlist(sgid=8, names=True)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["sgid"] = sgid
+
+        if names:
+            options.append("names")
+        return self._return_proxy("servergroupclientlist", cparams, uparams, options)
+
+    def servergroupdelclient(self, *, sgid, cldbid):
+        """
+        Usage::
+
+            servergroupdelclient sgid={groupID} cldbid={clientDBID}
+
+        Removes a client from the server group specified with sgid.
+
+        Example::
+
+           servergroupdelclient sgid=16 cldbid=3
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.servergroupdelclient(sgid=16, cldbid=3)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["sgid"] = sgid
+        cparams["cldbid"] = cldbid
+        return self._return_proxy("servergroupdelclient", cparams, uparams, options)
+
+    def servergroupdel(self, *, sgid, force=False):
+        """
+        Usage::
+
+            servergroupdel sgid={groupID} force={1|0}
+
+        Deletes the server group specified with sgid. If force is set to 1, the server
+        group will be deleted even if there are clients within.
+
+        Example::
+
+           servergroupdel sgid=13
+           error id=0 msg=ok
+
+           servergroupdel sgid=14 force=1
+           error id=0 msg=ok
+
+        Examples::
+
+            >>> ts3cmd.servergroupdel(sgid=13)
+            ...
+            >>> ts3cmd.servergroupdel(sgid=14, force=True)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["sgid"] = sgid
+        cparams["force"] = force
+        return self._return_proxy("servergroupdel", cparams, uparams, options)
+
+    def servergroupdelperm(self, *, sgid, permid=None, permsid=None):
+        """
+        Usage::
+
+            servergroupdelperm sgid={groupID} permid={permID}|permid={permID}
+            servergroupdelperm sgid={groupID} permsid={permName}
+
+        Removes a set of specified permissions from the server group specified with
+        sgid. Multiple permissions can be removed at once. A permission can be
+        specified by permid or permsid.
+
+        Examples::
+
+           servergroupdelperm sgid=16 permid=8470|permid=8475
+           error id=0 msg=ok
+
+           servergroupdelperm sgid=16 permsid=i_channel_join_power
+           error id=0 msg=ok
+
+        Examples::
+
+            >>> ts3cmd.servergroupdelperm(sgid=16, permid=8470)
+            ...
+            >>> ts3cmd.servergroupdelperm(sgid=16, permid=8475)
+            ...
+            >>> ts3cmd.servergroupdelperm(
+            ...     sgid=16, permsid="i_channel_join_power")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["sgid"] = sgid
+
+        uparams.append(OrderedDict())
+        uparams[0]["permid"] = permid
+        uparams[0]["permsid"] = permsid
+        return self._return_proxy("servergroupdelperm", cparams, uparams, options)
+
+    def servergrouplist(self):
+        """
+        Usage::
+
+            servergrouplist
+
+        Displays a list of server groups available. Depending on your permissions, the
+        output may also contain global ServerQuery groups and template groups.
+
+        Example::
+
+           servergrouplist
+           sgid=9 name=Server\sAdmin type=1 iconid=300 savedb=1|sgid=10 name=Normal t...
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.servergrouplist()
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("servergrouplist", cparams, uparams, options)
+
+    def servergrouppermlist(self, *, sgid, permsid=False):
+        """
+        Usage::
+
+            servergrouppermlist sgid={groupID} [-permsid]
+
+        Displays a list of permissions assigned to the server group specified with sgid.
+        The optional -permsid parameter can be used to get the permission names instead
+        of their internal ID.
+
+        Example::
+
+           servergrouppermlist sgid=13
+           permid=8470 permvalue=1 permnegated=0 permskip=0|permid=8475 permvalue=1|...
+           error id=0 msg=ok
+
+           servergrouppermlist sgid=14 -permsid
+           permsid=b_virtualserver_info_view permvalue=1 permnegated=0 permskip=0|...
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.servergrouppermlist(sgid=13)
+            ...
+            >>> ts3cmd.servergrouppermlist(sgid=14, permsid=True)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["sgid"] = sgid
+
+        if permsid:
+            options.append("permsid")
+        return self._return_proxy("servergrouppermlist", cparams, uparams, options)
+
+    def servergroupsbyclientid(self, *, cldbid):
+        """
+        Usage::
+
+            servergroupsbyclientid cldbid={clientDBID}
+
+        Displays all server groups the client specified with cldbid is currently
+        residing in.
+
+        Example::
+
+           servergroupsbyclientid cldbid=18
+           name=Server\sAdmin sgid=6 cldbid=18
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.servergroupsbyclientid(cldbid=18)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cldbid"] = cldbid
+        return self._return_proxy("servergroupsbyclientid", cparams, uparams, options)
+
+    def setclientchannelgroup(self, *, cgid, cid, cldbid):
+        """
+        Usage::
+
+            setclientchannelgroup cgid={groupID} cid={channelID} cldbid={clientDBID}
+
+        Sets the channel group of a client to the ID specified with cgid.
+
+        Example::
+
+           setclientchannelgroup cgid=13 cid=15 cldbid=20
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.setclientchannelgroup(cgid=13, cid=15, cldbid=20)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cgid"] = cgid
+        cparams["cid"] = cid
+        cparams["cldbid"] = cldbid
+        return self._return_proxy("setclientchannelgroup", cparams, uparams, options)
+
+    def tokenadd(self, *, tokentype, tokenid1, tokenid2, tokendescription=None,
+                 tokencustomset=None):
+        """
+        Usage::
+
+            tokenadd tokentype={1|0} tokenid1={groupID} tokenid2={channelID}
+                     [tokendescription={description}]
+                     [tokencustomset={customFieldSet}]
+
+        Create a new token. If tokentype is set to 0, the ID specified with tokenid1
+        will be a server group ID. Otherwise, tokenid1 is used as a channel group ID
+        and you need to provide a valid channel ID using tokenid2.
+
+        The tokencustomset parameter allows you to specify a set of custom client
+        properties. This feature can be used when generating tokens to combine a
+        website account database with a TeamSpeak user. The syntax of the value
+        needs to be escaped using the ServerQuery escape patterns and has to follow
+        the general syntax of:
+
+        ident=ident1 value=value1|ident=ident2 value=value2|ident=ident3 value=value3
+
+        Example::
+
+           tokenadd tokentype=0 tokenid1=6 tokenid2=0 tokendescription=Test
+            tokencustomset=ident=forum_user\svalue=ScP\pident=forum_id\svalue=123
+           token=eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.tokenadd(
+            ...     tokentype=0, tokenid1=6, tokenid2=0,
+            ...     tokendescription="Test",
+            ...     tokencustomset="ident=forum_user\svalue=ScP\pident=forum_id\svalue=123"
+            ...     )
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["tokentype"] = tokentype
+        cparams["tokenid1"] = tokenid1
+        cparams["tokenid2"] = tokenid2
+        cparams["tokendescription"] = tokendescription
+        cparams["tokencustomset"] = tokencustomset
+        return self._return_proxy("tokenadd", cparams, uparams, options)
+
+    def tokendelete(self, *, token):
+        """
+        Usage::
+
+            tokendelete token={tokenKey}
+
+        Deletes an existing token matching the token key specified with token.
+
+        Example::
+
+           tokendelete token=eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.tokendelete(
+            ...     token="eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["token"] = token
+        return self._return_proxy("tokendelete", cparams, uparams, options)
+
+    def tokenlist(self):
+        """
+        Usage::
+
+            tokenlist
+
+        Displays a list of tokens available including their type and group IDs. Tokens
+        can be used to gain access to specified server or channel groups.
+
+        A token is similar to a client with administrator privileges that adds you to
+        a certain permission group, but without the necessity of a such a client with
+        administrator privileges to actually exist. It is a long (random looking)
+        string that can be used as a ticket into a specific server group.
+
+        Example::
+
+           tokenlist
+           token=88CVUg\/zkujt+y+WfHdko79UcM4R6uyCL6nEfy3B token_type=0 token_id1=9...
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.tokenlist()
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("tokenlist", cparams, uparams, options)
+
+    def tokenuse(self, *, token):
+        """
+        Usage::
+
+            tokenuse token={tokenKey}
+
+        Use a token key gain access to a server or channel group. Please note
+        that the server will automatically delete the token after it has been
+        used.
+
+        Example::
+
+           tokenuse token=eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.tokenuse(
+            ...     token="eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["token"] = token
+        return self._return_proxy("tokenuse", cparams, uparams, options)
+
+
+class TS3ServerCommands(TS3CommonCommands):
+    """A convenient interface for all Server Query commands.
+
+    .. seealso::
+
+        The command set for the Client Query Plugin is implemented in the
+        :class:`TS3ClientCommands` class.
+    """
+
+    def bindinglist(self):
+        """
+        Usage::
+
+            bindinglist
+
+        Displays a list of IP addresses used by the server instance on multi-homed
+        machines.
+
+        Example::
+
+           bindinglist
+           ip=0.0.0.0
+           error id=0 msg=ok
+
+        Example:
+
+            >>> ts3cmd.bindinglist()
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("bindinglist", cparams, uparams, options)
+
+    def channelfind(self, *, pattern=None):
+        """
+        Usage::
+
+            channelfind [pattern={channelName}]
+
+        Displays a list of channels matching a given name pattern.
+
+        Example::
+
+           channelfind pattern=default
+           cid=15 channel_name=Default\sChannel
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.channelfind(pattern="default")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["pattern"] = pattern
+        return self._return_proxy("channelfind", cparams, uparams, options)
+
+    def channelgroupcopy(self, *, scgid, tcgid, name, type_):
+        """
+        Usage::
+
+            channelgroupcopy scgid={sourceGroupID} tcgid={targetGroupID} name={groupName} type={groupDbType}
+
+        Creates a copy of the channel group specified with ssgid. If tsgid is set to 0,
+        the server will create a new group. To overwrite an existing group, simply set
+        tsgid to the ID of a designated target group. If a target group is set, the
+        name parameter will be ignored.
+
+        The type parameter can be used to create ServerQuery and template groups.
+
+        Example::
+
+           channelgroupcopy scgid=4 tcgid=0 name=My\sGroup\s(Copy) type=1
+           cgid=13
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.channelgroupcopy(
+            ...     scgid=4, tcgid=0, name="My Group (Copy)", type_=1)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["scgid"] = scgid
+        cparams["tcgid"] = tcgid
+        cparams["name"] = name
+        cparams["type"] = type_
+        return self._return_proxy("channelgroupcopy", cparams, uparams, options)
+
+    def channelgrouprename(self, *, cgid, name):
+        """
+        Usage::
+
+            channelgrouprename cgid={groupID} name={groupName}
+
+        Changes the name of a specified channel group.
+
+        Example::
+
+           channelgrouprename cgid=13 name=New\sName
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.channelgrouprename(cgid=13, name="New name")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cgid"] = cgid
+        cparams["name"] = name
+        return self._return_proxy("channelgrouprename", cparams, uparams, options)
+
+    def channelinfo(self, *, cid):
+        """
+        Usage::
+
+            channelinfo cid={channelID}
+
+        Displays detailed configuration information about a channel including ID,
+        topic, description, etc.
+
+        Example::
+
+           channelinfo cid=1
+           channel_name=Default\sChannel channel_topic=No\s[b]topic[\/b]\shere channel_description=Welcome ...
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.channelinfo(cid=1)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cid"] = cid
+        return self._return_proxy("channelinfo", cparams, uparams, options)
+
+    def clientdbfind(self, *, pattern, uid=False):
+        """
+        Usage::
+
+            clientdbfind pattern={clientName|clientUID} [-uid]
+
+        Displays a list of client database IDs matching a given pattern. You can either
+        search for a clients last known nickname or his unique identity by using the
+        -uid option.
+
+        Example::
+
+           clientdbfind pattern=sven
+           cldbid=56
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientdbfind("sven")
+            ...
+            >>> ts3cmd.clientdbfind("sven", uid=True)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["pattern"] = pattern
+
+        if uid:
+            options.append("uid")
+        return self._return_proxy("clientdbfind", cparams, uparams, options)
+
+    def clientdbinfo(self, *, cldbid):
+        """
+        Usage::
+
+            clientdbinfo cldbid={clientDBID}
+
+        Displays detailed database information about a client including unique ID, creation date, etc.
+
+        Example::
+
+            clientdbinfo cldbid=2
+            client_unique_identifier=5rRxyxEjd+Kk/MvPRfqZdSI0teA= client_nickname=dante696 client_database_id=2 client_created=1279002103 ...
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientdbinfo(cldbid=2)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cldbid"] = cldbid
+        return self._return_proxy("clientdbinfo", cparams, uparams, options)
+
+    def clientedit(self, *, clid, **client_properties):
+        """
+        Usage::
+
+            clientedit clid={clientID} [client_properties...]
+
+        Changes a clients settings using given properties.
+
+        Example::
+
+           clientedit clid=10 client_description=Best\sguy\sever!
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientedit(clid=10, client_description="Best guy ever!")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["clid"] = clid
+        cparams.update(client_properties)
+        return self._return_proxy("clientedit", cparams, uparams, options)
+
+    def clientfind(self, *, pattern):
+        """
+        Usage::
+
+            clientfind pattern={clientName}
+
+        Displays a list of clients matching a given name pattern.
+
+        Example::
+
+           clientfind pattern=sven
+           clid=7 client_nickname=Sven
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientfind(pattern="sven")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["pattern"] = pattern
+        return self._return_proxy("clientfind", cparams, uparams, options)
+
+    def clientinfo(self, *, clid):
+        """
+        Usage::
+
+            clientinfo clid={clientID}
+
+        Displays detailed configuration information about a client including unique ID,
+        nickname, client version, etc.
+
+        Example::
+
+           clientinfo clid=6
+           client_unique_identifier=P5H2hrN6+gpQI4n\/dXp3p17vtY0= client_nickname=Rabe
+           client_version=3.0.0-alpha24\s[Build:\s8785]...
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientinfo(clid=6)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["clid"] = clid
+        return self._return_proxy("clientinfo", cparams, uparams, options)
+
+    def clientsetserverquerylogin(self, *, client_login_name):
+        """
+        Usage::
+
+            clientsetserverquerylogin client_login_name={username}
+
+        Updates your own ServerQuery login credentials using a specified username. The
+        password will be auto-generated.
+
+        Example::
+
+           clientsetserverquerylogin client_login_name=admin
+           client_login_password=+r\/TQqvR
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientsetserverquerylogin(client_login_name="admin")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["client_login_name"] = client_login_name
+        return self._return_proxy("clientsetserverquerylogin", cparams, uparams, options)
+
+    def clientupdate(self, **client_properties):
+        """
+        Usage::
+
+            clientupdate [client_properties...]
+
+        Change your ServerQuery clients settings using given properties.
+
+        Example::
+
+           clientupdate client_nickname=ScP\s(query)
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientupdate(client_nickname="ScP (query)")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams.update(client_properties)
+        return self._return_proxy("clientupdate", cparams, uparams, options)
+
+    def custominfo(self, *, cldbid):
+        """
+        Usage::
+
+            custominfo cldbid={clientDBID}
+
+        Displays a list of custom properties for the client specified with cldbid.
+
+        Example::
+
+           custominfo cldbid=3
+           cldbid=3 ident=forum_account value=ScP|ident=forum_id value=123
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.custominfo(cldbid=3)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cldbid"] = cldbid
+        return self._return_proxy("custominfo", cparams, uparams, options)
+
+    def customsearch(self, *, ident, pattern):
+        """
+        Usage::
+
+            customsearch ident={ident} pattern={pattern}
+
+        Searches for custom client properties specified by ident and value. The value
+        parameter can include regular characters and SQL wildcard characters (e.g. %).
+
+        Example::
+
+           customsearch ident=forum_account pattern=%ScP%
+           cldbid=2 ident=forum_account value=ScP
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.customsearch(ident="forum_account", pattern="%ScP")
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["ident"] = ident
+        cparams["pattern"] = pattern
+        return self._return_proxy("customsearch", cparams, uparams, options)
 
     def gm(self, *, msg):
         """
@@ -2446,139 +3125,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["begin_pos"] = begin_pos
         return self._return_proxy("logview", cparams, uparams, options)
 
-    def messageadd(self, *, cluid, subject, message):
-        """
-        Usage::
-
-            messageadd cluid={clientUID} subject={subject} message={text}
-
-        Sends an offline message to the client specified by cluid.
-
-        Example::
-
-           messageadd cluid=oHhi9WzXLNEFQOwAu4JYKGU+C+c= subject=Hi! message=Hello?!?
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.messageadd(
-            ...     cluid="oHhi9WzXLNEFQOwAu4JYKGU+C+c=", subject="Hi!",
-            ...     message="Hello?!?")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["cluid"] = cluid
-        cparams["subject"] = subject
-        cparams["message"] = message
-        return self._return_proxy("messageadd", cparams, uparams, options)
-
-    def messagedel(self, *, msgid):
-        """
-        Usage::
-
-            messagedel msgid={messageID}
-
-        Deletes an existing offline message with ID msgid from your inbox.
-
-        Example::
-
-           messagedel msgid=4
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.messagedel(msgid=4)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["msgid"] = msgid
-        return self._return_proxy("messagedel", cparams, uparams, options)
-
-    def messageget(self, *, msgid):
-        """
-        Usage::
-
-            messageget msgid={messageID}
-
-        Displays an existing offline message with ID msgid from your inbox. Please note
-        that this does not automatically set the flag_read property of the message.
-
-        Example::
-
-           messageget msgid=4
-           msgid=4 cluid=xwEzb5ENOaglVHu9oelK++reUyE= subject=Hi! message=Hello?!?
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.messageget(msgid=4)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["msgid"] = msgid
-        return self._return_proxy("messageget", cparams, uparams, options)
-
-    def messagelist(self):
-        """
-        Usage::
-
-            messagelist
-
-        Displays a list of offline messages you've received. The output contains the
-        senders unique identifier, the messages subject, etc.
-
-        Example::
-
-           messagelist
-           msgid=4 cluid=xwEzb5ENOaglVHu9oelK++reUyE= subject=Test flag_read=0...
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.messagelist()
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("messagelist", cparams, uparams, options)
-
-    def messageupdateflag(self, *, msgid, flag):
-        """
-        Usage::
-
-            messageupdateflag msgid={messageID} flag={1|0}
-
-        Updates the flag_read property of the offline message specified with msgid. If
-        flag is set to 1, the message will be marked as read.
-
-        Example::
-
-           messageupdateflag msgid=4 flag=1
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.messageupdateflag(msgid=4, flag=1)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["msgid"] = msgid
-        cparams["flag"] = flag
-        return self._return_proxy("messageupdateflag", cparams, uparams, options)
-
     def permfind(self, *, permid):
         """
         Usage::
@@ -2694,48 +3240,6 @@ class TS3ServerCommands(TS3CommonCommands):
         uparams = list()
         options = list()
         return self._return_proxy("permissionlist", cparams, uparams, options)
-
-    def permoverview(self, *, cid, cldbid, permid):
-        """
-        Usage::
-
-            permoverview cid={channelID} cldbid={clientDBID} permid={permID}
-
-        Displays all permissions assigned to a client for the channel specified with
-        cid. If permid is set to 0, all permissions will be displayed. The output
-        follows the following format:
-
-         t={permType} id1={id1} id2={id2} p={permID} v={permValue} n={permNegated}
-         s={permSkip}|t={permType} id1={id1} id2={id2} p={permID} v={permValue}
-         n={permNegated} s={permSkip}|...
-
-        The possible values for t, id1 and id2 are:
-
-         0: Server Group;    => id1={serverGroupID}, id2=0
-         1: Global Client;   => id1={clientDBID},    id2=0
-         2: Channel;         => id1={channelID},     id2=0
-         3: Channel Group;   => id1={channelID},     id2={channelGroupID}
-         4: Channel Client;  => id1={channelID},     id2={clientDBID}
-
-        Example::
-
-           permoverview cldbid=57 cid=74 permid=0
-           t=0 id1=5 id2=0 p=37 v=1 n=0 s=0|t=0 id1=5 id2=0 p=38 v=1 n=0 s=0|...
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.permoverview(cldbid=57, cid=74, permid=0)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["cid"] = cid
-        cparams["cldbid"] = cldbid
-        cparams["permid"] = permid
-        return self._return_proxy("permoverview", cparams, uparams, options)
 
     def permreset(self):
         """
@@ -2919,36 +3423,6 @@ class TS3ServerCommands(TS3CommonCommands):
         options = list()
         return self._return_proxy("quit", cparams, uparams, options)
 
-    def sendtextmessage(self, *, targetmode, target, msg):
-        """
-        Usage::
-
-            sendtextmessage targetmode={1-3}
-                            target={serverID|channelID|clientID} msg={text}
-
-        Sends a text message a specified target. The type of the target is determined
-        by targetmode while target specifies the ID of the recipient, whether it be a
-        virtual server, a channel or a client.
-
-        Example::
-
-           sendtextmessage targetmode=2 target=1 msg=Hello\sWorld!
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.sendtextmessage(
-            ...     targetmode=2, target=1, msg="Hello World!")
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["targetmode"] = targetmode
-        cparams["target"] = target
-        cparams["msg"] = msg
-        return self._return_proxy("sendtextmessage", cparams, uparams, options)
-
     def servercreate(self, **virtualserver_properties):
         """
         Usage::
@@ -3032,113 +3506,6 @@ class TS3ServerCommands(TS3CommonCommands):
 
         cparams.update(virtualserver_properties)
         return self._return_proxy("serveredit", cparams, uparams, options)
-
-    def servergroupadd(self, *, name, type_=None):
-        """
-        Usage::
-
-            servergroupadd name={groupName} [type={groupDbType}]
-
-        Creates a new server group using the name specified with name and displays
-        its ID. The optional type parameter can be used to create ServerQuery groups
-        and template groups.
-
-        Example::
-
-           servergroupadd name=Server\sAdmin
-           sgid=13
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.servergroupadd(name="Server Admin")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["name"] = name
-        cparams["type"] = type_
-        return self._return_proxy("servergroupadd", cparams, uparams, options)
-
-    def servergroupaddclient(self, *, sgid, cldbid):
-        """
-        Usage::
-
-            servergroupaddclient sgid={groupID} cldbid={clientDBID}
-
-        Adds a client to the server group specified with sgid. Please note that a
-        client cannot be added to default groups or template groups.
-
-        Example::
-
-           servergroupaddclient sgid=16 cldbid=3
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.servergroupaddclient(sgid=16, cldbid=3)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["sgid"] = sgid
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("servergroupaddclient", cparams, uparams, options)
-
-    def servergroupaddperm(self, *, sgid, permnegated, permskip,
-                           permid=None, permsid=None, permvalue=None):
-        """
-        Usage::
-
-            servergroupaddperm sgid={groupID} permid={permID}
-                               permvalue={permValue} permnegated={1|0}
-                               permskip={1|0}|...
-            servergroupaddperm sgid={groupID} permsid={permName}
-                               permvalue={permValue} permnegated={1|0}
-                               permskip={1|0}|...
-
-        Adds a set of specified permissions to the server group specified with sgid.
-        Multiple permissions can be added by providing the four parameters of each
-        permission. A permission can be specified by permid or permsid.
-
-        Example::
-
-           servergroupaddperm sgid=13 permid=8470 permvalue=1 permnegated=0
-            permskip=0|permid=8475 permvalue=0 permnegated=1 permskip=0
-           error id=0 msg=ok
-
-           servergroupaddperm sgid=13 permsid=i_icon_id permvalue=123
-            permnegated=0 permskip=0|permsid=b_virtualserver_stop permvalue=0
-            permnegated=1 permskip=0
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.servergroupaddperm(
-            ...     sgid=13, permid=8470, permvalue=1, permnegated=0,
-            ...     permskip=0)
-            ...
-            >>> ts3cmd.servergroupaddperm(
-            ...     sgid=13, permsid="i_icon_id", permvalue=123, permnegated=0,
-            ...     permskip=0)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        uparams.append(OrderedDict())
-        uparams[0]["sgid"] = sgid
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        uparams[0]["permvalue"] = permvalue
-        uparams[0]["permnegated"] = permnegated
-        uparams[0]["permskip"] = permskip
-        return self._return_proxy("servergroupaddperm", cparams, uparams, options)
 
     def servergroupautoaddperm(self, *, sgtype, permvalue, permnegated,
                                permskip, permid=None, permsid=None):
@@ -3255,7 +3622,7 @@ class TS3ServerCommands(TS3CommonCommands):
         uparams[0]["permsid"] = permsid
         return self._return_proxy("servergroupautodelperm", cparams, uparams, options)
 
-    def servergroupbyclientid(self, *, cldbid):
+    def servergroupsbyclientid(self, *, cldbid):
         """
         Usage::
 
@@ -3272,7 +3639,7 @@ class TS3ServerCommands(TS3CommonCommands):
 
         Example::
 
-            >>> ts3cmd.servergroupbyclientid(cldbid=18)
+            >>> ts3cmd.servergroupsbyclientid(cldbid=18)
             ...
         """
         cparams = OrderedDict()
@@ -3280,45 +3647,7 @@ class TS3ServerCommands(TS3CommonCommands):
         options = list()
 
         cparams["cldbid"] = cldbid
-        return self._return_proxy("servergroupbyclientid", cparams, uparams, options)
-
-    def servergroupclientlist(self, *, sgid, names=False):
-        """
-        Usage::
-
-            servergroupclientlist sgid={groupID} [-names]
-
-        Displays the IDs of all clients currently residing in the server group
-        specified with sgid. If you're using the -names option, the output will
-        also contain the last known nickname and the unique identifier of the
-        clients.
-
-        Example::
-
-           servergroupclientlist sgid=16
-           cldbid=7|cldbid=8|cldbid=9|cldbid=11|cldbid=13|cldbid=16|cldbid=18|...
-           error id=0 msg=ok
-
-           servergroupclientlist sgid=8 -names
-           cldbid=4 client_nickname=ScP client_unique_identifier=FPMPSC6MXqXq7...
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.servergroupclientlist(sgid=16)
-            ...
-            >>> ts3cmd.servergroupclientlist(sgid=8, names=True)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["sgid"] = sgid
-
-        if names:
-            options.append("names")
-        return self._return_proxy("servergroupclientlist", cparams, uparams, options)
+        return self._return_proxy("servergroupsbyclientid", cparams, uparams, options)
 
     def servergroupcopy(self, *, ssgid, tsgid, name, type_):
         """
@@ -3356,165 +3685,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["type"] = type_
         return self._return_proxy("servergroupcopy", cparams, uparams, options)
 
-    def servergroupdel(self, *, sgid, force=False):
-        """
-        Usage::
-
-            servergroupdel sgid={groupID} force={1|0}
-
-        Deletes the server group specified with sgid. If force is set to 1, the server
-        group will be deleted even if there are clients within.
-
-        Example::
-
-           servergroupdel sgid=13
-           error id=0 msg=ok
-
-           servergroupdel sgid=14 force=1
-           error id=0 msg=ok
-
-        Examples::
-
-            >>> ts3cmd.servergroupdel(sgid=13)
-            ...
-            >>> ts3cmd.servergroupdel(sgid=14, force=True)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["sgid"] = sgid
-        cparams["force"] = force
-        return self._return_proxy("servergroupdel", cparams, uparams, options)
-
-    def servergroupdelclient(self, *, sgid, cldbid):
-        """
-        Usage::
-
-            servergroupdelclient sgid={groupID} cldbid={clientDBID}
-
-        Removes a client from the server group specified with sgid.
-
-        Example::
-
-           servergroupdelclient sgid=16 cldbid=3
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.servergroupdelclient(sgid=16, cldbid=3)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["sgid"] = sgid
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("servergroupdelclient", cparams, uparams, options)
-
-    def servergroupdelperm(self, *, sgid, permid=None, permsid=None):
-        """
-        Usage::
-
-            servergroupdelperm sgid={groupID} permid={permID}|permid={permID}
-            servergroupdelperm sgid={groupID} permsid={permName}
-
-        Removes a set of specified permissions from the server group specified with
-        sgid. Multiple permissions can be removed at once. A permission can be
-        specified by permid or permsid.
-
-        Examples::
-
-           servergroupdelperm sgid=16 permid=8470|permid=8475
-           error id=0 msg=ok
-
-           servergroupdelperm sgid=16 permsid=i_channel_join_power
-           error id=0 msg=ok
-
-        Examples::
-
-            >>> ts3cmd.servergroupdelperm(sgid=16, permid=8470)
-            ...
-            >>> ts3cmd.servergroupdelperm(sgid=16, permid=8475)
-            ...
-            >>> ts3cmd.servergroupdelperm(
-            ...     sgid=16, permsid="i_channel_join_power")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["sgid"] = sgid
-
-        uparams.append(OrderedDict())
-        uparams[0]["permid"] = permid
-        uparams[0]["permsid"] = permsid
-        return self._return_proxy("servergroupdelperm", cparams, uparams, options)
-
-    def servergrouplist(self):
-        """
-        Usage::
-
-            servergrouplist
-
-        Displays a list of server groups available. Depending on your permissions, the
-        output may also contain global ServerQuery groups and template groups.
-
-        Example::
-
-           servergrouplist
-           sgid=9 name=Server\sAdmin type=1 iconid=300 savedb=1|sgid=10 name=Normal t...
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.servergrouplist()
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("servergrouplist", cparams, uparams, options)
-
-    def servergrouppermlist(self, *, sgid, permsid=False):
-        """
-        Usage::
-
-            servergrouppermlist sgid={groupID} [-permsid]
-
-        Displays a list of permissions assigned to the server group specified with sgid.
-        The optional -permsid parameter can be used to get the permission names instead
-        of their internal ID.
-
-        Example:
-           servergrouppermlist sgid=13
-           permid=8470 permvalue=1 permnegated=0 permskip=0|permid=8475 permvalue=1|...
-           error id=0 msg=ok
-
-           servergrouppermlist sgid=14 -permsid
-           permsid=b_virtualserver_info_view permvalue=1 permnegated=0 permskip=0|...
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.servergrouppermlist(sgid=13)
-            ...
-            >>> ts3cmd.servergrouppermlist(sgid=14, permsid=True)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["sgid"] = sgid
-
-        if permsid:
-            options.append("permsid")
-        return self._return_proxy("servergrouppermlist", cparams, uparams, options)
-
     def servergrouprename(self, *, sgid, name):
         """
         Usage::
@@ -3540,33 +3710,6 @@ class TS3ServerCommands(TS3CommonCommands):
         cparams["sgid"] = sgid
         cparams["name"] = name
         return self._return_proxy("servergrouprename", cparams, uparams, options)
-
-    def servergroupsbyclientid(self, *, cldbid):
-        """
-        Usage::
-
-            servergroupsbyclientid cldbid={clientDBID}
-
-        Displays all server groups the client specified with cldbid is currently
-        residing in.
-
-        Example::
-
-           servergroupsbyclientid cldbid=18
-           name=Server\sAdmin sgid=6 cldbid=18
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.servergroupsbyclientid(cldbid=18)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("servergroupsbyclientid", cparams, uparams, options)
 
     def serveridgetbyport(self, *, virtualserver_port):
         """
@@ -3973,166 +4116,6 @@ class TS3ServerCommands(TS3CommonCommands):
         options = list()
         return self._return_proxy("servertemppasswordlist", cparams, uparams, options)
 
-    def setclientchannelgroup(self, *, cgid, cid, cldbid):
-        """
-        Usage::
-
-            setclientchannelgroup cgid={groupID} cid={channelID}
-                                  cldbid={clientDBID}
-
-        Sets the channel group of a client to the ID specified with cgid.
-
-        Example::
-
-           setclientchannelgroup cgid=13 cid=15 cldbid=20
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.setclientchannelgroup(cgid=13, cid=15, cldbid=20)
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["cgid"] = cgid
-        cparams["cid"] = cid
-        cparams["cldbid"] = cldbid
-        return self._return_proxy("setclientchannelgroup", cparams, uparams, options)
-
-    def tokenadd(self, *, tokentype, tokenid1, tokenid2, tokendescription=None,
-                 tokencustomset=None):
-        """
-        Usage::
-
-            tokenadd tokentype={1|0} tokenid1={groupID} tokenid2={channelID}
-                     [tokendescription={description}]
-                     [tokencustomset={customFieldSet}]
-
-        Create a new token. If tokentype is set to 0, the ID specified with tokenid1
-        will be a server group ID. Otherwise, tokenid1 is used as a channel group ID
-        and you need to provide a valid channel ID using tokenid2.
-
-        The tokencustomset parameter allows you to specify a set of custom client
-        properties. This feature can be used when generating tokens to combine a
-        website account database with a TeamSpeak user. The syntax of the value
-        needs to be escaped using the ServerQuery escape patterns and has to follow
-        the general syntax of:
-
-        ident=ident1 value=value1|ident=ident2 value=value2|ident=ident3 value=value3
-
-        Example::
-
-           tokenadd tokentype=0 tokenid1=6 tokenid2=0 tokendescription=Test
-            tokencustomset=ident=forum_user\svalue=ScP\pident=forum_id\svalue=123
-           token=eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.tokenadd(
-            ...     tokentype=0, tokenid1=6, tokenid2=0,
-            ...     tokendescription="Test",
-            ...     tokencustomset="ident=forum_user\svalue=ScP\pident=forum_id\svalue=123"
-            ...     )
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["tokentype"] = tokentype
-        cparams["tokenid1"] = tokenid1
-        cparams["tokenid2"] = tokenid2
-        cparams["tokendescription"] = tokendescription
-        cparams["tokencustomset"] = tokencustomset
-        return self._return_proxy("tokenadd", cparams, uparams, options)
-
-    def tokendelete(self, *, token):
-        """
-        Usage::
-
-            tokendelete token={tokenKey}
-
-        Deletes an existing token matching the token key specified with token.
-
-        Example::
-
-           tokendelete token=eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.tokendelete(
-            ...     token="eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["token"] = token
-        return self._return_proxy("tokendelete", cparams, uparams, options)
-
-    def tokenlist(self):
-        """
-        Usage::
-
-            tokenlist
-
-        Displays a list of tokens available including their type and group IDs. Tokens
-        can be used to gain access to specified server or channel groups.
-
-        A token is similar to a client with administrator privileges that adds you to
-        a certain permission group, but without the necessity of a such a client with
-        administrator privileges to actually exist. It is a long (random looking)
-        string that can be used as a ticket into a specific server group.
-
-        Example::
-
-           tokenlist
-           token=88CVUg\/zkujt+y+WfHdko79UcM4R6uyCL6nEfy3B token_type=0 token_id1=9...
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.tokenlist()
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-        return self._return_proxy("tokenlist", cparams, uparams, options)
-
-    def tokenuse(self, *, token):
-        """
-        Usage::
-
-            tokenuse token={tokenKey}
-
-        Use a token key gain access to a server or channel group. Please note that the
-        server will automatically delete the token after it has
-        been used.
-
-        Example::
-
-           tokenuse token=eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW
-           error id=0 msg=ok
-
-        Example::
-
-            >>> ts3cmd.tokenuse(
-            ...     token="eKnFZQ9EK7G7MhtuQB6+N2B1PNZZ6OZL3ycDp2OW")
-            ...
-        """
-        cparams = OrderedDict()
-        uparams = list()
-        options = list()
-
-        cparams["token"] = token
-        return self._return_proxy("tokenuse", cparams, uparams, options)
-
     def use(self, *, sid=None, port=None, virtual=False):
         """
         Usage::
@@ -4221,9 +4204,178 @@ class TS3ServerCommands(TS3CommonCommands):
 
 
 class TS3ClientCommands(TS3CommonCommands):
+    """A convenient interface for all Client Query commands.
+
+    .. seealso::
+
+        The command set for the *Server Query* is implemented in the
+        :class:`TS3ServerCommands` class.
     """
-    :todo: Implement the full command set.
-    """
+
+    def help(self):
+        """
+        Read help files.
+
+        Example::
+
+            TeamSpeak 3 Client :: ClientQuery
+            (c) TeamSpeak Systems GmbH
+
+            Command Overview:
+               help                        | read help files
+               quit                        | close connection
+               use                         | select server connection handler
+               auth                        | authenticate telnet connection with users API key
+
+               banadd                      | add a new ban rule to the server
+               banclient                   | ban a client from the server
+               bandelall                   | delete all active ban rules
+               bandel                      | delete an active ban rule from the server
+               banlist                     | list all active ban rules
+               channeladdperm              | add a permission to a channel
+               channelclientaddperm        | add a channel-client permisison to a client and specified channel id
+               channelclientdelperm        | delete a channel-client permisison from a client and specified channel id
+               channelclientlist           | displays a list of clients that are in the channel specified by the cid parameter
+               channelclientpermlist       | list all assigned channel-client permisisons for a client and specified channel id
+               channelconnectinfo          | channel connect information
+               channelcreate               | create a channel
+               channeldelete               | delete a channel
+               channeldelperm              | delete a from a channel
+               channeledit                 | edit a channel
+               channelgroupadd             | create a channel group
+               channelgroupaddperm         | add a permission to a channel group
+               channelgroupclientlist      | list all assigned channel groups for the specified channel id
+               channelgroupdel             | delete a channel group
+               channelgroupdelperm         | delete a permission from a channel group
+               channelgrouplist            | list all available channel groups
+               channelgrouppermlist        | list all assigned permissions from a channel group
+               channellist                 | list of all channels
+               channelmove                 | assign a new parent channel to a channel
+               channelpermlist             | list all assigned permissions for a channel
+               channelvariable             | retrieve specific information about a channel
+               clientaddperm               | add a permission to a clientDBID
+               clientdbdelete              | delete a client from the server database
+               clientdbedit                | edit a clients properties identified by clientDBID
+               clientdblist                | list all clients stored in the server database
+               clientdelperm               | delete a permission from a clientDBID
+               clientgetdbidfromuid        | get the clientDBIDs for a certain client unique id
+               clientgetids                | get the clientIDs for a certain client unique id
+               clientgetnamefromdbid       | get the nickname from a client database id
+               clientgetnamefromuid        | get the nickname from a client unique id
+               clientgetuidfromclid        | get the unique id from a clientID
+               clientkick                  | kick a client
+               clientlist                  | list known clients
+               clientmove                  | move a client or switch channel ourself
+               clientmute                  | mute all voice data from a client
+               clientunmute                | unmute a previously muted client
+               clientnotifyregister        | register to receive client notifications
+               clientnotifyunregister      | unregister from receiving client notifications
+               clientpermlist              | list all assigned permissions from a clientDBID
+               clientpoke                  | poke a client
+               clientupdate                | set personal client variables, like your nickname
+               clientvariable              | retrieve specific information about a client
+               complainadd                 | submit a complaint about a clientDBID
+               complaindelall              | delete all complaints from a clientDBID
+               complaindel                 | delete a complaint from the server
+               complainlist                | list all complaints from a server or for a clientDBID
+               currentschandlerid          | server connection handler ID of current server tab
+               ftcreatedir                 | create a new directory
+               ftdeletefile                | delete one or more files
+               ftgetfileinfo               | get informations about the specified file
+               ftgetfilelist               | list all files for the specified channel and filepath
+               ftinitdownload              | initialise a filetransfer download
+               ftinitupload                | initialise a filetransfer upload
+               ftlist                      | get a list of all file transfers currently running on the server  notifyfiletransferlist
+               ftrenamefile                | rename the specified file
+               ftstop                      | stop an running file transfer progress
+               hashpassword                | create a password hash
+               messageadd                  | send an offline message to a clientDBID
+               messagedel                  | delete an existing offline message from your inbox
+               messageget                  | display an existing offline message from your inbox
+               messagelist                 | list all offline messages from your inbox
+               messageupdateflag           | mark or unmark an offline message as read
+               permoverview                | list all assigned permissons
+               sendtextmessage             | send a chat message
+               serverconnectinfo           | server connect information
+               serverconnectionhandlerlist | list available server connection handlers
+               servergroupaddclient        | add a client to a server group
+               servergroupadd              | create a server group
+               servergroupaddperm          | add a permission to a server group
+               servergroupclientlist       | list all client database ids from a server group
+               servergroupdelclient        | delete a client from a server group
+               servergroupdel              | delete a server group
+               servergroupdelperm          | delete a permission from a server group
+               servergrouplist             | get a list of server groups
+               servergrouppermlist         | list all assigned permission from a server group
+               servergroupsbyclientid      | get all assigned server groups from a clientDBID
+               servervariable              | retrieve specific information about a server
+               setclientchannelgroup       | assign a channel group to a client database id
+               tokenadd                    | add a token to a server- or channel group
+               tokendelete                 | delete an existing token from the server
+               tokenlist                   | lists all tokens available on the server
+               tokenuse                    | use a token to gain access to the server
+               verifychannelpassword       | check if we know the current password of a channel
+               verifyserverpassword        | check if we know the current server password
+               whoami                      | display information about ourself
+
+        Example::
+
+            >>> ts3cmd.help()
+            ...
+        """
+        return self._return_proxy("help", OrderedDict(), list(), list())
+
+    def quit(self):
+        """
+        Usage::
+
+            quit
+
+        Closes the ClientQuery connection to the TeamSpeak 3 Client instance.
+
+        Example::
+
+            quit
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.quit()
+            ...
+        """
+        return self._return_proxy("quit", OrderedDict(), list(), list())
+
+    def use(self, *, schandlerid=None):
+        """
+        Usage::
+
+            use [schandlerid={scHandlerID}] [{scHandlerID}]
+
+        Selects the server connection handler scHandlerID or, if no parameter is given,
+        the currently active server connection handler is selected.
+
+        Examples::
+
+            use schandlerid=1
+            selected schandlerid=1
+            error id=0 msg=ok
+
+            use 1
+            selected schandlerid=1
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.use()
+            ...
+            >>> ts3cmd.use(schandlerid=2)
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["schandlerid"] = schandlerid
+        return self._return_proxy("auth", cparams, uparams, options)
 
     def auth(self, *, apikey):
         """
@@ -4235,10 +4387,10 @@ class TS3ClientCommands(TS3CommonCommands):
 
         Example::
 
-           auth apikey=AAAA-BBBB-CCCC-DDDD-EEEE
-           error id=0 msg=ok
+            auth apikey=AAAA-BBBB-CCCC-DDDD-EEEE
+            error id=0 msg=ok
 
-         Example::
+        Example::
 
             >>> ts3cmd.auth(apikey="AAAA-BBBB-CCCC-DDDD-EEEE")
             ...
@@ -4249,3 +4401,445 @@ class TS3ClientCommands(TS3CommonCommands):
 
         cparams["apikey"] = apikey
         return self._return_proxy("auth", cparams, uparams, options)
+
+    def channelclientlist(self, *, cid, uid=False, away=False, voice=False,
+        groups=False, icon=False, country=False):
+        """
+        Usage::
+
+            channelclientlist cid=<cID> [-uid] [-away] [-voice] [-groups] [-icon] [-country]
+
+        Displays a list of clients that are in the channel specified by the cid
+        parameter. Included information is the clientID, client database id, nickname,
+        channelID and client type.
+        Please take note that you can only view clients in channels that you are
+        currently subscribed to.
+
+        Here is a list of the additional display paramters you will receive for
+        each of the possible modifier parameters.
+
+        -uid::
+
+            client_unique_identifier
+
+        -away::
+
+            client_away
+            client_away_message
+
+        -voice::
+
+            client_flag_talking
+            client_input_muted
+            client_output_muted
+            client_input_hardware
+            client_output_hardware
+            client_talk_power
+            client_is_talker
+            client_is_priority_speaker
+            client_is_recording
+            client_is_channel_commander
+            client_is_muted
+
+        -groups::
+
+            client_servergroups
+            client_channel_group_id
+
+        -icon::
+
+            client_icon_id
+
+        -country::
+
+            client_country
+
+        Example::
+
+            channelclientlist cid=184
+            clid=4 cid=184 client_database_id=35 client_nickname=MuhChy client_type=0
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.channelclientlist(cid=184, icon=True)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cid"] = cid
+        if uid:
+            options.append("uid")
+        if away:
+            options.append("away")
+        if voice:
+            options.append("voice")
+        if groups:
+            options.append("groups")
+        if icon:
+            options.append("icon")
+        if country:
+            options.append("country")
+        return self._return_proxy("channelclientlist", cparams, uparams, options)
+
+    def channelconnectinfo(self, *, cid=None):
+        """
+        Usage::
+
+            channelconnectinfo [cid={channelid}]
+
+        Get channel connection information for specified channelid from the currently
+        selected server connection handler. If no channelid is provided, information
+        for the current channel will be received.
+
+        Example::
+
+           channelconnectinfo
+           path=test\/subtest password=secret
+           error id=0 msg=ok
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cid"] = cid
+        return self._return_proxy("channelconnectinfo", cparams, uparams, options)
+
+    def channelvariable(self, *, cid, properties=None):
+        """
+        Usage::
+
+            channelvariable ( cid={channelID} properties )...
+
+        Retrieves channel variables from the client (no network usage). For each channel
+        you can specify one or more properties that should be queried, and this whole
+        block of channelID and properties can be repeated to get information about
+        multiple channels with one call of channelvariable.
+
+        Available properties are::
+
+            channel_name
+            channel_topic
+            channel_description
+            channel_codec
+            channel_codec_quality
+            channel_order
+            channel_maxclients
+            channel_maxfamilyclients
+            channel_flag_permanent
+            channel_flag_semi_permanent
+            channel_flag_default
+            channel_flag_password
+            channel_codec_latency_factor
+            channel_codec_is_unencrypted
+            channel_flag_maxclients_unlimited
+            channel_flag_maxfamilyclients_unlimited
+            channel_flag_maxfamilyclients_inherited
+            channel_flag_are_subscribed
+            channel_needed_talk_power
+            channel_forced_silence
+            channel_name_phonetic
+            channel_icon_id
+
+        Example::
+
+           channelvariable cid=5 channel_topic channel_flag_permanent channel_codec
+           cid=5 channel_topic=123 channel_flag_permanent=1 channel_codec=1
+           error id=0 msg=ok
+
+           channelvariable cid=5 channel_codec_quality|cid=1 channel_codec_quality
+           cid=5 channel_codec_quality=7|cid=1 channel_codec_quality=10
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.channelvariable(
+            ...     cid=5,
+            ...     properties=["channel_topic", "channel_flag_permanent"]
+            ... )
+
+        :todo: Escape the properties correct.
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cid"] = cid
+        return self._return_proxy("channelvariable", cparams, uparams, options, properties)
+
+    def clientmute(self, *, clid):
+        """
+        Usage::
+
+            clientmute clid={clientID1}...
+
+        Mutes one or more clients specified with clid. Also adds the specified client
+        to the FriendFoe list to make sure this mute is permanent...
+
+        Example::
+
+            clientmute clid=5|clid=6
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientmute(clid=5)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["clid"] = clid
+        return self._return_proxy("clientmute", cparams, uparams, options)
+
+    def clientunmute(self, *, clid):
+        """
+        Usage::
+
+            clientunmute clid={clientID1}...
+
+        Unmutes one or more clients specified with clid.
+
+        Example::
+
+            clientunmute clid=5|clid=6
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientunmute(clid=5)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["clid"] = clid
+        return self._return_proxy("clientunmute", cparams, uparams, options)
+
+    def clientnotifyregister(self, *, schandlerid, event):
+        """
+        Usage::
+
+            clientnotifyregister schandlerid=<serverConnectionHandlerID> event=<event>
+
+        This command allows you to listen to events that the client encounters. Events
+        are things like people starting or stopping to talk, people joining or leaving,
+        new channels being created and many more.
+        It registers for client notifications for the specified
+        serverConnectionHandlerID. If the serverConnectionHandlerID is set to zero it
+        applies to all server connection handlers. Possible event values are listed
+        below, additionally the special string "any" can be used to subscribe to all
+        events.
+
+        Possible values for event::
+
+            notifytalkstatuschange
+            notifymessage
+            notifymessagelist
+            notifycomplainlist
+            notifybanlist
+            notifyclientmoved
+            notifyclientleftview
+            notifycliententerview
+            notifyclientpoke
+            notifyclientchatclosed
+            notifyclientchatcomposing
+            notifyclientupdated
+            notifyclientids
+            notifyclientdbidfromuid
+            notifyclientnamefromuid
+            notifyclientnamefromdbid
+            notifyclientuidfromclid
+            notifyconnectioninfo
+            notifychannelcreated
+            notifychanneledited
+            notifychanneldeleted
+            notifychannelmoved
+            notifyserveredited
+            notifyserverupdated
+            channellist
+            channellistfinished
+            notifytextmessage
+            notifycurrentserverconnectionchanged
+            notifyconnectstatuschange
+
+        Example::
+
+            clientnotifyregister schandlerid=0 event=any
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientnotifyregister(schandlerid=0, event="any")
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["schandlerid"] = schandlerid
+        cparams["event"] = event
+        return self._return_proxy("clientnotifyregister", cparams, uparams, options)
+
+    def clientnotifyunregister(self):
+        """
+        Usage::
+
+            clientnotifyunregister
+
+        Unregisters from all previously registered client notifications.
+
+        Example::
+
+            clientnotifyunregister
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientnotifyunregister()
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("clientnotifyunregister", cparams, uparams, options)
+
+    def clientupdate(self):
+        """
+
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("clientupdate", cparams, uparams, options)
+
+    def clientvariable(self, *, client_nickname=None, client_away=None,
+        client_away_message=None, client_input_muted=None,
+        client_output_muted=None, client_input_deactivated=None,
+        client_is_channel_commander=None, client_flag_avatar=None,
+        client_meta_data=None, client_default_token=None
+        ):
+        """
+        Usage::
+
+            clientupdate ident=value...
+
+        Sets one or more values concerning your own client, and makes them available
+        to other clients through the server where applicable. Available idents
+        are::
+
+            client_nickname:             set a new nickname
+            client_away:                 0 or 1, set us away or back available
+            client_away_message:         what away message to display when away
+            client_input_muted:          0 or 1, mutes or unmutes microphone
+            client_output_muted:         0 or 1, mutes or unmutes speakers/headphones
+            client_input_deactivated:    0 or 1, same as input_muted, but invisible to
+                                         other clients
+            client_is_channel_commander: 0 or 1, sets or removes channel commander
+            client_nickname_phonetic:    set your phonetic nickname
+            client_flag_avatar:          set your avatar
+            client_meta_data:            any string that is passed to all clients that
+                                         have vision of you.
+            client_default_token:        privilege key to be used for the next server
+                                         connect
+
+        Example::
+
+            clientupdate client_nickname=me~brb client_away=1
+            error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientvariable(client_nickname="Homer", client_away=True)
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["client_nickname"] = client_nickname
+        cparams["client_away"] = client_away
+        cparams["client_away_message"] = client_away_message
+        cparams["client_input_muted"] = client_input_muted
+        cparams["client_output_muted"] = client_output_muted
+        cparams["client_input_deactivated"] = client_input_deactivated
+        cparams["client_is_channel_commander"] = client_is_channel_commander
+        cparams["client_nickname_phonetic"] = client_nickname_phonetic
+        cparams["client_is_channel_commander"] = client_is_channel_commander
+        cparams["client_flag_avatar"] = client_flag_avatar
+        cparams["client_meta_data"] = client_meta_data
+        cparams["client_default_token"] = client_default_token
+        return self._return_proxy("clientvariable", cparams, uparams, options)
+
+    def currentschandlerid(self):
+        """
+
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("currentschandlerid", cparams, uparams, options)
+
+    def hashpassword(self):
+        """
+
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("hashpassword", cparams, uparams, options)
+
+    def serverconnectinfo(self):
+        """
+
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("serverconnectinfo", cparams, uparams, options)
+
+    def serverconnectionhandlerlist(self):
+        """
+
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("serverconnectionhandlerlist", cparams, uparams, options)
+
+    def servervariable(self):
+        """
+
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("servervariable", cparams, uparams, options)
+
+    def verifychannelpassword(self):
+        """
+
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("verifychannelpassword", cparams, uparams, options)
+
+    def verifyserverpassword(self):
+        """
+
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("verifyserverpassword", cparams, uparams, options)
+
+    def whoami(self):
+        """
+
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+        return self._return_proxy("whoami", cparams, uparams, options)
