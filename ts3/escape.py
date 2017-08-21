@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 # The MIT License (MIT)
-# 
+#
 # Copyright (c) 2013-2016 Benedikt Schmitt <benedikt@benediktschmitt.de>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
 # the Software without restriction, including without limitation the rights to
 # use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 # the Software, and to permit persons to whom the Software is furnished to do so,
 # subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 # FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -53,7 +53,7 @@ class TS3Escape(object):
         ("\r", r"\r"),
         ("\t", r"\t"),
         ("\v", r"\v")
-        ]
+    ]
 
     @classmethod
     def escape(cls, raw):
@@ -70,11 +70,11 @@ class TS3Escape(object):
         'Hello\\sWorld'
 
         :arg raw: The value to escape.
-        :type raw: None, str, bool or int
+        :type raw: None, str, bool, int or RawParameter
 
         :return: The escaped value of *raw*
         :rtype: string
-        
+
         :raises TypeError: If *raw* has an unsupported type.
         """
         if raw is None:
@@ -83,11 +83,13 @@ class TS3Escape(object):
             return "1" if raw else "0"
         elif isinstance(raw, int):
             return str(raw)
-        elif isinstance(raw, str):            
+        elif isinstance(raw, str):
             # The order of the replacement is not trivial.
             for char, repl_char in cls._MAP:
                 raw = raw.replace(char, repl_char)
             return raw
+        elif isinstance(raw, RawParameter):
+            return str(raw)
         else:
             raise TypeError("*raw* has to be a string.")
 
@@ -117,7 +119,7 @@ class TS3Escape(object):
         """
         Escapes the parameters of a TS3 query and encodes it as a part
         of a valid ts3 query string.
-        
+
         >>> # None
         >>> TS3Escape.escape_parameters(None)
         ''        
@@ -139,16 +141,21 @@ class TS3Escape(object):
         """
         if parameters is None:
             return str()
-        
+
         tmp = list()
         for key, val in parameters.items():
             if val is None:
-                continue            
+                continue
             # Note, that escaping a key will never make it valid or invalid.
             # In other words: It's not necessairy to escape the key.
             key = key.lower()
             val = cls.escape(val)
-            tmp.append(key + "=" + val)
+            # if the key is empty => do not add an equal sign
+            # this allows unnamed parameters
+            if key:
+                tmp.append(key + "=" + val)
+            else:
+                tmp.append(val)
         tmp = " ".join(tmp)
         return tmp
 
@@ -157,7 +164,7 @@ class TS3Escape(object):
         """
         Escapes each parameter dictionary in the parameterslist and encodes
         the list as a part of a valid ts3 query string.
-        
+
         >>> TS3Escape.escape_parameterlist(None)
         ''
         >>> TS3Escape.escape_parameterlist(
@@ -208,3 +215,17 @@ class TS3Escape(object):
             tmp.append(e)
         tmp = " ".join(tmp)
         return tmp
+
+
+class RawParameter():
+    """Parameters wrapped in a RawParameter are not escaped."""
+
+    def __init__(self, parameter):
+        """
+        :arg parameter: The parameter which should not be escaped
+        :type parameter: string
+        """
+        self.parameter = parameter
+
+    def __str__(self):
+        return self.parameter

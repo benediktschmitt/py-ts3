@@ -25,6 +25,7 @@
 # Modules
 # ------------------------------------------------
 from collections import OrderedDict
+from .escape import RawParameter
 
 
 # Data
@@ -3787,7 +3788,7 @@ class TS3Commands(object):
         uparams = list()
         options = list()
 
-        cparams[""] = virtualserver_snapshot
+        cparams[""] = RawParameter(virtualserver_snapshot)
         return self._return_proxy("serversnapshotdeploy", cparams, uparams, options)
 
     def serverstart(self, *, sid):
