@@ -31,7 +31,7 @@ This package contains a Python API for the:
 
 # Data
 # ------------------------------------------------
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 
 
 # Modules

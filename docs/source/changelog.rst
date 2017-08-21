@@ -3,6 +3,11 @@
 Changelog
 =========
 
+*   **1.0.7**
+
+    **fix** for issue #49: https://github.com/benediktschmitt/py-ts3/issues/49 provided by
+    @LouisChrist
+
 *   **1.0.4**
 
     *   **added** fallbackhost parameter to some TS3FileTransfer methods
