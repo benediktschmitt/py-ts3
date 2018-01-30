@@ -35,6 +35,8 @@ USER = "serveradmin"
 # Login password
 PASS = "abc123"
 
+PASS = "JB8ZqxfI"
+
 # TS3 query address
 HOST = "127.0.0.1"
 PORT = 10011

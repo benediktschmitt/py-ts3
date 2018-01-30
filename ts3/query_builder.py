@@ -198,8 +198,8 @@ class TS3QueryBuilder(object):
 
         If the response did not contain any items, then ``None`` is returned.
 
-        :seealso: :meth:`TS3BaseConnection.exec_query`,\
-            :attr:`TS3QueryResponse.parsed`
+        :seealso: :meth:`ts3.query.TS3BaseConnection.exec_query`,\
+            :attr:`ts3.query.TS3QueryResponse.parsed`
         """
         resp = self.fetch()
         return resp.parsed[0] if resp.parsed else None
@@ -209,8 +209,8 @@ class TS3QueryBuilder(object):
         method if you are interested in the parsed response rather than the
         resoonse object.
 
-        :seealso: :meth:`TS3BaseConnection.exec_query`,\
-            :attr:`TS3QueryResponse.parsed`
+        :seealso: :meth:`ts3.query.TS3BaseConnection.exec_query`,\
+            :attr:`ts3.query.TS3QueryResponse.parsed`
         """
         resp = self.fetch()
         return resp.parsed
