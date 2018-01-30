@@ -56,12 +56,12 @@ class TS3QueryBuilder(object):
         # response object.
         resp = TS3QueryBuilder(ts3conn, "serverlist").all()
 
-    Please note, that query builder objects are *immutable*.
+    Please note, that query builder objects are **not** immutable.
 
-    :arg ~ts3.query.TS3BaseConnection ts3conn:
-        The TS3 connection which will be used to send the query.
     :arg str cmd:
         The name of the command to execute, e.g. ``"clientkick"``.
+    :arg ~ts3.query.TS3BaseConnection ts3conn:
+        The TS3 connection which will be used to send the query.
     :arg list pipes:
         A list of ``(options, params)`` in which options is a
         *set* and *params* is a *dictionary*.
@@ -73,20 +73,13 @@ class TS3QueryBuilder(object):
     :todo: What about the crazy *properties*??
     """
 
-    def __init__(self, ts3conn, cmd, pipes=None):
+    def __init__(self, cmd, ts3conn=None, pipes=None):
         self._ts3conn = ts3conn
         self._cmd = cmd
 
         # List of (options, params).
-        self._pipes = pipes or []
+        self._pipes = pipes or [(set(), dict())]
         return None
-
-    def copy(self):
-        """Returns a copy of the query builder."""
-        pipes_cp = [
-            (options.copy(), params.copy()) for options, params in self._pipes
-        ]
-        return TS3QueryBuilder(self._ts3conn, self._cmd, pipes_cp)
 
     def pipe(self, *options, **params):
         """
@@ -94,11 +87,12 @@ class TS3QueryBuilder(object):
 
         .. code-block:: python
 
-            q = ts3conn.query("clientkick").pipe(clid=1).pipe(clid=2).pipe(clid=3)
+            >>> q = TS3QueryBuilder("clientkick").pipe(clid=1).pipe(clid=2)
+            >>> print(q)
+            'clientkick clid=1 | clid=2'
         """
-        cp = self.copy()
-        cp._pipes.append((options, params))
-        return cp
+        self._pipes.append((set(options), params))
+        return self
 
     def options(self, *options):
         """
@@ -106,15 +100,20 @@ class TS3QueryBuilder(object):
 
         .. code-block:: python
 
-            q = q.pipe().options("foo").pipe().options("bar").pipe().options("baz")
+            >>> q = TS3QueryBuilder("clientkick").options("foo").pipe().options("bar")
+            >>> print(q)
+            'clientkick -foo | -bar'
 
         You should prefer passing the options directly to :meth:`pipe` as it
         is more readable.
+
+        .. note::
+
+            Most commands do not support pipelining options.
         """
-        cp = self.copy()
-        last_options, _ = cp.pipes[-1]
+        last_options, _ = self._pipes[-1]
         last_options.update(options)
-        return cp
+        return self
 
     def params(self, **params):
         """
@@ -122,15 +121,18 @@ class TS3QueryBuilder(object):
 
         .. code-block:: python
 
-            q = ts3conn.query("clientkick").pipe().options(clid=1).pipe().options(clid=2)
+            >>> q = TS3QueryBuilder("clientkick")\\
+            ...     .pipe().params(clid=1)\\
+            ...     .pipe().params(clid=2)
+            >>> print(q)
+            'clientkick clid=1 | clid=2'
 
         You should prefer passing the options directly to :meth:`pipe` as it
         is more readable.
         """
-        cp = self.copy()
-        _, last_params = cp.pipes[-1]
+        _, last_params = self._pipes[-1]
         last_params.update(params)
-        return cp
+        return self
 
     def compile(self):
         """
@@ -138,10 +140,16 @@ class TS3QueryBuilder(object):
 
         .. code-block:: python
 
-            >>> q = TS3QueryBuilder("clientkick", reasonid=5, reasonmsg="Go away!")\\
-            ...     .pipe(clid=1).pipe(clid=2).pipe(clid=3)
+            # Strings are escaped automatic.
+            >>> q = TS3QueryBuilder("clientkick").params(reasonid=5, reasonmsg="Go away!")\\
+            ...     .pipe(clid=1).pipe(clid=2)
             >>> q.compile()
-            'clientkick reasonid=5 reasonmsg=Go\saway! clid=1|clid=2|clid=3'
+            'clientkick reasonid=5 reasonmsg=Go\saway! | clid=1 | clid=2'
+
+            # Booleans are turned into 0 or 1.
+            >>> q = TS3QueryBuilder("clientupdate").params(client_input_muted=True)
+            >>> q.compile()
+            'clientupdate client_input_muted=1'
 
         :rtype: str
         :returns:
@@ -167,8 +175,8 @@ class TS3QueryBuilder(object):
                         value = escape(str(value))
                     res += " " + key + "=" + value
 
-                    if pipe is not last_pipe:
-                        res += " |"
+                if pipe is not last_pipe:
+                    res += " |"
 
         res += "\n\r"
         return res
@@ -184,7 +192,7 @@ class TS3QueryBuilder(object):
         return self._ts3conn.exec_query(self)
 
     #: Alias for :meth:`fetch`, but indicates that the result is not needed.
-    exec = fetch
+    go = fetch
 
     def first(self):
         """Executes the query and returns the first item in the parsed
