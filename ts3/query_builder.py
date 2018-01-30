@@ -142,6 +142,10 @@ class TS3QueryBuilder(object):
             ...     .pipe(clid=1).pipe(clid=2).pipe(clid=3)
             >>> q.compile()
             'clientkick reasonid=5 reasonmsg=Go\saway! clid=1|clid=2|clid=3'
+
+        :rtype: str
+        :returns:
+            A valid TS3 query command string with arguments and options.
         """
         # NOTE: If it turns out, that string addition is too slow, we can still
         #       use other means.
@@ -167,7 +171,7 @@ class TS3QueryBuilder(object):
                         res += " |"
 
         res += "\n\r"
-        return res.encode()
+        return res
 
     def __str__(self):
         return self.compile()

@@ -520,6 +520,8 @@ class TS3BaseConnection(object):
         :versionadded: 2.0.0
         """
         q = query.compile()
+        q = q.encode()
+
         self._telnet_conn.write(q)
 
         # To identify the response when we receive it.
