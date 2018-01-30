@@ -41,16 +41,8 @@ __version__ = "2.0.0"
 # We only import the high-level modules. If the user needs access to the
 # low-level modules, he can still import them manually, but I prefer to keep
 # the namespace clean.
+from . import query
+from . import filetransfer
+from . import response
 
-try:
-    import query
-    import filetransfer
-    import response
-
-    from common import TS3Error
-except ImportError:
-    from . import query
-    from . import filetransfer
-    from . import response
-
-    from .common import TS3Error
+from .common import TS3Error

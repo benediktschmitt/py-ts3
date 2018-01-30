@@ -33,12 +33,8 @@ import re
 import logging
 
 # local
-try:
-    from escape import unescape
-    from common import TS3Error
-except ImportError:
-    from .escape import unescape
-    from .common import TS3Error
+from .escape import unescape
+from .common import TS3Error
 
 
 # Data

@@ -33,10 +33,7 @@ import time
 import threading
 
 # local
-try:
-    from common import TS3Error
-except ImportError:
-    from .common import TS3Error
+from .common import TS3Error
 
 
 # Data

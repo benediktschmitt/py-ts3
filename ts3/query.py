@@ -45,14 +45,9 @@ import telnetlib
 import logging
 
 # local
-try:
-    from common import TS3Error
-    from response import TS3Response, TS3QueryResponse, TS3Event
-    from query_builder import TS3QueryBuilder
-except ImportError:
-    from .common import TS3Error
-    from .response import TS3Response, TS3QueryResponse, TS3Event
-    from .query_builder import TS3QueryBuilder
+from .common import TS3Error
+from .response import TS3Response, TS3QueryResponse, TS3Event
+from .query_builder import TS3QueryBuilder
 
 
 # Backward compatibility
