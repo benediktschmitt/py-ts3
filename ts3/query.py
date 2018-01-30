@@ -436,14 +436,47 @@ class TS3BaseConnection(object):
         self._telnet_conn.write(b"\n\r")
         return None
 
+    def exec(self, cmd, *options, **params):
+        """
+        Sends a command to the ts3 server and returns the response. Check out the :meth:`query`
+        if you want to make use of pipelining.
+
+        .. code-block:: python
+
+            # use sid=1
+            ts3conn.exec("use", sid=1)
+
+            # clientlist -uid -away -groups
+            resp = ts3conn.exec("clientlist", "uid", "away", "groups")
+
+        :arg str cmd:
+            A TS3 command
+        :arg options:
+            The options of a command without a leading minus,
+            e.g. ``'uid'``, ``'away'``.
+        :arg params:
+            Some parameters (key, value pairs) which modify the
+            command, e.g. ``sid=1``.
+
+        :rtype: TS3QueryResponse
+        :returns:
+            A object which contains all information about the response.
+
+        :seealso: :meth:`recv`, :meth:`wait_for_resp`, :meth:`query`
+        :versionadded: 2.0.0
+        """
+        q = self.query(cmd, *options, **params)
+        return q.fetch()
+
     def query(self, cmd, *options, **params):
         """
         .. note::
 
-            The queries are **not executed** as long as not
-            :meth:`~ts3.query_builder.TS3QueryBuilder.fetch`,
-            :meth:`~ts3.query_builder.TS3QueryBuilder.first`
-            or :meth:`~ts3.query_builder.TS3QueryBuilder.all` is called.
+            The :meth:`query` method is great if you want to **fetch** data
+            from the server or want to **pipeline** multiple commands.
+
+            If you are only interested in getting the command executed, then
+            you should probably use :meth:`exec` instead.
 
         Returns a new :class:`~ts3.query_builder.TS3QueryBuilder` object with the
         first pipe being initialised with the *options* and *params*::
@@ -470,7 +503,7 @@ class TS3BaseConnection(object):
             # sendtextmessage targetmode=2 target=12 msg=Hello\sWorld!
             q = ts3conn.query("sendtextmessage", targetmode=2, target=12, msg="Hello World!")
 
-        Queries are executed using the
+        Queries are **executed** using the
         :meth:`~ts3.query_builder.TS3QueryBuilder.fetch`,
         :meth:`~ts3.query_builder.TS3QueryBuilder.first`
         or :meth:`~ts3.query_builder.TS3QueryBuilder.all` methods::
@@ -490,9 +523,6 @@ class TS3BaseConnection(object):
         :arg params:
             All initial parameters (key value pairs) in the first pipe.
 
-        :raises TS3InvalidCommandError:
-            if the *cmd* is not supported for the query target.
-
         :rtype: TS3QueryBuilder
         :returns:
             A query builder initialised with the *options* and *params*.
@@ -501,7 +531,6 @@ class TS3BaseConnection(object):
         """
         if cmd not in self.COMMAND_SET:
             raise TS3InvalidCommandError(cmd, self.COMMAND_SET)
-
         return TS3QueryBuilder(ts3conn=self, cmd=cmd).pipe(*options, **params)
 
     def exec_query(self, query, timeout=None):
@@ -527,6 +556,21 @@ class TS3BaseConnection(object):
         # To identify the response when we receive it.
         self._num_pending_queries += 1
         return self._wait_for_resp(timeout=timeout)
+
+    # TODO: Use this or not?
+    # def __getattr__(self, key):
+    #     """
+    #     Make the commands available as methods:
+    #
+    #     .. code-block:: python
+    #
+    #         ts3conn.use(sid=1)
+    #         ts3conn.clientkick(sid=1)
+    #     """
+    #     if key not in self.COMMAND_SET:
+    #         return super().__getattr__(key)
+    #     from functools import partial
+    #     return partial(self.exec, cmd=key)
 
 
 class TS3ServerConnection(TS3BaseConnection):
