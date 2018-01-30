@@ -33,11 +33,13 @@ This package contains a Python API for the:
 __version__ = "2.0.0"
 
 
-# We only import the high-level modules. If the user needs access to the
-# low-level modules, he can still import them manually, but I prefer to keep
-# the namespace clean.
-from . import query
+# Only export some high level modules.
+from . import common
+from . import definitions
+from . import escape
 from . import filetransfer
+from . import query
 from . import response
 
+# Only export some classes directly.
 from .common import TS3Error
