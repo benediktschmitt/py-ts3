@@ -35,9 +35,7 @@ This module contains a high-level API for the TeamSpeak 3 *Server Query* and
     The :class:`TS3ClientConnection` class has been added.
 """
 
-
-# Modules
-# ------------------------------------------------
+# std
 import re
 import time
 import socket
@@ -50,16 +48,12 @@ from .response import TS3Response, TS3QueryResponse, TS3Event
 from .query_builder import TS3QueryBuilder
 
 
-# Backward compatibility
-# ------------------------------------------------
 try:
     TimeoutError
 except NameError:
     TimeoutError = OSError
 
 
-# Data
-# ------------------------------------------------
 __all__ = [
     "TS3InvalidCommandError",
     "TS3QueryError",
@@ -69,11 +63,10 @@ __all__ = [
     "TS3ServerConnection",
     "TS3ClientConnection"]
 
+
 _logger = logging.getLogger(__name__)
 
 
-# Exceptions
-# ------------------------------------------------
 class TS3InvalidCommandError(TS3Error, ValueError):
     """
     Raised if a :class:`TS3QueryBuilder` is constructed with an unknown
@@ -132,8 +125,6 @@ class TS3RecvError(TS3Error):
         return tmp
 
 
-# Classes
-# ------------------------------------------------
 class TS3BaseConnection(object):
     """
     The TS3 query client.

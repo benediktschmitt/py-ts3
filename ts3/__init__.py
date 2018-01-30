@@ -30,13 +30,8 @@ This package contains a Python API for the:
 """
 
 
-# Data
-# ------------------------------------------------
 __version__ = "2.0.0"
 
-
-# Modules
-# ------------------------------------------------
 
 # We only import the high-level modules. If the user needs access to the
 # low-level modules, he can still import them manually, but I prefer to keep

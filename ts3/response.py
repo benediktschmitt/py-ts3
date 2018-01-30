@@ -26,9 +26,7 @@ This module contains the classes to parse a TeamSpeak 3 Server Query response
 and to structure the data.
 """
 
-
-# Modules
-# ------------------------------------------------
+# std
 import re
 import logging
 
@@ -37,8 +35,6 @@ from .escape import unescape
 from .common import TS3Error
 
 
-# Data
-# ------------------------------------------------
 __all__ = ["TS3Response",
            "TS3ParserError",
            "TS3QueryResponse",
@@ -48,8 +44,6 @@ __all__ = ["TS3Response",
 LOG = logging.getLogger(__file__)
 
 
-# Exceptions
-# ------------------------------------------------
 class TS3ParserError(TS3Error, ValueError):
     """
     Raised, if the data could not be parsed.
@@ -69,8 +63,6 @@ class TS3ParserError(TS3Error, ValueError):
         return tmp
 
 
-# Exceptions
-# ------------------------------------------------
 class TS3Response(object):
     """
     Parses **ONE** response and stores it's data. If you init an instance

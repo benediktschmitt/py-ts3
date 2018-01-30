@@ -25,9 +25,7 @@
 This module contains an API for the TS3 file transfer interface.
 """
 
-
-# Modules
-# ------------------------------------------------
+# std
 import socket
 import time
 import threading
@@ -36,8 +34,6 @@ import threading
 from .common import TS3Error
 
 
-# Data
-# ------------------------------------------------
 __all__ = [
     "TS3FileTransferError",
     "TS3UploadError",
@@ -45,8 +41,6 @@ __all__ = [
     "TS3FileTransfer"]
 
 
-# Exceptions
-# ------------------------------------------------
 class TS3FileTransferError(TS3Error):
     """
     This is the base class for all exceptions in this module.
@@ -93,8 +87,6 @@ class TS3DownloadError(TS3FileTransferError):
         return tmp
 
 
-# Classes
-# ------------------------------------------------
 class TS3FileTransfer(object):
     """
     A high-level TS3 file transfer handler.

@@ -25,7 +25,7 @@
 This module contains classes and functions used to build valid query strings
 and to unescape responses.
 
-.. versionchanged:: 3.0.0
+.. versionchanged:: 2.0.0
 
     The *TS3Escape* class has been replaced by the :func:`escape` and
     :func:`unescape` functions, because most of its methods became

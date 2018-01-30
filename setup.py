@@ -21,15 +21,13 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
-# Modules
-# ------------------------------------------------
+# std
 from setuptools import setup
+
+# local
 from ts3 import __version__
 
 
-# Main
-# ------------------------------------------------
 try:
     long_description = open("README.rst").read()
 except OSError:
