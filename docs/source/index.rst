@@ -13,7 +13,6 @@ Content
    changelog
    faq
    contribute
-   license
 
 Indices and tables
 ------------------

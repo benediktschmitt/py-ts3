@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyTS3'
-copyright = '20103-2014, Benedikt Schmitt'
+copyright = '20103-2014, The py-ts3 authors <see AUTHORS.txt>'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -214,7 +214,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'PyTS3.tex', 'PyTS3 Documentation',
-   'Benedikt Schmitt', 'manual'),
+   'The py-ts3 authors <see AUTHORS.txt>', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -244,7 +244,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'pyts3', 'PyTS3 Documentation',
-     ['Benedikt Schmitt'], 1)
+     ['The py-ts3 authors <see AUTHORS.txt>'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -258,7 +258,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'PyTS3', 'PyTS3 Documentation',
-   'Benedikt Schmitt', 'PyTS3', 'One line description of project.',
+   'The py-ts3 authors <see AUTHORS.txt>', 'PyTS3', 'One line description of project.',
    'Miscellaneous'),
 ]
 
