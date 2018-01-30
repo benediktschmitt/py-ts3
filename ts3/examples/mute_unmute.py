@@ -32,17 +32,17 @@ __all__ = [
 
 def mute_unmute(ts3conn):
     """Mutes the client for 10 seconds."""
-    ts3conn.clientupdate(client_input_muted=True, client_output_muted=True)
+    ts3conn.query("clientupdate", client_input_muted=True, client_output_muted=True).exec()
     time.sleep(10)
-    ts3conn.clientupdate(client_input_muted=False, client_output_muted=False)
+    ts3conn.query("clientupdate", client_input_muted=False, client_output_muted=False).exec()
     return None
 
 
 if __name__ == "__main__":
-    APIKEY = "XUCG-45BE-B80G-RIOO-OGV0-0NM8"
+    APIKEY = "JCVP-QUME-ZBQJ-N1NZ-6ETL-YCDJ"
     HOST = "localhost"
 
     with ts3.query.TS3ClientConnection(HOST) as ts3conn:
-        ts3conn.auth(apikey=APIKEY)
-        ts3conn.use()
+        ts3conn.query("auth", apikey=APIKEY).exec()
+        ts3conn.query("use")
         mute_unmute(ts3conn)

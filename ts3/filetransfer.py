@@ -176,12 +176,15 @@ class TS3FileTransfer(object):
 
         .. seealso::
 
-            * :meth:`~commands.TS3Commands.ftinitdownload`
+            * The TS3 *ftinitdownload* command
             * :func:`~urllib.request.urlretrieve`
         """
         ftid = self.get_ftid()
-        resp = self.ts3conn.ftinitdownload(
-            clientftfid=ftid, name=name, cid=cid, cpw=cpw, seekpos=seekpos)
+
+        query = self.ts3conn.query(
+            "ftinitdownload", clientftfid=ftid, name=name, cid=cid, cpw=cpw, seekpos=seekpos
+        )
+        resp = query.fetch()
 
         if query_resp_hook is not None:
             query_resp_hook(resp)
@@ -324,9 +327,10 @@ class TS3FileTransfer(object):
 
         ftid = self.get_ftid()
 
-        resp = self.ts3conn.ftinitupload(
-            clientftfid=ftid, name=name, cid=cid, cpw=cpw, size=size,
-            overwrite=overwrite, resume=resume)
+        query = self.ts3conn.query(
+            "ftinitupload", clientftfid=ftid, name=name, cid=cid, cpw=cpw,
+            size=size, overwrite=overwrite, resume=resume)
+        resp = query.fetch()
 
         if query_resp_hook is not None:
             query_resp_hook(resp)

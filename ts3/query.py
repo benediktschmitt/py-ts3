@@ -46,15 +46,13 @@ import logging
 
 # local
 try:
-    from commands import TS3ServerCommands, TS3ClientCommands
     from common import TS3Error
-    from escape import TS3Escape
     from response import TS3Response, TS3QueryResponse, TS3Event
+    from query_builder import TS3QueryBuilder
 except ImportError:
-    from .commands import TS3ServerCommands, TS3ClientCommands
     from .common import TS3Error
-    from .escape import TS3Escape
     from .response import TS3Response, TS3QueryResponse, TS3Event
+    from .query_builder import TS3QueryBuilder
 
 
 # Backward compatibility
@@ -68,6 +66,7 @@ except NameError:
 # Data
 # ------------------------------------------------
 __all__ = [
+    "TS3InvalidCommandError",
     "TS3QueryError",
     "TS3TimeoutError",
     "TS3RecvError",
@@ -80,6 +79,26 @@ _logger = logging.getLogger(__name__)
 
 # Exceptions
 # ------------------------------------------------
+class TS3InvalidCommandError(TS3Error, ValueError):
+    """Raised if a :class:`TS3QueryBuilder` is constructed with an unknown
+    command.
+
+    :seealso: :attr:`TS3BaseConnection.COMMAND_SET`
+    """
+
+    def __init__(self, cmd, valid_cmds):
+        #: The unknown command.
+        self.cmd = cmd
+
+        #: A set with all allowed (known) commands.
+        self.valid_cmds = valid_cmds
+        return None
+
+    def __str__(self):
+        tmp = "The command '{}' is unknown.".format(self.cmd)
+        return tmp
+
+
 class TS3QueryError(TS3Error):
     """
     Raised, if the error code of the response was not 0.
@@ -143,6 +162,11 @@ class TS3BaseConnection(object):
     .. warning::
 
         This class is **not thread safe**!
+
+    .. versionchanged:: 3.0.0
+
+        *   The *send()* method has been removed. Use :meth:`query` instead.
+        *   The :meth:`query` and :meth:`exec_query` methods have been added.
     """
 
     #: The default port to use when no port is specified.
@@ -156,6 +180,9 @@ class TS3BaseConnection(object):
     #:      b'TS3\n\r'
     #:      b'Welcome to the [...] on a specific command.\n\r'
     GREETING_LENGTH = None
+
+    #: A set with all known commands.
+    COMMAND_SET = set()
 
     def __init__(self, host=None, port=None):
         """
@@ -425,78 +452,101 @@ class TS3BaseConnection(object):
         self._telnet_conn.write(b"\n\r")
         return None
 
-    def send(self, command, common_parameters=None, unique_parameters=None,
-             options=None, properties=None, timeout=None):
+    def query(self, cmd, *options, **params):
         """
-        The general structure of a query command is::
+        Returns a new :class:`TS3QueryBuilder` object with the first pipe being
+        initialised with the *options* and *params*::
 
-            <command> <options> <common parameters> <unique parameters>|<unique parameters>|...
-            <command> <options> <common parameter> <properties>
+            # serverlist
+            q = ts3conn.query("serverlist")
 
-        Example::
+            # clientlist -uid -away -groups
+            q = ts3conn.query("clientlist", "uid", "away", "groups")
 
-            >>> # clientaddperm cldbid=16 permid=17276 permvalue=50 permskip=1|permid=21415 permvalue=20 permskip=0
-            >>> ts3conn.send(
-            ...     command = "clientaddperm",
-            ...     common_paramters = {"cldbid": 16},
-            ...     parameterlist = [
-            ...         {"permid": 17276, "permvalue": 50, "permskip": 1},
-            ...         {"permid": 21415, "permvalue": 20, "permskip": 0}
-            ...         ]
-            ...     )
-            >>> # clientlist -uid -away
-            >>> ts3conn.send(
-            ...     command = "clientlist",
-            ...     options = ["uid", "away"]
-            ...     )
+            # clientdbfind pattern=ScP
+            q = ts3conn.query("clientdbfind", pattern="ScP")
 
-        .. versionadded:: 2.0.0
+            # clientdbfind pattern=FPMPSC6MXqXq751dX7BKV0JniSo= -uid
+            q = ts3conn.query("clientdbfind", "uid", pattern="FPMPSC6MXqXq751dX7BKV0JniSo")
 
-            *   The *properties* parameter
+            # clientkick reasonid=5 reasonmsg=Go\saway! clid=1|clid=2|clid=3
+            q = ts3conn.query("clientkick", reasonid=5, reasonmsg="Go away!")\
+                .pipe(clid=1).pipe(clid=2).pipe(clid=3)
+
+            # channelmove cid=16 cpid=1 order=0
+            q = ts3conn.query("channelmove", cid=16, cpid=1, order=0)
+
+            # sendtextmessage targetmode=2 target=12 msg=Hello\sWorld!
+            q = ts3conn.query("sendtextmessage", targetmode=2, target=12, msg="Hello World!")
+
+        To execute the query, simply call the :meth:`~ts3.query_builder.TS3QueryBuilder.fetch`
+        method::
+
+            resp = q.fetch()
+
+        Or simply::
+
+            resp = ts3conn.query("serverlist").fetch()
+
+        If you are only interested in the first result of the response::
+
+            result = ts3conn.query("serverlist").first()
+
+        if you are not interested in the raw response itself, but simply the parsed list::
+
+            results = ts3conn.query("serverlist").all()
+
+        :arg options:
+            All initial options in the first pipe.
+        :arg params:
+            All initial parameters (key value pairs) in the first pipe.
+
+        :raises TS3InvalidCommandError:
+            if the *cmd* is not supported for the query target.
+
+        :rtype: TS3QueryBuilder
+        :returns:
+            A query builder initialised with the *options* and *params.
+        """
+        if cmd not in self.COMMAND_SET:
+            raise TS3InvalidCommandError(cmd, self.COMMAND_SET)
+
+        return TS3QueryBuilder(ts3conn=self, cmd=cmd).pipe(*options, **params)
+
+    def exec_query(self, query, timeout=None):
+        """
+        Sends the *query* to the server, waits and returns for the
+        response.
+
+        :arg TS3QueryBuilder query:
+            The query which should be executed.
+
+        :rtype: TS3QueryResponse
+        :returns:
+            A object which contains all information about the response.
 
         .. seealso::
 
-            :meth:`recv`, :meth:`wait_for_resp`
+            :meth:`recv`, :meth:`wait_for_resp`, :meth:`query`
         """
-        # Escape the command and build the final query command string.
-        if not isinstance(command, str):
-            raise TypeError("*command* has to be a string.")
-
-        common_parameters = TS3Escape.escape_parameters(common_parameters)
-        unique_parameters = TS3Escape.escape_parameterlist(unique_parameters)
-        options = TS3Escape.escape_options(options)
-        properties = " ".join(properties or [])
-
-        query_command = command\
-                        + " " + common_parameters\
-                        + " " + properties\
-                        + " " + unique_parameters\
-                        + " " + options \
-                        + "\n\r"
-        query_command = query_command.encode()
-
-        # Send the command.
-        self._telnet_conn.write(query_command)
+        q = query.compile()
+        self._telnet_conn.write(q)
 
         # To identify the response when we receive it.
         self._num_pending_queries += 1
-
         return self._wait_for_resp(timeout=timeout)
 
 
-class TS3ServerConnection(TS3BaseConnection, TS3ServerCommands):
+class TS3ServerConnection(TS3BaseConnection):
     """
-    TS3 Server Query client.
+    Use this class to connect to a **TS3 Server**::
 
-    This class provides the command wrapper capabilities
-    :class:`~commands.TS3ServerCommands` and the ability to handle a
-    connection to a TeamSpeak 3 server of :class:`TS3BaseConnection`.
+        with TS3ServerConnection("localhost") as tsconn:
+            ts3conn.query("login").params("serveradmin", "MyStupidPassword").exec()
+            ts3conn.query("use").exec()
+            ts3conn.query("clientkick", clid=1).exec()
 
-    Use this class to connect to a TS3 Server.
-
-    >>> with TS3ServerConnection("localhost") as tsconn:
-    ...     ts3conn.login("serveradmin", "MyStupidPassword")
-    ...     ts3conn.clientkick(1)
+            resp = ts3conn.query("serverlist").all()
     """
 
     #: The default port of the server query service.
@@ -508,38 +558,143 @@ class TS3ServerConnection(TS3BaseConnection, TS3ServerCommands):
     #:      b'Welcome to the [...] on a specific command.\n\r'
     GREETING_LENGTH = 2
 
-    def _return_proxy(
-            self, command, common_parameters=None, unique_parameters=None,
-            options=None, properties=None
-        ):
-        """
-        Executes the command created with a method of TS3Commands directly.
-        """
-        return TS3BaseConnection.send(
-            self, command, common_parameters, unique_parameters, options,
-            properties)
+    #: All server query commands as returned by the *help* command,
+    #: excluding *quit*. Use :meth:`close` instead.
+    COMMAND_SET = frozenset([
+        "help",
+        "login",
+        "logout",
+        "version",
+        "hostinfo",
+        "instanceinfo",
+        "instanceedit",
+        "bindinglist",
+        "use",
+        "serverlist",
+        "serveridgetbyport",
+        "serverdelete",
+        "servercreate",
+        "serverstart",
+        "serverstop",
+        "serverprocessstop",
+        "serverinfo",
+        "serverrequestconnectioninfo",
+        "servertemppasswordadd",
+        "servertemppassworddel",
+        "servertemppasswordlist",
+        "serveredit",
+        "servergrouplist",
+        "servergroupadd",
+        "servergroupdel",
+        "servergroupcopy",
+        "servergrouprename",
+        "servergrouppermlist",
+        "servergroupaddperm",
+        "servergroupdelperm",
+        "servergroupaddclient",
+        "servergroupdelclient",
+        "servergroupclientlist",
+        "servergroupsbyclientid",
+        "servergroupautoaddperm",
+        "servergroupautodelperm",
+        "serversnapshotcreate",
+        "serversnapshotdeploy",
+        "servernotifyregister",
+        "servernotifyunregister",
+        "sendtextmessage",
+        "logview",
+        "logadd",
+        "gm",
+        "channellist",
+        "channelinfo",
+        "channelfind",
+        "channelmove",
+        "channelcreate",
+        "channeldelete",
+        "channeledit",
+        "channelgrouplist",
+        "channelgroupadd",
+        "channelgroupdel",
+        "channelgroupcopy",
+        "channelgrouprename",
+        "channelgroupaddperm",
+        "channelgrouppermlist",
+        "channelgroupdelperm",
+        "channelgroupclientlist",
+        "setclientchannelgroup",
+        "channelpermlist",
+        "channeladdperm",
+        "channeldelperm",
+        "clientlist",
+        "clientinfo",
+        "clientfind",
+        "clientedit",
+        "clientdblist",
+        "clientdbinfo",
+        "clientdbfind",
+        "clientdbedit",
+        "clientdbdelete",
+        "clientgetids",
+        "clientgetdbidfromuid",
+        "clientgetnamefromuid",
+        "clientgetnamefromdbid",
+        "clientsetserverquerylogin",
+        "clientupdate",
+        "clientmove",
+        "clientkick",
+        "clientpoke",
+        "clientpermlist",
+        "clientaddperm",
+        "clientdelperm",
+        "channelclientpermlist",
+        "channelclientaddperm",
+        "channelclientdelperm",
+        "permissionlist",
+        "permidgetbyname",
+        "permoverview",
+        "permget",
+        "permfind",
+        "permreset",
+        "privilegekeylist",
+        "privilegekeyadd",
+        "privilegekeydelete",
+        "privilegekeyuse",
+        "messagelist",
+        "messageadd",
+        "messagedel",
+        "messageget",
+        "messageupdateflag",
+        "complainlist",
+        "complainadd",
+        "complaindelall",
+        "complaindel",
+        "banclient",
+        "banlist",
+        "banadd",
+        "bandel",
+        "bandelall",
+        "ftinitupload",
+        "ftinitdownload",
+        "ftlist",
+        "ftgetfilelist",
+        "ftgetfileinfo",
+        "ftstop",
+        "ftdeletefile",
+        "ftcreatedir",
+        "ftrenamefile",
+        "customsearch",
+        "custominfo",
+        "whoami"
+    ])
 
-    def quit(self):
-        """
-        Closes the connection.
-        """
-        self.close()
-        return None
 
-
-class TS3ClientConnection(TS3BaseConnection, TS3ClientCommands):
+class TS3ClientConnection(TS3BaseConnection):
     """
-    TS3 Client Query client.
+    Use this class if you want to connect to a **TS3 Client**::
 
-    This class provides the command wrapper capabilities
-    :class:`~commands.TS3ClientCommands` and the ability to handle a
-    connection to a TeamSpeak 3 server of :class:`TS3BaseConnection`.
-
-    Use this class if you want to connect to a TS3 Client.
-
-    >>> with TS3ClientConnection("localhost") as tsconn:
-    ...     ts3conn.auth(apikey="AAAA-BBBB-CCCC-DDDD-EEEE")
-    ...     ts3conn.use()
+        with TS3ClientConnection("localhost") as tsconn:
+            ts3conn.query("auth", apikey="AAAA-BBBB-CCCC-DDDD-EEEE").exec()
+            ts3conn.query("use").exec()
     """
 
     #: The default port of the server query service.
@@ -553,20 +708,101 @@ class TS3ClientConnection(TS3BaseConnection, TS3ClientCommands):
     #:      b'selected schandlerid=1\n\r'
     GREETING_LENGTH = 4
 
-    def _return_proxy(
-            self, command, common_parameters=None, unique_parameters=None,
-            options=None, properties=None
-        ):
-        """
-        Executes the command created with a method of TS3Commands directly.
-        """
-        return TS3BaseConnection.send(
-            self, command, common_parameters, unique_parameters, options,
-            properties)
-
-    def quit(self):
-        """
-        Closes the connection.
-        """
-        self.close()
-        return None
+    #: All client query commands as returned by the *help* command,
+    #: excluding *quit*. Use :meth:`close` instead.
+    COMMAND_SET = frozenset([
+        "help",
+        "quit",
+        "use",
+        "auth",
+        "banadd",
+        "banclient",
+        "bandelall",
+        "bandel",
+        "banlist",
+        "channeladdperm",
+        "channelclientaddperm",
+        "channelclientdelperm",
+        "channelclientlist",
+        "channelclientpermlist",
+        "channelconnectinfo",
+        "channelcreate",
+        "channeldelete",
+        "channeldelperm",
+        "channeledit",
+        "channelgroupadd",
+        "channelgroupaddperm",
+        "channelgroupclientlist",
+        "channelgroupdel",
+        "channelgroupdelperm",
+        "channelgrouplist",
+        "channelgrouppermlist",
+        "channellist",
+        "channelmove",
+        "channelpermlist",
+        "channelvariable",
+        "clientaddperm",
+        "clientdbdelete",
+        "clientdbedit",
+        "clientdblist",
+        "clientdelperm",
+        "clientgetdbidfromuid",
+        "clientgetids",
+        "clientgetnamefromdbid",
+        "clientgetnamefromuid",
+        "clientgetuidfromclid",
+        "clientkick",
+        "clientlist",
+        "clientmove",
+        "clientmute",
+        "clientunmute",
+        "clientnotifyregister",
+        "clientnotifyunregister",
+        "clientpermlist",
+        "clientpoke",
+        "clientupdate",
+        "clientvariable",
+        "complainadd",
+        "complaindelall",
+        "complaindel",
+        "complainlist",
+        "currentschandlerid",
+        "ftcreatedir",
+        "ftdeletefile",
+        "ftgetfileinfo",
+        "ftgetfilelist",
+        "ftinitdownload",
+        "ftinitupload",
+        "ftlist",
+        "ftrenamefile",
+        "ftstop",
+        "hashpassword",
+        "messageadd",
+        "messagedel",
+        "messageget",
+        "messagelist",
+        "messageupdateflag",
+        "permoverview",
+        "sendtextmessage",
+        "serverconnectinfo",
+        "serverconnectionhandlerlist",
+        "servergroupaddclient",
+        "servergroupadd",
+        "servergroupaddperm",
+        "servergroupclientlist",
+        "servergroupdelclient",
+        "servergroupdel",
+        "servergroupdelperm",
+        "servergrouplist",
+        "servergrouppermlist",
+        "servergroupsbyclientid",
+        "servervariable",
+        "setclientchannelgroup",
+        "tokenadd",
+        "tokendelete",
+        "tokenlist",
+        "tokenuse",
+        "verifychannelpassword",
+        "verifyserverpassword",
+        "whoami"
+    ])

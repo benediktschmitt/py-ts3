@@ -133,16 +133,12 @@ class ChannelTreeNode(object):
         Returns the channel tree from the virtual server identified with
         *sid*, using the *TS3Connection* ts3conn.
         """
-        ts3conn.use(sid=sid, virtual=True)
+        ts3conn.query("use", sid=sid, virtual=True).exec()
 
-        resp = ts3conn.serverinfo()
-        serverinfo = resp.parsed[0]
+        serverinfo = ts3conn.query("serverinfo").first()
+        channellist = ts3conn.query("channellist").all()
+        clientlist = ts3conn.query("clientlist").all()
 
-        resp = ts3conn.channellist()
-        channellist = resp.parsed
-
-        resp = ts3conn.clientlist()
-        clientlist = resp.parsed
         # channel id -> clients
         clientlist = {cid: [client for client in clientlist \
                             if client["cid"] == cid]
@@ -150,8 +146,8 @@ class ChannelTreeNode(object):
 
         root = cls.init_root(serverinfo)
         for channel in channellist:
-            resp = ts3conn.channelinfo(cid=channel["cid"])
-            channelinfo = resp.parsed[0]
+            channelinfo = ts3conn.query("channelinfo", cid=channel["cid"]).first()
+
             # This makes sure, that *cid* is in the dictionary.
             channelinfo.update(channel)
 
@@ -238,5 +234,5 @@ if __name__ == "__main__":
     from def_param import *
 
     with ts3.query.TS3ServerConnection(HOST, PORT) as ts3conn:
-        ts3conn.login(client_login_name=USER, client_login_password=PASS)
+        ts3conn.query("login", client_login_name=USER, client_login_password=PASS).exec()
         view(ts3conn, sid=1)

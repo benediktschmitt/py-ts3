@@ -45,7 +45,7 @@ def endless_poke(ts3conn, nickname, msg=None, num=100, delay=1):
         msg = "Stop annoying me!"
 
     # Get the client ids
-    clients = ts3conn.clientfind(pattern=nickname)
+    clients = ts3conn.query("clientfind", pattern=nickname).all()
     clients = [client["clid"] for client in clients]
 
     # Break, if there's no client.
@@ -56,7 +56,7 @@ def endless_poke(ts3conn, nickname, msg=None, num=100, delay=1):
     i = 0
     while num == -1 or i < num:
         for clid in clients:
-            ts3conn.clientpoke(msg=msg, clid=clid)
+            ts3conn.query("clientpoke", msg=msg, clid=clid).exec()
         time.sleep(delay)
     return None
 
@@ -68,6 +68,6 @@ if __name__ == "__main__":
     from def_param import *
 
     with ts3.query.TS3ServerConnection(HOST, PORT) as ts3conn:
-        ts3conn.login(client_login_name=USER, client_login_password=PASS)
-        ts3conn.use(sid=SID)
+        ts3conn.query("login", client_login_name=USER, client_login_password=PASS).exec()
+        ts3conn.query("use", sid=SID).exec()
         endless_poke(ts3conn, "Ben", delay=0.25)

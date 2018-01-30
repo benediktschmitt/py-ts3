@@ -34,10 +34,10 @@ import logging
 
 # local
 try:
-    from escape import TS3Escape
+    from escape import unescape
     from common import TS3Error
 except ImportError:
-    from .escape import TS3Escape
+    from .escape import unescape
     from .common import TS3Error
 
 
@@ -247,8 +247,8 @@ class TS3Response(object):
             LOG.warning("Failed to decode the value part properly: '%s'.", err)
             val = val.decode(errors="ignore")
 
-        key = TS3Escape.unescape(key)
-        val = TS3Escape.unescape(val)
+        key = unescape(key)
+        val = unescape(val)
         return (key, val)
 
     def _parse_item(self, item):

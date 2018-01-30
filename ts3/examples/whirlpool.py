@@ -46,14 +46,14 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
     """
     # Countdown till whirlpool
     for i in range(5, 0, -1):
-        ts3conn.sendtextmessage(
+        ts3conn.query("sendtextmessage",
             targetmode=ts3.definitions.TextMessageTargetMode.SERVER,
-            target=0, msg="Whirpool in {}s".format(i))
+            target=0, msg="Whirpool in {}s".format(i)).exec()
         time.sleep(1)
 
     # Fetch the clientlist and the channellist.
-    clientlist = ts3conn.clientlist()
-    channellist = ts3conn.channellist()
+    clientlist = ts3conn.query("clientlist").all()
+    channellist = ts3conn.query("channellist").all()
 
     # Ignore query clients
     clientlist = [client for client in clientlist \
@@ -73,7 +73,7 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
                 clid = client["clid"]
                 cid = random.choice(channellist)["cid"]
                 try:
-                    ts3conn.clientmove(clid=clid, cid=cid)
+                    ts3conn.query("clientmove", clid=clid, cid=cid).exec()
                 except ts3.query.TS3QueryError as err:
                     # Only ignore 'already member of channel error'
                     if err.resp.error["id"] != "770":
@@ -83,7 +83,7 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
         # Move all clients back
         for client in clientlist:
             try:
-                ts3conn.clientmove(clid=client["clid"], cid=client["cid"])
+                ts3conn.query("clientmove", clid=client["clid"], cid=client["cid"]).exec()
             except ts3.query.TS3QueryError as err:
                 if err.resp.error["id"] != "770":
                     raise
@@ -97,6 +97,6 @@ if __name__ == "__main__":
     from def_param import *
 
     with ts3.query.TS3ServerConnection(HOST, PORT) as ts3conn:
-        ts3conn.login(client_login_name=USER, client_login_password=PASS)
-        ts3conn.use(sid=SID)
+        ts3conn.query("login", client_login_name=USER, client_login_password=PASS).exec()
+        ts3conn.query("use", sid=SID).exec()
         whirlpool(ts3conn)

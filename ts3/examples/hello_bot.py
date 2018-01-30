@@ -36,7 +36,7 @@ def hello_bot(ts3conn, msg=None):
         msg = "Hello :)"
 
     # Register for the event.
-    ts3conn.servernotifyregister(event="server")
+    ts3conn.query("servernotifyregister", event="server").exec()
 
     while True:
         ts3conn.send_keepalive()
@@ -52,7 +52,7 @@ def hello_bot(ts3conn, msg=None):
             # Greet new clients.
             if event[0]["reasonid"] == "0":
                 print("Client '{}' connected.".format(event[0]["client_nickname"]))
-                ts3conn.clientpoke(clid=event[0]["clid"], msg=msg)
+                ts3conn.query("clientpoke", clid=event[0]["clid"], msg=msg).exec()
     return None
 
 
@@ -61,6 +61,6 @@ if __name__ == "__main__":
     from def_param import *
 
     with ts3.query.TS3ServerConnection(HOST, PORT) as ts3conn:
-        ts3conn.login(client_login_name=USER, client_login_password=PASS)
-        ts3conn.use(sid=SID)
+        ts3conn.query("login", client_login_name=USER, client_login_password=PASS).exec()
+        ts3conn.query("use", sid=SID).exec()
         hello_bot(ts3conn)
