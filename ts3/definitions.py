@@ -22,14 +22,15 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
+:mod:`ts3.definitions`
+======================
+
 This module contains the definitions described in the TeamSpeak 3 Server Manual,
 so that the variables can be used instead of the constans to improve the
 readability of the code.
 """
 
 
-# Data
-# ------------------------------------------------
 __all__ = [
     "HostMessageMode",
     "HostBannerMode",
@@ -44,8 +45,6 @@ __all__ = [
     ]
 
 
-# Definitions
-# ------------------------------------------------
 class HostMessageMode(object):
 
     #: don't display anything

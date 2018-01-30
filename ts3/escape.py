@@ -22,6 +22,9 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
+:mod:`ts3.escape`
+=================
+
 This module contains classes and functions used to build valid query strings
 and to unescape responses.
 

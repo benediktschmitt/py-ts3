@@ -22,18 +22,17 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
+:mod:`ts3.common`
+=================
+
 This module contains common functions, classes and exceptions used in almost
 all modules of the ts3 package.
 """
 
 
-# Data
-# ------------------------------------------------
 __all__ = ["TS3Error"]
 
 
-# Exceptions
-# ------------------------------------------------
 class TS3Error(Exception):
     """
     This is the base class for all exceptions in this package.

@@ -22,13 +22,13 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
+:mod:`ts3.query_builder`
+========================
+
 This module contains a flexible query builder which is modeled after the *COMMAND SYNTAX* section
 in the TS3 Server Query Manual.
 
-.. versionadded:: 3.0.0
-
-    The query builder replaces the *ts3.commands* and *ts3.escape* modules
-    and made the *TS3BaseConnection.send()* method obsolete.
+:versionadded: 2.0.0
 """
 
 # local
@@ -56,7 +56,19 @@ class TS3QueryBuilder(object):
         # response object.
         resp = TS3QueryBuilder(ts3conn, "serverlist").all()
 
-    :seealso: :meth:`TS3BaseConnection.query`, :meth:`TS3BaseConnection.exec_query`
+    Please note, that query builder objects are *immutable*.
+
+    :arg ~ts3.query.TS3BaseConnection ts3conn:
+        The TS3 connection which will be used to send the query.
+    :arg str cmd:
+        The name of the command to execute, e.g. ``"clientkick"``.
+    :arg list pipes:
+        A list of ``(options, params)`` in which options is a
+        *set* and *params* is a *dictionary*.
+
+    :seealso: \
+        :meth:`ts3.query.TS3BaseConnection.query`,
+        :meth:`ts3.query.TS3BaseConnection.exec_query`
 
     :todo: What about the crazy *properties*??
     """

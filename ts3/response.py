@@ -22,6 +22,9 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
+:mod:`ts3.response`
+===================
+
 This module contains the classes to parse a TeamSpeak 3 Server Query response
 and to structure the data.
 """

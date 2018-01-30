@@ -22,11 +22,30 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
+.. _api:
+
+:mod:`ts3`
+==========
+
+.. toctree::
+    :maxdepth: 1
+    :titlesonly:
+    :glob:
+
+    common
+    escape
+    response
+    definitions
+    query
+    query_builder
+    filetransfer
+
 This package contains a Python API for the:
-    * TeamSpeak 3 Server Query
-    * TeamSpeak 3 Client Query
-    * TeamSpeak 3 Filetransfer Interface
-    * TeamSpeak 3 Query Events
+
+    * TeamSpeak 3 Server Query,
+    * TeamSpeak 3 Client Query,
+    * TeamSpeak 3 Filetransfer Interface,
+    * and TeamSpeak 3 Query Events.
 """
 
 

@@ -22,6 +22,9 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
+:mod:`ts3.filetransfer`
+=======================
+
 This module contains an API for the TS3 file transfer interface.
 """
 

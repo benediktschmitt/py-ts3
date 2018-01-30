@@ -22,6 +22,9 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
+:mod:`ts3.query`
+================
+
 This module contains a high-level API for the TeamSpeak 3 *Server Query* and
 *Client Query plugin*.
 
@@ -151,7 +154,7 @@ class TS3BaseConnection(object):
 
         This class is **not thread safe**!
 
-    .. versionchanged:: 3.0.0
+    .. versionchanged:: 2.0.0
 
         *   The *send()* method has been removed. Use :meth:`query` instead.
         *   The :meth:`query` and :meth:`exec_query` methods have been added.
@@ -354,7 +357,7 @@ class TS3BaseConnection(object):
 
         .. code-block:: python3
 
-            ts3conn.servernotifyregister(event="server")
+            ts3conn.query("servernotifyregister", event="server").exec()
             while True:
                 ts3conn.send_keepalive()
                 try:
@@ -442,8 +445,8 @@ class TS3BaseConnection(object):
             :meth:`~ts3.query_builder.TS3QueryBuilder.first`
             or :meth:`~ts3.query_builder.TS3QueryBuilder.all` is called.
 
-        Returns a new :class:`TS3QueryBuilder` object with the first pipe being
-        initialised with the *options* and *params*::
+        Returns a new :class:`~ts3.query_builder.TS3QueryBuilder` object with the
+        first pipe being initialised with the *options* and *params*::
 
             # serverlist
             q = ts3conn.query("serverlist")
@@ -493,6 +496,8 @@ class TS3BaseConnection(object):
         :rtype: TS3QueryBuilder
         :returns:
             A query builder initialised with the *options* and *params*.
+
+        :versionadded: 2.0.0
         """
         if cmd not in self.COMMAND_SET:
             raise TS3InvalidCommandError(cmd, self.COMMAND_SET)
@@ -511,9 +516,8 @@ class TS3BaseConnection(object):
         :returns:
             A object which contains all information about the response.
 
-        .. seealso::
-
-            :meth:`recv`, :meth:`wait_for_resp`, :meth:`query`
+        :seealso: :meth:`recv`, :meth:`wait_for_resp`, :meth:`query`
+        :versionadded: 2.0.0
         """
         q = query.compile()
         self._telnet_conn.write(q)
