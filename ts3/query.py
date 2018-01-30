@@ -75,7 +75,8 @@ _logger = logging.getLogger(__name__)
 # Exceptions
 # ------------------------------------------------
 class TS3InvalidCommandError(TS3Error, ValueError):
-    """Raised if a :class:`TS3QueryBuilder` is constructed with an unknown
+    """
+    Raised if a :class:`TS3QueryBuilder` is constructed with an unknown
     command.
 
     :seealso: :attr:`TS3BaseConnection.COMMAND_SET`
@@ -141,18 +142,19 @@ class TS3BaseConnection(object):
     TeamSpeak 3 query service. For a more convenient interface, use the
     :class:`TS3ServerConnection` or :class:`TS3ClientConnection` class.
 
-    Note, that this class supports the ``with`` statement:
+    Note, that this class supports the *with* statement::
 
-        >>> with TS3BaseConnection() as ts3conn:
-        ...     ts3conn.open("localhost")
-        ...     ts3conn.send(...)
-        >>> # This is equal too:
-        >>> ts3conn = TS3BaseConnection()
-        >>> try:
-        ...     ts3conn.open("localhost")
-        ...     ts3conn.send(...)
-        ... finally:
-        ...     ts3conn.close()
+        with TS3BaseConnection() as ts3conn:
+            ts3conn.open("localhost")
+            ts3conn.send(...)
+
+        # You can also use an equal try-finally construct.
+        ts3conn = TS3BaseConnection()
+        try:
+            ts3conn.open("localhost")
+            ts3conn.send(...)
+        finally:
+            ts3conn.close()
 
     .. warning::
 
@@ -238,13 +240,6 @@ class TS3BaseConnection(object):
             If the client is already connected.
         :raises TimeoutError:
             If the connection can not be created.
-
-        .. versionchanged:: 2.0.0
-
-            This method does not consume the greeting anymore::
-
-                b'TS3\n\r'
-                b'Welcome to the [...] on a specific command.\n\r'
         """
         port = port or self.DEFAULT_PORT
 
@@ -449,6 +444,13 @@ class TS3BaseConnection(object):
 
     def query(self, cmd, *options, **params):
         """
+        .. note::
+
+            The queries are **not executed** as long as not
+            :meth:`~ts3.query_builder.TS3QueryBuilder.fetch`,
+            :meth:`~ts3.query_builder.TS3QueryBuilder.first`
+            or :meth:`~ts3.query_builder.TS3QueryBuilder.all` is called.
+
         Returns a new :class:`TS3QueryBuilder` object with the first pipe being
         initialised with the *options* and *params*::
 
@@ -465,7 +467,7 @@ class TS3BaseConnection(object):
             q = ts3conn.query("clientdbfind", "uid", pattern="FPMPSC6MXqXq751dX7BKV0JniSo")
 
             # clientkick reasonid=5 reasonmsg=Go\saway! clid=1|clid=2|clid=3
-            q = ts3conn.query("clientkick", reasonid=5, reasonmsg="Go away!")\
+            q = ts3conn.query("clientkick", reasonid=5, reasonmsg="Go away!")\\
                 .pipe(clid=1).pipe(clid=2).pipe(clid=3)
 
             # channelmove cid=16 cpid=1 order=0
@@ -474,22 +476,20 @@ class TS3BaseConnection(object):
             # sendtextmessage targetmode=2 target=12 msg=Hello\sWorld!
             q = ts3conn.query("sendtextmessage", targetmode=2, target=12, msg="Hello World!")
 
-        To execute the query, simply call the :meth:`~ts3.query_builder.TS3QueryBuilder.fetch`
-        method::
+        Queries are executed using the
+        :meth:`~ts3.query_builder.TS3QueryBuilder.fetch`,
+        :meth:`~ts3.query_builder.TS3QueryBuilder.first`
+        or :meth:`~ts3.query_builder.TS3QueryBuilder.all` methods::
 
+            # Returns a TS3Response object.
             resp = q.fetch()
 
-        Or simply::
+            # Returns the first item in the response or *None*.
+            resp = q.first()
 
-            resp = ts3conn.query("serverlist").fetch()
-
-        If you are only interested in the first result of the response::
-
-            result = ts3conn.query("serverlist").first()
-
-        if you are not interested in the raw response itself, but simply the parsed list::
-
-            results = ts3conn.query("serverlist").all()
+            # Returns a list with all items in the response rather
+            # than a TS3Response object.
+            resp = q.all()
 
         :arg options:
             All initial options in the first pipe.
@@ -501,7 +501,7 @@ class TS3BaseConnection(object):
 
         :rtype: TS3QueryBuilder
         :returns:
-            A query builder initialised with the *options* and *params.
+            A query builder initialised with the *options* and *params*.
         """
         if cmd not in self.COMMAND_SET:
             raise TS3InvalidCommandError(cmd, self.COMMAND_SET)

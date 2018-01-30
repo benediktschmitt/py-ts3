@@ -44,7 +44,7 @@ __all__ = [
 class TS3QueryBuilder(object):
     """Simplifies building a valid TS3 query.
 
-    .. code-block::
+    .. code-block:: python
 
         # When you are interested in the whole response.
         resp = TS3QueryBuilder(ts3conn, "clientkick").pipe(pattern="Ben").fetch()
@@ -77,21 +77,24 @@ class TS3QueryBuilder(object):
         return TS3QueryBuilder(self._ts3conn, self._cmd, pipes_cp)
 
     def pipe(self, *options, **params):
-        """Starts a new pipe::
+        """
+        Starts a new pipe:
 
-            q = ts3conn.query("clientkick")\
-                .pipe(clid=1).pipe(clid=2).pipe(clid=3)
+        .. code-block:: python
+
+            q = ts3conn.query("clientkick").pipe(clid=1).pipe(clid=2).pipe(clid=3)
         """
         cp = self.copy()
         cp._pipes.append((options, params))
         return cp
 
     def options(self, *options):
-        """Adds the options to the last pipe::
+        """
+        Adds the options to the last pipe:
 
-            q = q.pipe().options("foo")\
-                .pipe().options("bar")\
-                .pipe().options("baz")
+        .. code-block:: python
+
+            q = q.pipe().options("foo").pipe().options("bar").pipe().options("baz")
 
         You should prefer passing the options directly to :meth:`pipe` as it
         is more readable.
@@ -102,12 +105,12 @@ class TS3QueryBuilder(object):
         return cp
 
     def params(self, **params):
-        """Adds the parameters to the last pipe::
+        """
+        Adds the parameters to the last pipe:
 
-            q = ts3conn.query("clientkick")\
-                .pipe().options(clid=1)\
-                .pipe().options(clid=2)\
-                .pipe().options(clid=3)
+        .. code-block:: python
+
+            q = ts3conn.query("clientkick").pipe().options(clid=1).pipe().options(clid=2)
 
         You should prefer passing the options directly to :meth:`pipe` as it
         is more readable.
@@ -118,9 +121,12 @@ class TS3QueryBuilder(object):
         return cp
 
     def compile(self):
-        """Compiles the query into a TS3 query command and returns it::
+        """
+        Compiles the query into a TS3 query command and returns it:
 
-            >>> q = TS3QueryBuilder("clientkick", reasonid=5, reasonmsg="Go away!")\
+        .. code-block:: python
+
+            >>> q = TS3QueryBuilder("clientkick", reasonid=5, reasonmsg="Go away!")\\
             ...     .pipe(clid=1).pipe(clid=2).pipe(clid=3)
             >>> q.compile()
             'clientkick reasonid=5 reasonmsg=Go\saway! clid=1|clid=2|clid=3'

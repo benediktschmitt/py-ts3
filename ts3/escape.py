@@ -56,7 +56,10 @@ _ESCAPE_MAP = [
 
 
 def escape(value):
-    """Escapes the *value* as required by the Server Query Manual::
+    """
+    Escapes the *value* as required by the Server Query Manual:
+
+    .. code-block:: python
 
         >>> escape('Hello World')
         'Hello\\sWorld'
@@ -79,7 +82,10 @@ def escape(value):
 
 
 def unescape(value):
-    """Undo the escaping used for transport::
+    """
+    Undo the escaping used for transport:
+
+    .. code-block:: python
 
         >>> unescape('Hello\\sWorld')
         'Hello World'

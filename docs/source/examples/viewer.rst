@@ -1,6 +1,6 @@
 Viewer
 ======
 
-Download: :download:`viewer.py </../../ts3/examples/viewer.py>`
+Download: :download:`viewer.py </../../examples/viewer.py>`
 
-.. literalinclude:: /../../ts3/examples/viewer.py
+.. literalinclude:: /../../examples/viewer.py
