@@ -191,9 +191,6 @@ class TS3QueryBuilder(object):
         """
         return self._ts3conn.exec_query(self)
 
-    #: Alias for :meth:`fetch`, but indicates that the result is not needed.
-    go = fetch
-
     def first(self):
         """Executes the query and returns the first item in the parsed
         response. Use this method if you are only interested in the
