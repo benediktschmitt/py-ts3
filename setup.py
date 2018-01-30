@@ -49,7 +49,7 @@ setup(
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
     packages = ["ts3"],
     license = license_,
-    install_requires = ["blinker"],
+    install_requires = [],
     include_package_data = True,
     classifiers = [
         "License :: OSI Approved :: MIT License",
