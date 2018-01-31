@@ -436,7 +436,7 @@ class TS3BaseConnection(object):
         self._telnet_conn.write(b"\n\r")
         return None
 
-    def exec(self, cmd, *options, **params):
+    def exec_(self, cmd, *options, **params):
         """
         Sends a command to the ts3 server and returns the response. Check out the :meth:`query`
         if you want to make use of pipelining.
