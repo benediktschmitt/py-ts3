@@ -18,8 +18,6 @@ def mute_unmute(ts3conn):
 
 
 if __name__ == "__main__":
-    APIKEY = "JCVP-QUME-ZBQJ-N1NZ-6ETL-YCDJ"
-
     with ts3.query.TS3ClientConnection(HOST) as ts3conn:
         ts3conn.exec_("auth", apikey=APIKEY)
         ts3conn.exec_("use")
