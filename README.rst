@@ -1,7 +1,7 @@
 PyTS3
 =====
 
-`Installation <#installation>`
+`Installation <#installation>`_
 ~ `TS3 Server Whitelist <#ts3-server-whitelist>`_
 ~ `Introduction <#introduction>`_
 ~ `Examples <#examples>`_
