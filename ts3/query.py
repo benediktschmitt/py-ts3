@@ -140,13 +140,13 @@ class TS3BaseConnection(object):
 
         with TS3BaseConnection() as ts3conn:
             ts3conn.open("localhost")
-            ts3conn.send(...)
+            ts3conn.exec_("use", sid=1)
 
         # You can also use an equal try-finally construct.
         ts3conn = TS3BaseConnection()
         try:
             ts3conn.open("localhost")
-            ts3conn.send(...)
+            ts3conn.exec_("use", sid=1)
         finally:
             ts3conn.close()
 
@@ -156,8 +156,8 @@ class TS3BaseConnection(object):
 
     .. versionchanged:: 2.0.0
 
-        *   The *send()* method has been removed. Use :meth:`query` instead.
-        *   The :meth:`query` and :meth:`exec_query` methods have been added.
+        The *send()* method has been removed, use :meth:`exec_`, :meth:`query`
+        instead.
     """
 
     #: The default port to use when no port is specified.
@@ -259,7 +259,6 @@ class TS3BaseConnection(object):
         """
         if self._telnet_conn is not None:
             try:
-                # Sent it directly, to avoid a recursive call of this method.
                 self._telnet_conn.write(b"quit\n\r")
             finally:
                 self._telnet_conn.close()
@@ -438,16 +437,16 @@ class TS3BaseConnection(object):
 
     def exec_(self, cmd, *options, **params):
         """
-        Sends a command to the ts3 server and returns the response. Check out the :meth:`query`
-        if you want to make use of pipelining.
+        Sends a command to the TS3 server and returns the response. Check out the :meth:`query`
+        method if you want to make use of pipelining and more control.
 
         .. code-block:: python
 
             # use sid=1
-            ts3conn.exec("use", sid=1)
+            ts3conn.exec_("use", sid=1)
 
             # clientlist -uid -away -groups
-            resp = ts3conn.exec("clientlist", "uid", "away", "groups")
+            resp = ts3conn.exec_("clientlist", "uid", "away", "groups")
 
         :arg str cmd:
             A TS3 command
@@ -462,7 +461,7 @@ class TS3BaseConnection(object):
         :returns:
             A object which contains all information about the response.
 
-        :seealso: :meth:`recv`, :meth:`wait_for_resp`, :meth:`query`
+        :seealso: :meth:`wait_for_resp`
         :versionadded: 2.0.0
         """
         q = self.query(cmd, *options, **params)
@@ -473,10 +472,11 @@ class TS3BaseConnection(object):
         .. note::
 
             The :meth:`query` method is great if you want to **fetch** data
-            from the server or want to **pipeline** multiple commands.
+            from the server or want to **pipeline** parameters on the same
+            command.
 
             If you are only interested in getting the command executed, then
-            you should probably use :meth:`exec` instead.
+            you are probably better off using :meth:`exec_`.
 
         Returns a new :class:`~ts3.query_builder.TS3QueryBuilder` object with the
         first pipe being initialised with the *options* and *params*::
@@ -503,10 +503,10 @@ class TS3BaseConnection(object):
             # sendtextmessage targetmode=2 target=12 msg=Hello\sWorld!
             q = ts3conn.query("sendtextmessage", targetmode=2, target=12, msg="Hello World!")
 
-        Queries are **executed** using the
+        Queries are **executed** once the
         :meth:`~ts3.query_builder.TS3QueryBuilder.fetch`,
         :meth:`~ts3.query_builder.TS3QueryBuilder.first`
-        or :meth:`~ts3.query_builder.TS3QueryBuilder.all` methods::
+        or :meth:`~ts3.query_builder.TS3QueryBuilder.all` is invoked::
 
             # Returns a TS3Response object.
             resp = q.fetch()
@@ -535,8 +535,7 @@ class TS3BaseConnection(object):
 
     def exec_query(self, query, timeout=None):
         """
-        Sends the *query* to the server, waits and returns for the
-        response.
+        Sends the *query* to the server, waits and returns for the response.
 
         :arg TS3QueryBuilder query:
             The query which should be executed.
@@ -545,7 +544,7 @@ class TS3BaseConnection(object):
         :returns:
             A object which contains all information about the response.
 
-        :seealso: :meth:`recv`, :meth:`wait_for_resp`, :meth:`query`
+        :seealso: :meth:`wait_for_resp`
         :versionadded: 2.0.0
         """
         q = query.compile()
@@ -570,7 +569,7 @@ class TS3BaseConnection(object):
     #     if key not in self.COMMAND_SET:
     #         return super().__getattr__(key)
     #     from functools import partial
-    #     return partial(self.exec, cmd=key)
+    #     return partial(self.exec_, cmd=key)
 
 
 class TS3ServerConnection(TS3BaseConnection):
@@ -578,9 +577,9 @@ class TS3ServerConnection(TS3BaseConnection):
     Use this class to connect to a **TS3 Server**::
 
         with TS3ServerConnection("localhost") as tsconn:
-            ts3conn.query("login").params("serveradmin", "MyStupidPassword").exec()
-            ts3conn.query("use").exec()
-            ts3conn.query("clientkick", clid=1).exec()
+            ts3conn.exec_("login", client_login_name="serveradmin", client_login_password="MyStupidPassword")
+            ts3conn.exec_("use")
+            ts3conn.exec_("clientkick", clid=1)
 
             resp = ts3conn.query("serverlist").all()
     """
@@ -729,8 +728,8 @@ class TS3ClientConnection(TS3BaseConnection):
     Use this class if you want to connect to a **TS3 Client**::
 
         with TS3ClientConnection("localhost") as tsconn:
-            ts3conn.query("auth", apikey="AAAA-BBBB-CCCC-DDDD-EEEE").exec()
-            ts3conn.query("use").exec()
+            ts3conn.exec_("auth", apikey="AAAA-BBBB-CCCC-DDDD-EEEE")
+            ts3conn.exec_("use")
     """
 
     #: The default port of the server query service.
