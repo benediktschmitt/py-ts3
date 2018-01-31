@@ -91,7 +91,15 @@ class TS3QueryBuilder(object):
             >>> print(q)
             'clientkick clid=1 | clid=2'
         """
-        self._pipes.append((set(options), params))
+        last_options, last_params = self._pipes[-1] if self._pipes else (None, None)
+
+        if not self._pipes:
+            self._pipes.append((set(options), params))
+        elif last_options or last_params:
+            self._pipes.append((set(options), params))
+        else:
+            last_options.update(options)
+            last_params.update(params)
         return self
 
     def options(self, *options):
