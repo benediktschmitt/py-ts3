@@ -173,15 +173,15 @@ class TS3QueryBuilder(object):
             for pipe in self._pipes:
                 options, params = pipe
 
-                for option in options:
-                    res += " -" + option
-
                 for key, value in params.items():
                     if isinstance(value, bool):
                         value = "1" if value else "0"
                     else:
                         value = escape(str(value))
                     res += " " + key + "=" + value
+
+                for option in options:
+                    res += " -" + option
 
                 if pipe is not last_pipe:
                     res += " |"

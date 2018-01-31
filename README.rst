@@ -1,6 +1,13 @@
 PyTS3
 =====
 
+`Installation <#installation>`
+~ `TS3 Server Whitelist <#ts3-server-whitelist>`
+~ `Introduction <#introduction>`
+~ `Examples <#examples>`
+~ `Bugs <#bugs>`
+~ `License <#license>`
+
 This package provides a **Python 3 API** for
 
 * TS3 query connections,
@@ -12,6 +19,22 @@ This package provides a **Python 3 API** for
 You can find a complete API documentation
 `here <http://py-ts3.readthedocs.org>`_.
 
+.. code-block:: python
+
+	import ts3
+
+	with ts3.query.TS3ServerConnection("localhost") as ts3conn:
+		# login serveradmin FoOBa9
+		ts3conn.exec_(
+			"login", client_login_name="serveradmin", client_login_password="FoOBa9"
+		)
+
+		# use sid=1
+		ts3conn.exec_("use", sid=1)
+
+		# clientlist -away -uid
+		clients = ts3conn.query("clientlist", "away", "uid").all()
+
 Installation
 ------------
 
@@ -21,8 +44,8 @@ This package is registered on PyPi, so you're done with:
 
 	$ pip3 install ts3
 
-TS3 Server configuration
-------------------------
+TS3 Server Whitelist
+--------------------
 
 If you want to send lots of queries to the TS3 server, make sure, that you're
 connection is not closed by the **anti-flood protection** of the TS3 server.
@@ -40,7 +63,9 @@ The easiest way to get to grips with this library is taking a look at the
 `examples <https://github.com/benediktschmitt/py-ts3/tree/master/ts3/examples>`_.
 
 If you need information about the possible query commands, take a look at the
-**TS3 Server Query Manual**.
+**TS3 Server Query Manual**, which comes as a html file in the server installation
+folder, or at the **TS3 Client Query Manual** which is located in the client
+installation folder.
 
 Examples
 ''''''''
