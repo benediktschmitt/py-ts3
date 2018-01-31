@@ -1,42 +1,18 @@
 #!/usr/bin/env python3
 
-# The MIT License (MIT)
-#
-# Copyright (c) 2013-2017 Benedikt Schmitt <benedikt@benediktschmitt.de>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of
-# this software and associated documentation files (the "Software"), to deal in
-# the Software without restriction, including without limitation the rights to
-# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-# the Software, and to permit persons to whom the Software is furnished to do so,
-# subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-# Modules
-# ------------------------------------------------
 import time
 import random
 import ts3
-import ts3.definitions
+from ts3.definitions import TextMessageTargetMode
 
 
-# Data
-# ------------------------------------------------
-__all__ = ["whirlpool"]
+USER = "serveradmin"
+PASS = "JB8ZqxfI"
+HOST = "localhost"
+PORT = 10011
+SID = 1
 
 
-# Functions
-# ------------------------------------------------
 def whirlpool(ts3conn, duration=10, relax_time=0.5):
     """
     Moves all clients randomly in other channels for *duration* seconds.
@@ -46,22 +22,27 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
     """
     # Countdown till whirlpool
     for i in range(5, 0, -1):
-        ts3conn.query("sendtextmessage",
-            targetmode=ts3.definitions.TextMessageTargetMode.SERVER,
-            target=0, msg="Whirpool in {}s".format(i)).exec()
+        ts3conn.exec_(
+            "sendtextmessage", targetmode=TextMessageTargetMode.SERVER,
+            target=0, msg="Whirpool in {}s".format(i)
+        )
         time.sleep(1)
 
-    # Fetch the clientlist and the channellist.
-    clientlist = ts3conn.query("clientlist").all()
-    channellist = ts3conn.query("channellist").all()
+    # Fetch the ids of all channels.
+    channels = ts3conn.query("channellist").all()
+    cids = [channel["cid"] for channel in channels]
 
-    # Ignore query clients
-    clientlist = [client for client in clientlist \
-                  if client["client_type"] != "1"]
+    # Fetch the ids of all clients and ignore query clients.
+    clients = ts3conn.query("clientlist").all()
+    clids = [client["clid"] for client in clients if client["client_type"] != "1"]
 
     # Whirpool with one channel or no users is boring.
-    if len(channellist) == 1 or not clientlist:
+    if len(cids) == 1 or not clids:
         return None
+
+    # Keep track of the current positions,
+    # so that we can move all clients back when the whirpool stops.
+    old_pos = {client["clid"]: client["cid"] for client in clients}
 
     # We need this try-final construct to make sure, that all
     # clients will be in the same channel at the end of the
@@ -69,34 +50,30 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
     try:
         end_time = time.time() + duration
         while end_time > time.time():
-            for client in clientlist:
-                clid = client["clid"]
-                cid = random.choice(channellist)["cid"]
+
+            # Move clients randomly around and ignore
+            # 'already member of channel' errors.
+            for clid in clids:
                 try:
-                    ts3conn.query("clientmove", clid=clid, cid=cid).exec()
+                    ts3conn.exec_("clientmove", clid=clid, cid=random.choice(cids))
                 except ts3.query.TS3QueryError as err:
-                    # Only ignore 'already member of channel error'
                     if err.resp.error["id"] != "770":
                         raise
+
             time.sleep(relax_time)
     finally:
-        # Move all clients back
-        for client in clientlist:
+        # Move all clients back, this time using *no* pipelining.
+        for clid in clids:
             try:
-                ts3conn.query("clientmove", clid=client["clid"], cid=client["cid"]).exec()
+                ts3conn.exec_("clientmove", clid=clid, cid=old_pos[clid])
             except ts3.query.TS3QueryError as err:
                 if err.resp.error["id"] != "770":
                     raise
     return None
 
 
-# Main
-# ------------------------------------------------
 if __name__ == "__main__":
-    # USER, PASS, HOST, ...
-    from def_param import *
-
     with ts3.query.TS3ServerConnection(HOST, PORT) as ts3conn:
-        ts3conn.query("login", client_login_name=USER, client_login_password=PASS).exec()
-        ts3conn.query("use", sid=SID).exec()
+        ts3conn.exec_("login", client_login_name=USER, client_login_password=PASS)
+        ts3conn.exec_("use", sid=SID)
         whirlpool(ts3conn)
