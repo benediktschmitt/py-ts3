@@ -85,9 +85,7 @@ For example:
 	command key1=value1 key2=value2 key3=value3 -option1 -option1
 
 The pipe symbol (|) can be used to separate list items, e.g. mutiple clients
-in a virtual server *clientlist*.
-
-This syntax translates into *py-ts3* as follows:
+in a virtual server *clientlist*. This syntax translates into *py-ts3* as follows:
 
 .. code-block:: python
 
@@ -133,7 +131,7 @@ You can find more examples in the ``ts3.examples`` package.
 			ts3conn.exec_("use", sid=1)
 
 			# exec_() returns a **TS3QueryResponse** instance with the response.
-			resp = ts3conn.exec_("clientlist)
+			resp = ts3conn.exec_("clientlist")
 			print("Clients on the server:", resp.parsed)
 			print("Error:", resp.error["id"], resp.error["msg"])
 
@@ -161,7 +159,7 @@ You can find more examples in the ``ts3.examples`` package.
 
 			for client in ts3conn.exec_("clientlist"):
 				msg = "Hi {}".format(client["client_nickname"])
-				ts3conn.clientpoke(clid=client["clid"], msg=msg)
+				ts3conn.exec_("clientpoke", clid=client["clid"], msg=msg)
 
 *	Event handling (*Server Query*):
 
@@ -227,6 +225,7 @@ You can find more examples in the ``ts3.examples`` package.
 			ts3conn.exec_(
 				"login", client_login_name="serveradmin", client_login_password="FoOBa9"
 			)
+			ts3conn.exec_("use", sid=1)
 
 			# Create a new TS3FileTransfer instance associated with the
 			# TS3ServerConnection.
@@ -253,10 +252,9 @@ You can find more examples in the ``ts3.examples`` package.
 
 		with ts3.query.TS3ClientConnection("localhost") as ts3conn:
 			ts3conn.exec_("auth", apikey="AAAA-....-EEEE")
-			ts3conn.exec_("use")
 
 			# Register for events
-			ts3conn.exec_("clientnotifyregister", event="any")
+			ts3conn.exec_("clientnotifyregister", event="any", schandlerid=0)
 
 			while True:
 				event = ts3conn.wait_for_event()
@@ -278,6 +276,3 @@ License
 -------
 
 This package is licensed under the MIT License.
-
-The docstrings copied from the TS3 Server Query Manual are the property of the
-`TeamSpeak Systems GmbH <http://www.teamspeak.com/>`_.
