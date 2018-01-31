@@ -68,7 +68,11 @@ If you need information about the possible query commands, take a look at the
 folder, or at the **TS3 Client Query Manual** which is located in the client
 installation folder.
 
-(Excerpt from the manual) Query commands follow the syntax:
+TS3 Query Commands
+''''''''''''''''''
+(Excerpt from the manual) 
+
+Query commands follow the syntax:
 
 .. code-block:: raw
 
@@ -97,7 +101,7 @@ supports pipelining:
 .. code-block:: python
 
 	# clientkick reasonid=5 reasonmsg=Go\saway! clid=1|clid=2|clid=3
-	resp = ts3conn.query("clientkick", reasonid=5, reasonmsg="Go away!")\\
+	resp = ts3conn.query("clientkick", reasonid=5, reasonmsg="Go away!")\
 		.pipe(clid=1).pipe(clid=2).pipe(clid=3).fetch()
 
 As a general rule of thumb, use *exec_()* if you don't need pipelining.
@@ -119,19 +123,17 @@ You can find more examples in the ``ts3.examples`` package.
 			# Note, that the client will wait for the response and raise a
 			# **TS3QueryError** if the error id of the response is not 0.
 			try:
-				ts3conn.login(
-					client_login_name="serveradmin",
-					client_login_password="FoOBa9"
+				ts3conn.exec_(
+					"login", client_login_name="serveradmin", client_login_password="FoOBa9"
 				)
 			except ts3.query.TS3QueryError as err:
 				print("Login failed:", err.resp.error["msg"])
 				exit(1)
 
-			ts3conn.use(sid=1)
+			ts3conn.exec_("use", sid=1)
 
-			# Each query method will return a **TS3QueryResponse** instance,
-			# with the response.
-			resp = ts3conn.clientlist()
+			# exec_() returns a **TS3QueryResponse** instance with the response.
+			resp = ts3conn.exec_("clientlist)
 			print("Clients on the server:", resp.parsed)
 			print("Error:", resp.error["id"], resp.error["msg"])
 
@@ -152,13 +154,12 @@ You can find more examples in the ``ts3.examples`` package.
 		import ts3
 
 		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-			ts3conn.login(
-				client_login_name="serveradmin",
-				client_login_password="FoOBa9"
+			ts3conn.exec_(
+				"login", client_login_name="serveradmin", client_login_password="FoOBa9"
 			)
-			ts3conn.use(sid=1)
+			ts3conn.exec_("use", sid=1)
 
-			for client in ts3conn.clientlist():
+			for client in ts3conn.exec_("clientlist"):
 				msg = "Hi {}".format(client["client_nickname"])
 				ts3conn.clientpoke(clid=client["clid"], msg=msg)
 
@@ -172,22 +173,26 @@ You can find more examples in the ``ts3.examples`` package.
 		import ts3
 
 		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-			ts3conn.login(
-				client_login_name="serveradmin",
-				client_login_password="FoOBa9"
+			ts3conn.exec_(
+				"login", client_login_name="serveradmin", client_login_password="FoOBa9"
 			)
-			ts3conn.use(sid=1)
+			ts3conn.exec_("use", sid=1)
 
 			# Register for events
-			ts3conn.servernotifyregister(event="server")
+			ts3conn.exec_("servernotifyregister", event="server")
 
 			while True:
-				event = ts3conn.wait_for_event()
-
-				# Greet new clients.
-				if event[0]["reasonid"] == "0":
-					print("client connected")
-					ts3conn.clientpoke(clid=event[0]["clid"], msg="Hello :)")
+				ts3conn.send_keepalive()
+				
+				try:
+					event = ts3conn.wait_for_event(timeout=550)
+				except ts3.query.TS3TimeoutError:
+					pass
+				else:
+					# Greet new clients.
+					if event[0]["reasonid"] == "0":
+						print("client connected")
+						ts3conn.exec_("clientpoke", clid=event[0]["clid"], msg="Hello :)")
 
 *	A simple TS3 viewer:
 
@@ -198,14 +203,15 @@ You can find more examples in the ``ts3.examples`` package.
 		import ts3
 
 		# The examples package already contains this implementation.
-		# Note, that the ts3.examples.viewer module has an helpful class to
+		# Note, that the examples.viewer module has an helpful class to
 		# build a complete channel tree of a virtual server: ChannelTreeNode
-		from ts3.examples.viewer import view
+		#
+		# You may have to download it from GitHub first.
+		from ts3_examples.viewer import view
 
 		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-			ts3conn.login(
-				client_login_name="serveradmin",
-				client_login_password="FoOBa9"
+			ts3conn.exec_(
+				"login", client_login_name="serveradmin", client_login_password="FoOBa9"
 			)
 			view(ts3conn, sid=1)
 
@@ -218,9 +224,8 @@ You can find more examples in the ``ts3.examples`` package.
 		import ts3
 
 		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-			ts3conn.login(
-				client_login_name="serveradmin",
-				client_login_password="FoOBa9"
+			ts3conn.exec_(
+				"login", client_login_name="serveradmin", client_login_password="FoOBa9"
 			)
 
 			# Create a new TS3FileTransfer instance associated with the
@@ -247,11 +252,11 @@ You can find more examples in the ``ts3.examples`` package.
 		import ts3
 
 		with ts3.query.TS3ClientConnection("localhost") as ts3conn:
-			ts3conn.auth(apikey="AAAA-....-EEEE")
-			ts3conn.use()
+			ts3conn.exec_("auth", apikey="AAAA-....-EEEE")
+			ts3conn.exec_("use")
 
 			# Register for events
-			ts3conn.clientnotifyregister(event="any")
+			ts3conn.exec_("clientnotifyregister", event="any")
 
 			while True:
 				event = ts3conn.wait_for_event()
