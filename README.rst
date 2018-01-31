@@ -11,6 +11,7 @@ PyTS3
 
 **What's new in version 2.0.0?** `Show changes. <https://py-ts3.readthedocs.io/en/latest/changelog.html>`_
 
+
 This package provides a **Python 3 API** for
 
 * TS3 query connections,
