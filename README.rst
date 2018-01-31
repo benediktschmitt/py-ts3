@@ -2,11 +2,11 @@ PyTS3
 =====
 
 `Installation <#installation>`
-~ `TS3 Server Whitelist <#ts3-server-whitelist>`
-~ `Introduction <#introduction>`
-~ `Examples <#examples>`
-~ `Bugs <#bugs>`
-~ `License <#license>`
+~ `TS3 Server Whitelist <#ts3-server-whitelist>`_
+~ `Introduction <#introduction>`_
+~ `Examples <#examples>`_
+~ `Bugs <#bugs>`_
+~ `License <#license>`_
 
 This package provides a **Python 3 API** for
 
