@@ -60,12 +60,47 @@ Introduction
 ------------
 
 The easiest way to get to grips with this library is taking a look at the
-`examples <https://github.com/benediktschmitt/py-ts3/tree/master/ts3/examples>`_.
+`examples <https://github.com/benediktschmitt/py-ts3/tree/master/ts3/examples>`_ or
+simply read through the small ones in this README.
 
 If you need information about the possible query commands, take a look at the
 **TS3 Server Query Manual**, which comes as a html file in the server installation
 folder, or at the **TS3 Client Query Manual** which is located in the client
 installation folder.
+
+(Excerpt from the manual) Query commands follow the syntax:
+
+.. code-block:: raw
+
+	command [parameter...] [option...]
+
+For example:
+
+.. code-block:: raw
+
+	command key1=value1 key2=value2 key3=value3 -option1 -option1
+
+The pipe symbol (|) can be used to separate list items, e.g. mutiple clients
+in a virtual server *clientlist*.
+
+This syntax translates into *py-ts3* as follows:
+
+.. code-block:: python
+
+	ts3conn.exec_("command", "option1", "option2", key1=value1, key2=value2)
+	ts3conn.query("command", "option1", "option2", key1=value1, key2=value2).fetch()
+
+The *exec()* method executes the command immediately and is often sufficient,
+while the *query()* method offers a slightly more sophisticated interface and
+supports pipelining:
+
+.. code-block:: python
+
+	# clientkick reasonid=5 reasonmsg=Go\saway! clid=1|clid=2|clid=3
+	resp = ts3conn.query("clientkick", reasonid=5, reasonmsg="Go away!")\\
+		.pipe(clid=1).pipe(clid=2).pipe(clid=3).fetch()
+
+As a general rule of thumb, use *exec_()* if you don't need pipelining.
 
 Examples
 ''''''''
