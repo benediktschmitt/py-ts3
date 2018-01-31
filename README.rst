@@ -5,6 +5,7 @@ PyTS3
 ~ `TS3 Server Whitelist <#ts3-server-whitelist>`_
 ~ `Introduction <#introduction>`_
 ~ `Examples <#examples>`_
+~ `Changelog <https://py-ts3.readthedocs.io/en/latest/changelog.html>`_
 ~ `Bugs <#bugs>`_
 ~ `License <#license>`_
 
@@ -70,7 +71,7 @@ installation folder.
 
 TS3 Query Commands
 ''''''''''''''''''
-(Excerpt from the manual) 
+(Excerpt from the manual)
 
 Query commands follow the syntax:
 
@@ -181,7 +182,7 @@ You can find more examples in the ``ts3.examples`` package.
 
 			while True:
 				ts3conn.send_keepalive()
-				
+
 				try:
 					event = ts3conn.wait_for_event(timeout=550)
 				except ts3.query.TS3TimeoutError:

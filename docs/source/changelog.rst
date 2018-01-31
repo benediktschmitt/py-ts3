@@ -6,14 +6,48 @@ Changelog
 *   **2.0.0**
 
     *   **added** Support for the TS3 Client Query API
-
-        https://github.com/benediktschmitt/py-ts3/issues/48
-
+        (`issue 48 <https://github.com/benediktschmitt/py-ts3/issues/48>`_)
     *   **renamed** :class:`TS3Connection` to :class:`TS3ServerConnection`
     *   **added** :class:`TS3ClientConnection`
-    *   **renamed** :class:`TS3Commands` to :class:`TS3ServerCommands`
-    *   **added** :class:`TS3ClientCommands`
-    *   **added** *properties* parameter to :meth:`TS3Connection.send`    
+    *   **removed** the monstrous :mod:`commands` module, use :class:`TS3QueryBuilder` instead.
+    *   **removed** the :mod:`TS3Escape` class, use the :class:`TS3QueryBuilder` and the
+        :func:`escape` and :func:`unespace` functions instead.
+
+    Version 2.0.0 introduces support for the client query API and pipelining
+    query commands. This come at the costs and benefits of having a new
+    query API.
+
+    **Update Guide**
+
+    .. code-block:: python
+
+        # Old code
+        ts3conn.login(client_login_name="serveradmin", client_login_password="abc")
+        ts3conn.clientlist(away=True, uid=True)
+        ts3conn.clientkick(reasonmsg="Haha.", clid=42)
+
+        # New code
+        ts3conn.exec_("login", client_login_name="serveradmin", client_login_password="abc")
+        ts3conn.exec_("clientlist", "away", "uid")
+        ts3conn.exec_("clientkick", reasonmsg="Haha", clid=42)
+
+        query = ts3conn.query("clientkick", reasonmsg="Haha").pipe(clid=42).pipe(clid=43)
+        resp = query.fetch()
+
+    In short:
+
+        #.  The **command** is the first parameter of *exec_()*
+        #.  The **options** are simple string arguments after the command.
+        #.  The **parameters** are given as keyworkd arguments.
+
+    **Update or not?**
+
+    Version 1.0.0 is quite stable. If you don't need the client query API or support
+    for pipelining, then there is no reason to update, but you should fix the version
+    in your *requirements.txt* file.
+
+    If you start a new project, use version 2.0.0. It has only a slightly different
+    API but offers more features, while keeping the readability.
 
 *   **1.0.4**
 
