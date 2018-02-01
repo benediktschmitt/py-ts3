@@ -9,8 +9,7 @@ PyTS3
 ~ `Bugs <#bugs>`_
 ~ `License <#license>`_
 
-**What's new in version 2.0.0?** `Show changes. <https://py-ts3.readthedocs.io/en/latest/changelog.html>`_
-
+**>> Click** `here <https://py-ts3.readthedocs.io/en/latest/changelog.html>`_ **to find out what's new in version 2.0.0. <<**
 
 This package provides a **Python 3 API** for
 
@@ -76,20 +75,13 @@ TS3 Query Commands
 ''''''''''''''''''
 (Excerpt from the manual)
 
-Query commands follow the syntax:
-
-.. code-block:: raw
-
-	command [parameter...] [option...]
-
-For example:
+Query commands are made up of a command word, options and parameters (key-value pairs):
 
 .. code-block:: raw
 
 	command key1=value1 key2=value2 key3=value3 -option1 -option1
 
-The pipe symbol (|) can be used to separate list items, e.g. mutiple clients
-in a virtual server *clientlist*. This syntax translates into *py-ts3* as follows:
+This syntax translates into *py-ts3* as follows:
 
 .. code-block:: python
 
