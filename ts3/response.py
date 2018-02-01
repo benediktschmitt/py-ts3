@@ -61,8 +61,7 @@ class TS3ParserError(TS3Error, ValueError):
         return None
 
     def __str__(self):
-        tmp = "The response could not be parsed! Desc: {}"
-        tmp.format(self.exc)
+        tmp = "The response could not be parsed! Desc: {}".format(self.exc)
         return tmp
 
 
