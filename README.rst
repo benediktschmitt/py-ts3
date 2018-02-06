@@ -1,7 +1,7 @@
 PyTS3
 =====
 
-**Check out** `version 2 <https://github.com/benediktschmitt/py-ts3/tree/v2>`_ **, which also supports the TS3 Client Query API!**
+>> **Check out** `version 2 <https://github.com/benediktschmitt/py-ts3/tree/v2>`_ **, which also supports the TS3 Client Query API!** <<
 
 This package provides a **Python 3 API** for:
 
