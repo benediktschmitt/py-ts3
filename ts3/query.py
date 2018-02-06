@@ -67,7 +67,7 @@ __all__ = [
     "TS3ClientConnection"]
 
 
-_logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class TS3InvalidCommandError(TS3Error, ValueError):
@@ -250,7 +250,7 @@ class TS3BaseConnection(object):
             self._num_pending_queries = 0
             self._event_queue = list()
 
-            _logger.info("Created connection to {}:{}.".format(host, port))
+            LOG.info("Created connection to {}:{}.".format(host, port))
         return None
 
     def close(self):
@@ -268,7 +268,7 @@ class TS3BaseConnection(object):
                 del self._event_queue[:]
                 self._num_pending_queries = 0
 
-                _logger.debug("Disconnected client.")
+                LOG.debug("Disconnected client.")
         return None
 
     def fileno(self):
@@ -548,28 +548,14 @@ class TS3BaseConnection(object):
         :versionadded: 2.0.0
         """
         q = query.compile()
-        q = q.encode()
+        LOG.debug("Sending query: '%s'.", q)
 
+        q = q.encode()
         self._telnet_conn.write(q)
 
         # To identify the response when we receive it.
         self._num_pending_queries += 1
         return self._wait_for_resp(timeout=timeout)
-
-    # TODO: Use this or not?
-    # def __getattr__(self, key):
-    #     """
-    #     Make the commands available as methods:
-    #
-    #     .. code-block:: python
-    #
-    #         ts3conn.use(sid=1)
-    #         ts3conn.clientkick(sid=1)
-    #     """
-    #     if key not in self.COMMAND_SET:
-    #         return super().__getattr__(key)
-    #     from functools import partial
-    #     return partial(self.exec_, cmd=key)
 
 
 class TS3ServerConnection(TS3BaseConnection):
