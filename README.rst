@@ -5,11 +5,11 @@ PyTS3
 ~ `TS3 Server Whitelist <#ts3-server-whitelist>`_
 ~ `Introduction <#introduction>`_
 ~ `Examples <#examples>`_
-~ `Changelog <https://py-ts3.readthedocs.io/en/latest/changelog.html>`_
+~ `Changelog <https://py-ts3.readthedocs.io/en/v2/changelog.html>`_
 ~ `Bugs <#bugs>`_
 ~ `License <#license>`_
 
-**>> Click** `here <https://py-ts3.readthedocs.io/en/latest/changelog.html>`_ **to find out what's new in version 2.0.0. <<**
+**>> Click** `here <https://py-ts3.readthedocs.io/en/v2/changelog.html>`_ **to find out what's new in version 2.0.0. <<**
 
 This package provides a **Python 3 API** for
 
@@ -20,7 +20,7 @@ This package provides a **Python 3 API** for
 * and TS3 client events.
 
 You can find a complete API documentation
-`here <http://py-ts3.readthedocs.org>`_.
+`here <http://py-ts3.readthedocs.io/en/v2/>`_.
 
 .. code-block:: python
 
