@@ -1,6 +1,9 @@
 PyTS3
 =====
 
+**Check out version 2, which also supports the TS3 Client Query API!**
+>>`Take me to v2 <https://github.com/benediktschmitt/py-ts3/tree/v2>`_<<
+
 This package provides a **Python 3 API** for:
 
 * TS3 query connections
