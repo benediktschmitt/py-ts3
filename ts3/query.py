@@ -391,7 +391,7 @@ class TS3BaseConnection(object):
         Sends an empty query to the server to prevent automatic disconnect.
         Make sure to call it at least once in 10 minutes.
         """
-        self._telnet_conn.write(b"\n\r")
+        self._telnet_conn.write(b" \n\r")
         return None
 
     def send(self, command, common_parameters=None, unique_parameters=None,
