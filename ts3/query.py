@@ -319,7 +319,7 @@ class TS3BaseConnection(object):
             while True:
                 ts3conn.send_keepalive()
                 try:
-                    event = ts3conn.wait_for_event(timeout=540)
+                    event = ts3conn.wait_for_event(timeout=60)
                 except TS3TimeoutError:
                     pass
                 else:
@@ -389,7 +389,7 @@ class TS3BaseConnection(object):
     def send_keepalive(self):
         """
         Sends an empty query to the server to prevent automatic disconnect.
-        Make sure to call it at least once in 5 minutes.
+        Make sure to call it at least once in 5 minutes (better each minute).
         """
         self._telnet_conn.write(b" \n\r")
         return None
