@@ -43,9 +43,9 @@ def hello_bot(ts3conn, msg=None):
 
         try:
             # This method blocks, but we must sent the keepalive message at
-            # least once in 10 minutes. So we set the timeout parameter to
-            # 9 minutes.
-            event = ts3conn.wait_for_event(timeout=550)
+            # least once in 5 minutes to avoid the sever side idle client
+            # disconnect. So we set the timeout parameter simply to 1 minute.
+            event = ts3conn.wait_for_event(timeout=60)
         except ts3.query.TS3TimeoutError:
             pass
         else:
