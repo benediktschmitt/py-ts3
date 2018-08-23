@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 #
-# Copyright (c) 2013-2016 Benedikt Schmitt <benedikt@benediktschmitt.de>
+# Copyright (c) 2013-2018 <see AUTHORS.txt>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -57,7 +57,7 @@ class TS3Escape(object):
 
     @classmethod
     def escape(cls, raw):
-        """        
+        """
         Escapes the value of *raw*.
 
         >>> TS3Escape.escape(None)
@@ -122,7 +122,7 @@ class TS3Escape(object):
 
         >>> # None
         >>> TS3Escape.escape_parameters(None)
-        ''        
+        ''
         >>> # key -> str
         >>> TS3Escape.escape_parameters({'virtualserver_name': 'foo bar'})
         'virtualserver_name=foo\\\sbar'

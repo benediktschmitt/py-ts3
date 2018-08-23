@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyTS3'
-copyright = '20103-2014, Benedikt Schmitt'
+copyright = '2013-2018, <see AUTHORS.txt>'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

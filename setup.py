@@ -2,7 +2,7 @@
 
 # The MIT License (MIT)
 #
-# Copyright (c) 2013-2016 Benedikt Schmitt
+# Copyright (c) 2013-2018 <see AUTHORS.txt>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -45,13 +45,10 @@ setup(
     version = __version__,
     description = "TS3 Server Query API",
     long_description = long_description,
-    author = "Benedikt Schmitt",
-    author_email = "benedikt@benediktschmitt.de",
     url = "https://github.com/benediktschmitt/py-ts3",
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
     packages = ["ts3", "ts3.examples"],
     license = license_,
-    install_requires = ["blinker"],
     include_package_data = True,
     classifiers = [
         "License :: OSI Approved :: MIT License",

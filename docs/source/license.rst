@@ -12,7 +12,7 @@ The PyTS3 package is licensed under the **MIT License**:
 
 .. code-block:: none
 
-   Copyright (c) 2013-2016 Benedikt Schmitt
+   Copyright (c) 2013-2018 <see AUTHORS.txt>
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
