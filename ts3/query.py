@@ -389,7 +389,7 @@ class TS3BaseConnection(object):
     def send_keepalive(self):
         """
         Sends an empty query to the server to prevent automatic disconnect.
-        Make sure to call it at least once in 10 minutes.
+        Make sure to call it at least once in 5 minutes.
         """
         self._telnet_conn.write(b" \n\r")
         return None
