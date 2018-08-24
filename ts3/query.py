@@ -44,6 +44,11 @@ import time
 import socket
 import telnetlib
 import logging
+import warnings
+from urllib.parse import urlparse
+
+# third party
+import paramiko
 
 # local
 from .common import TS3Error
@@ -117,15 +122,138 @@ class TS3TimeoutError(TS3Error, TimeoutError):
         return tmp
 
 
-class TS3RecvError(TS3Error):
+class TS3TransportError(TS3Error):
     """
-    Raised if receiving data from the server failed, because the connection
-    was closed or for other reasons.
+    Raised if something goes wrong on the transport level, e.g. a connection
+    cannot be established or has already been closed.
+
+    :seealso: :class:`TS3Transport`
     """
 
-    def __str__(self):
-        tmp = "Could not receive data from the server."
-        return tmp
+
+class TS3Transport(object):
+    """
+    The TS3 server supports the *telnet* and *ssh* protocols. This class defines
+    an abstract interface which is used by the :class:`TS3BaseConnection` to
+    perform requests.
+
+    TS3Transport instances are used for **exactly one connection**.
+
+    .. note::
+
+        The transport adapter is only used internally and not part of the
+        public API.
+    """
+
+    def connect(self, host, port, timeout, **kargs):
+        """
+        Connect to the TS3 query service at the specificed address (host, port).
+
+        :raises TS3TimeoutError:
+        :raises TS3TransportError:
+        """
+        raise NotImplementedError()
+
+    def close(self):
+        """Closes the connection, never fails."""
+        raise NotImplementedError()
+
+    def read_line(self, timeout):
+        """
+        Blocks until a line has been received (delimted by ``b\n\r``) or the
+        timeout expired.
+
+        :raises TS3TimeoutError:
+        :raises TS3TransportError:
+        """
+        raise NotImplementedError()
+
+    def send_line(self, data, timeout):
+        """
+        Send a line of data to the TS3 query service. The delimiter is added
+        automatic.
+
+        :raises TS3TransportError:
+        """
+        raise NotImplementedError()
+
+
+class TS3TelnetTransport(TS3Transport):
+    """An adapter for the telnet protocol using :class:`telnetlib.Telnet`."""
+
+    def fileno(self):
+        return self._conn.fileno()
+
+    def connect(self, host, port, timeout, **kargs):
+        self._conn = telnetlib.Telnet(host, port, timeout)
+        return None
+
+    def close(self):
+        self._conn.close()
+        return None
+
+    def read_line(self, timeout):
+        return self._conn.read_until(b"\n\r", timeout=timeout)
+
+    def send_line(self, data, timeout):
+        return self._conn.write(data + b"\n\r")
+
+
+class TS3SSHTransport(TS3Transport):
+    """An adapter for the SSH protocol using :class:`paramiko.SSHClient`."""
+
+    def fileno(self):
+        return self._channel.fileno()
+
+    def connect(self, host, port, timeout, **kargs):
+        client = paramiko.SSHClient()
+
+        # Load the host key and warn if not provided.
+        if "host_key" in kargs:
+            client.load_host_keys(kargs["host_key"])
+        else:
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            warnings.warn(
+                "You should provide a 'host_key' to improve security.", Warning
+            )
+
+        client.connect(
+            host, port=port,
+            username=kargs["username"], password=kargs["password"]
+        )
+
+        self._client = client
+        self._channel = client.invoke_shell("raw")
+        self._rbuffer = b""
+        return None
+
+    def close(self):
+        self._client.close()
+        return None
+
+    def read_line(self, timeout):
+
+        # TODO: Enforce the timeout (multiple calls to recv ...)
+        #self._client.settimeout(timeout)
+
+        # Wait until the delimiter can be found in the line buffer.
+        try:
+            while True:
+                eol = self._rbuffer.find(b"\n\r")
+                if eol != -1:
+                    break
+                self._rbuffer += self._channel.recv(4096)
+        except socket.timeout as err:
+            raise TS3TimeoutError() from err
+
+        # + len(b"\n\r")
+        eol += 2
+        line, self._rbuffer = self._rbuffer[:eol], self._rbuffer[eol:]
+        return line
+
+    def send_line(self, data, timeout):
+        self._channel.send(data + b"\n\r")
+        return None
 
 
 class TS3BaseConnection(object):
@@ -160,9 +288,6 @@ class TS3BaseConnection(object):
         instead.
     """
 
-    #: The default port to use when no port is specified.
-    DEFAULT_PORT = None
-
     #: The length of the greeting. This is the number of lines returned by
     #: the query service after successful connection.
     #:
@@ -182,8 +307,10 @@ class TS3BaseConnection(object):
 
         .. seealso:: :meth:`open`
         """
-        self._telnet_conn = None
-        self._telnet_queue = None
+        self._transport = None
+
+        # A buffer for the lines in a query response.
+        self._resp_buffer = None
 
         # The number of queries for which we have not received a response yet.
         self._num_pending_queries = 0
@@ -199,17 +326,6 @@ class TS3BaseConnection(object):
     # *Simple* get and set methods
     # ------------------------------------------------
 
-    @property
-    def telnet_conn(self):
-        """
-        :getter:
-            If the client is connected, the used Telnet instance
-            else None.
-        :type:
-            None or :class:`telnetlib.Telnet`.
-        """
-        return self._telnet_conn
-
     def is_connected(self):
         """
         :return:
@@ -217,56 +333,108 @@ class TS3BaseConnection(object):
         :rtype:
             bool
         """
-        return self._telnet_conn is not None
+        return self._transport is not None
 
     # Networking
     # ------------------------------------------------
 
-    def open(self, host, port=None,
-             timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+    def open(self, host, port, timeout=None, protocol="telnet", tp_args=None):
         """
-        Connect to the TS3 query service listening on the address given by the
-        *host* and *port* parameters. If *timeout* is provided, this is the
-        maximum time in seconds for the connection attempt. If no *port* is
-        provided, then the :attr:`DEFAULT_PORT` is used.
+        Connect to the TS3 query service.
 
-        :raises OSError:
-            If the client is already connected.
-        :raises TimeoutError:
-            If the connection can not be created.
+        .. code-block::
+
+            # Connect using telnet.
+            ts3conn.open("localhost", 10011)
+
+            # Connect using ssh.
+            ts3conn.open("localhost", 10022, protocol="ssh", tp_args={
+                "username": "serveradmin", "password": "123456"
+            })
+
+        :arg str host:
+            The hostname
+        :arg int port:
+            The listening port of the service.
+        :arg int timeout:
+            If not *None*, an exception is raised if the connection cannot be
+            established within *timeout* seconds.
+        :arg str protocol:
+            The protocol to be used. The TS3 server supports *ssh* and *telnet*,
+            while the client only supports *telnet*.
+        :arg dict tp_args:
+            A dictionary with parameters that are passed to the
+            :meth:`~TS3Transport.connect` method of the used transport. The
+            SSH protocol for example requires a *username* and *password*.
+
+        :raises TS3TransportError:
+            If the client is already connected or the connection cannot be
+            established.
+        :raises TS3TimeoutError:
+            If the connection cannot be established within the specified
+            *timeout*.
+
+        :seealso: :meth:`open_uri`
         """
-        port = port or self.DEFAULT_PORT
-
         if self.is_connected():
-             raise OSError("The client is already connected.")
+            raise TS3TransportError("Already connected.")
+
+        # Choose the transport adapter.
+        if protocol == "telnet":
+            tp = TS3TelnetTransport()
+        elif protocol == "ssh":
+            tp = TS3SSHTransport()
         else:
-            self._telnet_conn = telnetlib.Telnet(host, port, timeout)
-            self._telnet_queue = list()
+            raise ValueError("The protocol must be 'ssh' or 'telnet'.")
 
-            # Skip the greeting.
-            for i in range(self.GREETING_LENGTH):
-                self._telnet_conn.read_until(b"\n\r")
+        # Conenct to the query service.
+        tp_args = tp_args or dict()
+        tp.connect(host, port, timeout, **tp_args)
 
-            self._num_pending_queries = 0
-            self._event_queue = list()
+        # Skip the greeting.
+        for i in range(self.GREETING_LENGTH):
+            tp.read_line(timeout=timeout)
 
-            LOG.info("Created connection to {}:{}.".format(host, port))
-        return None
+        self._transport = tp
+        self._num_pending_queries = 0
+        self._resp_buffer = list()
+        self._event_queue = list()
 
-    def close(self):
+        LOG.info("Created connection to {}:{}.".format(host, port))
+        return self
+
+    def open_uri(self, uri, timeout=None, tp_args=None):
+        """
+        The same as :meth:`open`, but the host, port, username, password, ...
+        are encoded compact in a URI.
+
+        .. code-block::
+
+            >>> ts3conn.open_uri("telnet://my.server.com:10011")
+            >>> ts3conn.open_uri("ssh://serveradmin@123456@my.server.com:10022")
+        """
+        p = urlparse(uri)
+        host = p.hostname
+        port = p.port
+        protocol = p.scheme
+
+        tp_args = tp_args or dict()
+        tp_args["username"] = p.username
+        tp_args["password"] = p.password
+        return self.open(host, port, timeout, protocol, tp_args)
+
+    def close(self, timeout=None):
         """
         Sends the ``quit`` command and closes the telnet connection.
         """
-        if self._telnet_conn is not None:
+        if self.is_connected():
             try:
-                self._telnet_conn.write(b"quit\n\r")
+                self._transport.close()
             finally:
-                self._telnet_conn.close()
-                self._telnet_conn = None
-                self._telnet_queue = None
-
-                del self._event_queue[:]
+                self._transport = None
                 self._num_pending_queries = 0
+                self._resp_buffer = list()
+                self._event_queue = list()
 
                 LOG.debug("Disconnected client.")
         return None
@@ -278,7 +446,7 @@ class TS3BaseConnection(object):
         :rtype:
             int
         """
-        return self._telnet_conn.fileno()
+        return self._transport.fileno()
 
     def __enter__(self):
         return self
@@ -321,7 +489,7 @@ class TS3BaseConnection(object):
             timeout = end_time - time.time() if end_time is not None else None
 
             try:
-                data = self._telnet_conn.read_until(b"\n\r", timeout=timeout)
+                data = self._transport.read_line(timeout=timeout)
             # Catch socket and telnet errors
             except (OSError, EOFError) as err:
                 self.close()
@@ -336,15 +504,15 @@ class TS3BaseConnection(object):
                     return event
 
                 elif data.startswith(b"error"):
-                    self._telnet_queue.append(data)
-                    data = b"".join(self._telnet_queue)
-                    self._telnet_queue = list()
+                    self._resp_buffer.append(data)
+                    data = b"".join(self._resp_buffer)
+                    self._resp_buffer = list()
 
                     resp = TS3QueryResponse(data)
                     self._num_pending_queries -= 1
                     return resp
                 else:
-                    self._telnet_queue.append(data)
+                    self._resp_buffer.append(data)
         return None
 
     def wait_for_event(self, timeout=None):
@@ -427,12 +595,12 @@ class TS3BaseConnection(object):
     # Sending
     # -------------------------
 
-    def send_keepalive(self):
+    def send_keepalive(self, timeout=None):
         """
         Sends an empty query to the query service in order to prevent automatic
         disconnect. Make sure to call it at least once in 10 minutes.
         """
-        self._telnet_conn.write(b" \n\r")
+        self._transport.send_line(b" ", timeout=timeout)
         return None
 
     def exec_(self, cmd, *options, **params):
@@ -551,7 +719,7 @@ class TS3BaseConnection(object):
         LOG.debug("Sending query: '%s'.", q)
 
         q = q.encode()
-        self._telnet_conn.write(q)
+        self._transport.send_line(q, timeout=timeout)
 
         # To identify the response when we receive it.
         self._num_pending_queries += 1
@@ -569,9 +737,6 @@ class TS3ServerConnection(TS3BaseConnection):
 
             resp = ts3conn.query("serverlist").all()
     """
-
-    #: The default port of the server query service.
-    DEFAULT_PORT = 10011
 
     #: The typical TS3 Server greeting::
     #:
@@ -717,9 +882,6 @@ class TS3ClientConnection(TS3BaseConnection):
             ts3conn.exec_("auth", apikey="AAAA-BBBB-CCCC-DDDD-EEEE")
             ts3conn.exec_("use")
     """
-
-    #: The default port of the server query service.
-    DEFAULT_PORT = 25639
 
     #: The typical TS3 Server greeting::
     #:

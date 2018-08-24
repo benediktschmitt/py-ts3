@@ -185,8 +185,6 @@ class TS3QueryBuilder(object):
 
                 if pipe is not last_pipe:
                     res += " |"
-
-        res += "\n\r"
         return res
 
     def __str__(self):
