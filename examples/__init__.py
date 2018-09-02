@@ -27,8 +27,7 @@ try:
 except ImportError:
     import os
     import sys
-    sys.path.append(
-        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../ts3")))
     import ts3
 
     del os

@@ -40,3 +40,6 @@ nosetests.xml
 ts3-testserver
 docs/build
 sandbox/*
+
+#WolverinDEV's IDA files
+.idea/

@@ -24,20 +24,20 @@
 """
 Default settings for the examples.
 """
-
+import os
 
 # Data
 # ------------------------------------------------
 
 # Login name
-USER = "serveradmin"
+USER = os.getenv('py-ts3_user', "serveradmin")
 
 # Login password
-PASS = "MzI4M8GK"
+PASS = os.getenv('py-ts3_pass', "MzI4M8GK")
 
 # TS3 query address
-HOST = "127.0.0.1"
-PORT = 10011
+HOST = os.getenv('py-ts3_host', "127.0.0.1")
+PORT = int(os.getenv('py-ts3_port', "10011"))
 
 # The id of the virtual server
-SID = 1
+SID = int(os.getenv('py-ts3_sid', "1"))

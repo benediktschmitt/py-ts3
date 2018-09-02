@@ -47,7 +47,7 @@ setup(
     long_description = long_description,
     url = "https://github.com/benediktschmitt/py-ts3",
     download_url = "https://github.com/benediktschmitt/Py-TS3/archive/master.zip",
-    packages = ["ts3", "ts3.examples"],
+    packages = ["ts3", "examples"],
     license = license_,
     include_package_data = True,
     classifiers = [

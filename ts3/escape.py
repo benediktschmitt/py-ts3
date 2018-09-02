@@ -29,7 +29,7 @@ and to unescape responses.
 
 # Data
 # ------------------------------------------------
-__all__ = ["TS3Escape"]
+__all__ = ["TS3Escape", "RawParameter"]
 
 
 # Classes

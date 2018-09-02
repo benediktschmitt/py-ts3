@@ -134,7 +134,7 @@ class TS3BaseConnection(object):
         This class is **not thread safe**!
     """
 
-    def __init__(self, host=None, port=10011):
+    def __init__(self, host=None, port=10011, newline = b"\n\r", motd_line_count = 2):
         """
         If *host* is provided, the connection will be established before
         the constructor returns.
@@ -150,6 +150,9 @@ class TS3BaseConnection(object):
         # The undelivered events. These events are returned, the next time
         # *wait_for_event()* is called.
         self._event_queue = list()
+
+        self._newline = newline
+        self._motd_lines = motd_line_count
 
         if host is not None:
             self.open(host, port)
@@ -181,8 +184,7 @@ class TS3BaseConnection(object):
     # Networking
     # ------------------------------------------------
 
-    def open(self, host, port=10011,
-             timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+    def open(self, host, port=10011, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         """
         Connect to the TS3 Server listening on the address given by the
         *host* and *port* parmeters. If *timeout* is provided, this is the
@@ -202,8 +204,14 @@ class TS3BaseConnection(object):
             # Wait for the first and the second greeting:
             # b'TS3\n\r'
             # b'Welcome to the [...] on a specific command.\n\r'
-            self._telnet_conn.read_until(b"\n\r")
-            self._telnet_conn.read_until(b"\n\r")
+            line_count = 0
+            motd = ""
+            while line_count < self._motd_lines:
+                motd += str(self._telnet_conn.read_until(self._newline)) + "\n"
+                line_count = line_count + 1
+
+            _logger.debug("Got motd lines:")
+            _logger.debug(motd)
 
             self._num_pending_queries = 0
             self._event_queue = list()
@@ -218,7 +226,7 @@ class TS3BaseConnection(object):
         if self._telnet_conn is not None:
             try:
                 # Sent it directly, to avoid a recursive call of this method.
-                self._telnet_conn.write(b"quit\n\r")
+                self._telnet_conn.write(b"quit" + self._newline)
             finally:
                 self._telnet_conn.close()
                 self._telnet_conn = None
@@ -280,7 +288,7 @@ class TS3BaseConnection(object):
             timeout = end_time - time.time() if end_time is not None else None
 
             try:
-                data = self._telnet_conn.read_until(b"\n\r", timeout=timeout)
+                data = self._telnet_conn.read_until(self._newline, timeout=timeout)
             # Catch socket and telnet errors
             except (OSError, EOFError) as err:
                 self.close()
@@ -433,10 +441,9 @@ class TS3BaseConnection(object):
         query_command = command\
                         + " " + common_parameters\
                         + " " +  unique_parameters\
-                        + " " + options \
-                        + "\n\r"
-        query_command = query_command.encode()
+                        + " " + options
 
+        query_command = query_command.encode() + self._newline
         # Send the command.
         self._telnet_conn.write(query_command)
 
