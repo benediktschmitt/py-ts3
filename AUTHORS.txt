@@ -1,1 +1,2 @@
 Benedikt Schmitt <me@benediktschmitt.de>
+Markus Hadenfeldt <git@teaspeak.de>
