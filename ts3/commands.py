@@ -27,7 +27,7 @@
 from collections import OrderedDict
 try:
     from .escape import RawParameter
-except Exception: #ImportError
+except Exception:
     from escape import RawParameter
 
 # Data
