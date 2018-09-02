@@ -25,8 +25,10 @@
 # Modules
 # ------------------------------------------------
 from collections import OrderedDict
-from escape import RawParameter
-
+try:
+    from .escape import RawParameter
+except Exception: #ImportError
+    from escape import RawParameter
 
 # Data
 # ------------------------------------------------
