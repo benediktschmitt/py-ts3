@@ -226,7 +226,7 @@ class TS3BaseConnection(object):
         if self._telnet_conn is not None:
             try:
                 # Sent it directly, to avoid a recursive call of this method.
-                self._telnet_conn.write(b"quit".join(self._newline))
+                self._telnet_conn.write(b"quit" + self._newline)
             finally:
                 self._telnet_conn.close()
                 self._telnet_conn = None
