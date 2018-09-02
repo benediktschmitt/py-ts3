@@ -25,7 +25,7 @@
 # Modules
 # ------------------------------------------------
 from collections import OrderedDict
-from .escape import RawParameter
+from escape import RawParameter
 
 
 # Data
@@ -3627,12 +3627,17 @@ class TS3Commands(object):
             options.append("onlyoffline")
         return self._return_proxy("serverlist", cparams, uparams, options)
 
-    def servernotifyregister(self, *, event, id_=None):
+    def servernotifyregister(self, *, event, specifier=None, id_=None):
         """
         Usage::
 
             servernotifyregister [id={channelID}]
                                  event={server|channel|textserver|textchannel|textprivate}
+
+        Usage (TeaSpeak Specific)::
+            servernotifyregister
+                                event={all/server/client/chat/channel/music}
+                                specifier=~see event documentation~
 
         Registers for a specified category of events on a virtual server to receive
         notification messages. Depending on the notifications you've registered for,
@@ -3655,6 +3660,8 @@ class TS3Commands(object):
             ...
             >>> ts3cmd.servernotifyregister(event="channel", id_=123)
             ...
+            >>> ts3cmd.servernotifyregister(event="chat", specifier="composing")
+            ...
         """
         cparams = OrderedDict()
         uparams = list()
@@ -3662,6 +3669,8 @@ class TS3Commands(object):
 
         cparams["id"] = id_
         cparams["event"] = event
+        cparams["specifier"] = specifier
+
         return self._return_proxy("servernotifyregister", cparams, uparams, options)
 
     def servernotifyunregister(self):
