@@ -69,13 +69,6 @@ def escape(value):
         >>> escape('TeamSpeak ]|[ Server')
         'TeamSpeak\s]\p[\sServer'
 
-    :arg str value: The value to escape.
-
-    :rtype: str
-    :return: The escaped version of the value.
-
-    :raises TypeError: if *value* is not a string.
-
     :seealso: :func:`unescape`
     """
     # The order of the replacement is important.
