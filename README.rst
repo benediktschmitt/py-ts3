@@ -26,7 +26,7 @@ You can find a complete API documentation
 
 	import ts3
 
-	# Change the URI scheme from *ssh* to *telnet*, if your erver doesn not
+	# Change the URI scheme from *ssh* to *telnet*, if your server does not
 	# support ssh.
 	with ts3.query.TS3ServerConnection("ssh://serveradmin:Z0YxRb7u@localhost:10022") as ts3conn:
 		# use sid=1
