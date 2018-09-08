@@ -66,7 +66,7 @@ __all__ = [
     "TS3InvalidCommandError",
     "TS3QueryError",
     "TS3TimeoutError",
-    "TS3RecvError",
+    "TS3TransportError",
     "TS3BaseConnection",
     "TS3ServerConnection",
     "TS3ClientConnection"]
@@ -131,6 +131,29 @@ class TS3TransportError(TS3Error):
     """
 
 
+def running_timeout(timeout):
+    """Helper to enforce a 'global' timeout::
+
+        timeout = running_timeout(timeout)
+        while True:
+            line = conn.recv(timeout())
+
+    :raises TS3TimeoutError:
+    """
+    start = time.time()
+
+    def remaining():
+        """Returns the remaining time until *timeout* seconds have passed."""
+        if timeout is None:
+            return None
+
+        dt = time.time() - start
+        if dt > timeout:
+            raise TS3TimeoutError()
+        return timeout - dt
+    return remaining
+
+
 class TS3Transport(object):
     """
     The TS3 server supports the *telnet* and *ssh* protocols. This class defines
@@ -168,7 +191,7 @@ class TS3Transport(object):
         """
         raise NotImplementedError()
 
-    def send_line(self, data, timeout):
+    def send_line(self, data):
         """
         Send a line of data to the TS3 query service. The delimiter is added
         automatic.
@@ -185,7 +208,12 @@ class TS3TelnetTransport(TS3Transport):
         return self._conn.fileno()
 
     def connect(self, host, port, timeout, **kargs):
-        self._conn = telnetlib.Telnet(host, port, timeout)
+        try:
+            self._conn = telnetlib.Telnet(host, port, timeout)
+        except OSError as err:
+            raise TS3TransportError() from err
+        except TimeoutError as err:
+            raise TS3TimeoutError() from err
         return None
 
     def close(self):
@@ -193,10 +221,16 @@ class TS3TelnetTransport(TS3Transport):
         return None
 
     def read_line(self, timeout):
-        return self._conn.read_until(b"\n\r", timeout=timeout)
+        try:
+            return self._conn.read_until(b"\n\r", timeout=timeout)
+        except (EOFError, OSError) as err:
+            raise TS3TransportError() from err
 
-    def send_line(self, data, timeout):
-        return self._conn.write(data + b"\n\r")
+    def send_line(self, data):
+        try:
+            return self._conn.write(data + b"\n\r")
+        except OSError as err:
+            raise TS3TransportError() from err
 
 
 class TS3SSHTransport(TS3Transport):
@@ -232,26 +266,27 @@ class TS3SSHTransport(TS3Transport):
         return None
 
     def read_line(self, timeout):
-
-        # TODO: Enforce the timeout (multiple calls to recv ...)
-        #self._client.settimeout(timeout)
+        timeout = running_timeout(timeout)
+        delimiter = b"\n\r"
 
         # Wait until the delimiter can be found in the line buffer.
-        try:
-            while True:
-                eol = self._rbuffer.find(b"\n\r")
-                if eol != -1:
-                    break
-                self._rbuffer += self._channel.recv(4096)
-        except socket.timeout as err:
-            raise TS3TimeoutError() from err
+        while True:
+            eol = self._rbuffer.find(delimiter)
+            if eol != -1:
+                break
 
-        # + len(b"\n\r")
-        eol += 2
+            self._channel.settimeout(timeout())
+            try:
+                self._rbuffer += self._channel.recv(4096)
+            except socket.timeout as err:
+                raise TS3TimeoutError() from err
+
+        # include the delimiter
+        eol += len(delimiter)
         line, self._rbuffer = self._rbuffer[:eol], self._rbuffer[eol:]
         return line
 
-    def send_line(self, data, timeout):
+    def send_line(self, data):
         self._channel.send(data + b"\n\r")
         return None
 
@@ -266,26 +301,28 @@ class TS3BaseConnection(object):
 
     Note, that this class supports the *with* statement::
 
-        with TS3BaseConnection() as ts3conn:
-            ts3conn.open("localhost")
+        with TS3BaseConnection("ssh://serveradmin:Z0YxRb7u@localhost:10022") as ts3conn:
             ts3conn.exec_("use", sid=1)
 
         # You can also use an equal try-finally construct.
         ts3conn = TS3BaseConnection()
         try:
-            ts3conn.open("localhost")
+            ts3conn.open_uri("telnet://serveradmin:Z0YxRb7u@localhost:10011")
             ts3conn.exec_("use", sid=1)
         finally:
             ts3conn.close()
 
     .. warning::
 
-        This class is **not thread safe**!
+        *   This class is **not thread safe**.
+        *   Do **not reuse** already connected instances.
 
     .. versionchanged:: 2.0.0
 
-        The *send()* method has been removed, use :meth:`exec_`, :meth:`query`
-        instead.
+        *   The *send()* method has been removed, use :meth:`exec_`,
+            :meth:`query` instead.
+        *   SSH support
+        *   The :meth:`open_uri` method.
     """
 
     #: The length of the greeting. This is the number of lines returned by
@@ -300,7 +337,7 @@ class TS3BaseConnection(object):
     #: A set with all known commands.
     COMMAND_SET = set()
 
-    def __init__(self, host=None, port=None):
+    def __init__(self, uri=None, tp_args=None):
         """
         If *host* and *port* are provided, the connection will be established
         before the constructor returns.
@@ -319,8 +356,11 @@ class TS3BaseConnection(object):
         # *wait_for_event()* is called.
         self._event_queue = list()
 
-        if host is not None:
-            self.open(host, port)
+        #: The hostname of the query service to which this client is connected.
+        self._host = None
+
+        if uri is not None:
+            self.open_uri(uri, tp_args=tp_args)
         return None
 
     # *Simple* get and set methods
@@ -334,6 +374,11 @@ class TS3BaseConnection(object):
             bool
         """
         return self._transport is not None
+
+    @property
+    def host(self):
+        """The hostname of the host of the query service."""
+        return self._host
 
     # Networking
     # ------------------------------------------------
@@ -399,6 +444,7 @@ class TS3BaseConnection(object):
         self._num_pending_queries = 0
         self._resp_buffer = list()
         self._event_queue = list()
+        self._host = host
 
         LOG.info("Created connection to {}:{}.".format(host, port))
         return self
@@ -435,6 +481,7 @@ class TS3BaseConnection(object):
                 self._num_pending_queries = 0
                 self._resp_buffer = list()
                 self._event_queue = list()
+                self._host = None
 
                 LOG.debug("Disconnected client.")
         return None
@@ -483,15 +530,13 @@ class TS3BaseConnection(object):
         :raises TS3TimeoutError:
         :raises TS3RecvError:
         """
-        end_time = timeout + time.time() if timeout is not None else None
+        timeout = running_timeout(timeout)
 
         while True:
-            timeout = end_time - time.time() if end_time is not None else None
-
             try:
-                data = self._transport.read_line(timeout=timeout)
+                data = self._transport.read_line(timeout=timeout())
             # Catch socket and telnet errors
-            except (OSError, EOFError) as err:
+            except TS3TransportError as err:
                 self.close()
                 raise
             # Handle the receives message.
@@ -546,18 +591,9 @@ class TS3BaseConnection(object):
         :raises TS3TimeoutError:
         :raises TS3RecvError:
         """
-        start_time = time.time()
+        timeout = running_timeout(timeout)
         while not self._event_queue:
-
-            if timeout is not None:
-                remaining_time = timeout - (time.time() - start_time)
-                if remaining_time <= 0:
-                    raise TS3TimeoutError()
-            else:
-                remaining_time = None
-
-            self._recv(timeout=remaining_time)
-
+            self._recv(timeout=timeout())
         return self._event_queue.pop(0) if self._event_queue else None
 
     def _wait_for_resp(self, timeout=None):
@@ -575,18 +611,11 @@ class TS3BaseConnection(object):
         """
         assert self._num_pending_queries
 
-        start_time = time.time()
-        resp = None
-        while not (isinstance(resp, TS3QueryResponse) and self._num_pending_queries == 0):
-
-            if timeout is not None:
-                remaining_time = timeout - (time.time() - start_time)
-                if remaining_time <= 0:
-                    raise TS3TimeoutError()
-            else:
-                remaining_time = None
-
-            resp = self._recv(timeout=remaining_time)
+        timeout = running_timeout(timeout)
+        while True:
+            resp = self._recv(timeout=timeout())
+            if isinstance(resp, TS3QueryResponse):
+                break
 
         if resp.error["id"] != "0":
             raise TS3QueryError(resp)
@@ -595,12 +624,12 @@ class TS3BaseConnection(object):
     # Sending
     # -------------------------
 
-    def send_keepalive(self, timeout=None):
+    def send_keepalive(self):
         """
         Sends an empty query to the query service in order to prevent automatic
-        disconnect. Make sure to call it at least once in 10 minutes.
+        disconnect. Make sure to call it at least once in 5 minutes.
         """
-        self._transport.send_line(b" ", timeout=timeout)
+        self._transport.send_line(b" ")
         return None
 
     def exec_(self, cmd, *options, **params):
@@ -719,7 +748,7 @@ class TS3BaseConnection(object):
         LOG.debug("Sending query: '%s'.", q)
 
         q = q.encode()
-        self._transport.send_line(q, timeout=timeout)
+        self._transport.send_line(q)
 
         # To identify the response when we receive it.
         self._num_pending_queries += 1
@@ -872,6 +901,21 @@ class TS3ServerConnection(TS3BaseConnection):
         "custominfo",
         "whoami"
     ])
+
+    def open(self, host, port, timeout=None, protocol="telnet", tp_args=None):
+        super().open(host, port, timeout, protocol, tp_args)
+
+        # Try to log in. Only SSH requires authentication during the connection
+        # handshake.
+        username = tp_args.get("username")
+        password = tp_args.get("password")
+        if username and password:
+            self.exec_(
+                "login", client_login_name=username,
+                client_login_password=password
+            )
+            LOG.info("Logged in as '%s'.", username)
+        return None
 
 
 class TS3ClientConnection(TS3BaseConnection):
