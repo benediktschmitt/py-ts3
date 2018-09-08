@@ -1,7 +1,8 @@
 PyTS3
 =====
 
->> **Check out** `version 2 <https://github.com/benediktschmitt/py-ts3/tree/v2>`_ **, which also supports the TS3 Client Query API!** <<
+>> **Check out** `version 2 <https://github.com/benediktschmitt/py-ts3/tree/v2>`_ **, which also supports the TS3 Client Query API and SSH!** <<
+>> v1 will only receive bug fixes, but no more updates. So better start using v2. <<
 
 This package provides a **Python 3 API** for:
 

@@ -1,6 +1,12 @@
 Welcome to PyTS3's documentation!
 =================================
 
+.. hint::
+
+    You are viewing the documentation for v1. You should consider to use v2
+    for new projects as it supports also the TS3 client query interface and SSH.
+    v1 will only receive bug fixes but no more enhancements.
+
 Content
 -------
 
