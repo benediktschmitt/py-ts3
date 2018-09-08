@@ -3,6 +3,33 @@
 Changelog
 =========
 
+*   **2.0.1**
+
+    *   **added** SSH support
+        (`issue 70 <https://github.com/benediktschmitt/py-ts3/issues/70>`_)
+    *   **added** :meth:`TS3BaseConnection.open_uri`
+    *   **changed** The constructor of :class:`TS3BaseConnection` accepts now a
+        URI instead of a host and port to keep things simple, especially with
+        the new SSH parameters.
+    *   **fixed** timeout handling
+    *   **fixed** error propagation
+
+    **Update Guide**
+
+    .. code-block:: python
+
+        # Old code
+        with TS3ServerConnection("localhost") as ts3conn:
+            pass
+
+        # New code (1)
+        with TS3ServerConnection("telnet://localhost:10011") as ts3conn:
+            pass
+
+        # New code (2)
+        with TS3ServerConnection("ssh://serveradmin:abc123@localhost:10011") as ts3conn:
+            pass
+
 *   **2.0.0**
 
     *   **added** Support for the TS3 Client Query API

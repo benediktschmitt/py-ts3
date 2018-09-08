@@ -387,7 +387,7 @@ class TS3BaseConnection(object):
         """
         Connect to the TS3 query service.
 
-        .. code-block::
+        .. code-block:: python
 
             # Connect using telnet.
             ts3conn.open("localhost", 10011)
@@ -454,7 +454,7 @@ class TS3BaseConnection(object):
         The same as :meth:`open`, but the host, port, username, password, ...
         are encoded compact in a URI.
 
-        .. code-block::
+        .. code-block:: python
 
             >>> ts3conn.open_uri("telnet://my.server.com:10011")
             >>> ts3conn.open_uri("ssh://serveradmin@123456@my.server.com:10022")

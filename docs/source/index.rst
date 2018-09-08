@@ -5,7 +5,8 @@ Welcome to PyTS3's documentation!
 
     You are currently watching the documentation for the next upcoming
     version of py-ts3. This version is quite stable and ready for use.
-    One major advantage compared to v1 is support for the TS3 Client Query API.
+    One major advantage compared to v1 is support for the TS3 Client Query API
+    and SSH.
 
 Content
 -------
