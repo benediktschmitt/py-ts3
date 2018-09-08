@@ -40,3 +40,4 @@ nosetests.xml
 ts3-testserver
 docs/build
 sandbox/*
+examples/xkcd_python_(copy).png

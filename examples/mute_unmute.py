@@ -4,9 +4,8 @@ import time
 import ts3
 
 
-APIKEY = "JCVP-QUME-ZBQJ-N1NZ-6ETL-YCDJ"
-HOST = "localhost"
-PORT = 25639
+APIKEY = "C2OL-77SJ-M45X-BZ6E-1PBJ-FE2M"
+URI = "telnet://localhost:25639"
 
 
 def mute_unmute(ts3conn):
@@ -18,7 +17,7 @@ def mute_unmute(ts3conn):
 
 
 if __name__ == "__main__":
-    with ts3.query.TS3ClientConnection(HOST) as ts3conn:
+    with ts3.query.TS3ClientConnection(URI) as ts3conn:
         ts3conn.exec_("auth", apikey=APIKEY)
         ts3conn.exec_("use")
         mute_unmute(ts3conn)

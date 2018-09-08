@@ -3,10 +3,10 @@
 import ts3
 
 
-USER = "serveradmin"
-PASS = "JB8ZqxfI"
-HOST = "localhost"
-PORT = 10011
+# Telnet or SSH ?
+URI = "ssh://serveradmin:Z0YxRb7u@localhost:10022"
+URI = "telnet://serveradmin:Z0YxRb7u@localhost:10011"
+
 SID = 1
 
 
@@ -206,7 +206,6 @@ def view(ts3conn, sid=1):
 
 
 if __name__ == "__main__":
-    with ts3.query.TS3ServerConnection(HOST, PORT) as ts3conn:
-        ts3conn.exec_("login", client_login_name=USER, client_login_password=PASS)
+    with ts3.query.TS3ServerConnection(URI) as ts3conn:
         ts3conn.exec_("use", sid=SID)
         view(ts3conn, sid=1)

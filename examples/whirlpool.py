@@ -5,11 +5,10 @@ import random
 import ts3
 from ts3.definitions import TextMessageTargetMode
 
+# Telnet or SSH ?
+URI = "ssh://serveradmin:Z0YxRb7u@localhost:10022"
+URI = "telnet://serveradmin:Z0YxRb7u@localhost:10011"
 
-USER = "serveradmin"
-PASS = "JB8ZqxfI"
-HOST = "localhost"
-PORT = 10011
 SID = 1
 
 
@@ -73,7 +72,6 @@ def whirlpool(ts3conn, duration=10, relax_time=0.5):
 
 
 if __name__ == "__main__":
-    with ts3.query.TS3ServerConnection(HOST, PORT) as ts3conn:
-        ts3conn.exec_("login", client_login_name=USER, client_login_password=PASS)
+    with ts3.query.TS3ServerConnection(URI) as ts3conn:
         ts3conn.exec_("use", sid=SID)
         whirlpool(ts3conn)

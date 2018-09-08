@@ -3,11 +3,10 @@
 import time
 import ts3
 
+# Telnet or SSH ?
+URI = "ssh://serveradmin:Z0YxRb7u@localhost:10022"
+URI = "telnet://serveradmin:Z0YxRb7u@localhost:10011"
 
-USER = "serveradmin"
-PASS = "JB8ZqxfI"
-HOST = "localhost"
-PORT = 10011
 SID = 1
 
 
@@ -27,8 +26,8 @@ def hello_bot(ts3conn, msg=None):
         try:
             # This method blocks, but we must sent the keepalive message at
             # least once in 10 minutes. So we set the timeout parameter to
-            # 9 minutes.
-            event = ts3conn.wait_for_event(timeout=550)
+            # 1 minutes, just to be ultra safe.
+            event = ts3conn.wait_for_event(timeout=60)
         except ts3.query.TS3TimeoutError:
             pass
         else:
@@ -40,7 +39,6 @@ def hello_bot(ts3conn, msg=None):
 
 
 if __name__ == "__main__":
-    with ts3.query.TS3ServerConnection(HOST, PORT) as ts3conn:
-        ts3conn.exec_("login", client_login_name=USER, client_login_password=PASS)
+    with ts3.query.TS3ServerConnection(URI) as ts3conn:
         ts3conn.exec_("use", sid=SID)
         hello_bot(ts3conn)
