@@ -25,8 +25,8 @@
 :mod:`ts3.query_builder`
 ========================
 
-This module contains a flexible query builder which is modeled after the *COMMAND SYNTAX* section
-in the TS3 Server Query Manual.
+This module contains a flexible query builder which is modeled after the
+*COMMAND SYNTAX* section in the TS3 Server Query Manual.
 
 :versionadded: 2.0.0
 """
@@ -56,7 +56,7 @@ class TS3QueryBuilder(object):
         # response object.
         resp = TS3QueryBuilder(ts3conn, "serverlist").all()
 
-    Please note, that query builder objects are **not** immutable.
+    Please note, that query builder objects are **not immutable**.
 
     :arg str cmd:
         The name of the command to execute, e.g. ``"clientkick"``.
@@ -70,7 +70,7 @@ class TS3QueryBuilder(object):
         :meth:`ts3.query.TS3BaseConnection.query`,
         :meth:`ts3.query.TS3BaseConnection.exec_query`
 
-    :todo: What about the crazy *properties*??
+    :todo: What about the crazy *properties* in the documentation, what are they?
     """
 
     def __init__(self, cmd, ts3conn=None, pipes=None):
@@ -163,8 +163,6 @@ class TS3QueryBuilder(object):
         :returns:
             A valid TS3 query command string with arguments and options.
         """
-        # NOTE: If it turns out, that string addition is too slow, we can still
-        #       use other means.
         res = self._cmd
 
         if self._pipes:
