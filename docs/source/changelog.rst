@@ -3,7 +3,7 @@
 Changelog
 =========
 
-*   **2.0.1**
+*   **2.0.0b2**
 
     *   **added** SSH support
         (`issue 70 <https://github.com/benediktschmitt/py-ts3/issues/70>`_)
@@ -30,7 +30,7 @@ Changelog
         with TS3ServerConnection("ssh://serveradmin:abc123@localhost:10011") as ts3conn:
             pass
 
-*   **2.0.0**
+*   **2.0.0b1**
 
     *   **added** Support for the TS3 Client Query API
         (`issue 48 <https://github.com/benediktschmitt/py-ts3/issues/48>`_)

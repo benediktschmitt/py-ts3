@@ -49,7 +49,7 @@ This package contains a Python API for the:
 """
 
 
-__version__ = "2.0.0"
+__version__ = "2.0.0b2"
 
 
 # Only export some high level modules.
