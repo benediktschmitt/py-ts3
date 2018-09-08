@@ -26,12 +26,9 @@ You can find a complete API documentation
 
 	import ts3
 
-	with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-		# login serveradmin FoOBa9
-		ts3conn.exec_(
-			"login", client_login_name="serveradmin", client_login_password="FoOBa9"
-		)
-
+	# Change the URI scheme from *ssh* to *telnet*, if your erver doesn not
+	# support ssh.
+	with ts3.query.TS3ServerConnection("ssh://serveradmin:Z0YxRb7u@localhost:10022") as ts3conn:
 		# use sid=1
 		ts3conn.exec_("use", sid=1)
 
@@ -98,6 +95,11 @@ supports pipelining:
 	resp = ts3conn.query("clientkick", reasonid=5, reasonmsg="Go away!")\
 		.pipe(clid=1).pipe(clid=2).pipe(clid=3).fetch()
 
+	# channellist -flags -icon
+	resp = ts3conn.query("channellist", "flags", "icon").fetch()
+	resp = ts3conn.query("channellist").options("flags", "icon").all()
+	resp = ts3conn.query("channellist").options("flags", "icon").first()
+
 As a general rule of thumb, use *exec_()* if you don't need pipelining.
 
 Examples
@@ -113,17 +115,7 @@ You can find more examples in the ``ts3.examples`` package.
 
 		import ts3
 
-		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-			# Note, that the client will wait for the response and raise a
-			# **TS3QueryError** if the error id of the response is not 0.
-			try:
-				ts3conn.exec_(
-					"login", client_login_name="serveradmin", client_login_password="FoOBa9"
-				)
-			except ts3.query.TS3QueryError as err:
-				print("Login failed:", err.resp.error["msg"])
-				exit(1)
-
+		with ts3.query.TS3ServerConnection("telnet://serveradmin:Z0YxRb7u@localhost:10011") as ts3conn:
 			ts3conn.exec_("use", sid=1)
 
 			# exec_() returns a **TS3QueryResponse** instance with the response.
@@ -147,10 +139,7 @@ You can find more examples in the ``ts3.examples`` package.
 
 		import ts3
 
-		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-			ts3conn.exec_(
-				"login", client_login_name="serveradmin", client_login_password="FoOBa9"
-			)
+		with ts3.query.TS3ServerConnection("telnet://serveradmin:Z0YxRb7u@localhost:10011") as ts3conn:
 			ts3conn.exec_("use", sid=1)
 
 			for client in ts3conn.exec_("clientlist"):
@@ -166,10 +155,7 @@ You can find more examples in the ``ts3.examples`` package.
 		import time
 		import ts3
 
-		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-			ts3conn.exec_(
-				"login", client_login_name="serveradmin", client_login_password="FoOBa9"
-			)
+		with ts3.query.TS3ServerConnection("telnet://serveradmin:Z0YxRb7u@localhost:10011") as ts3conn:
 			ts3conn.exec_("use", sid=1)
 
 			# Register for events
@@ -179,7 +165,7 @@ You can find more examples in the ``ts3.examples`` package.
 				ts3conn.send_keepalive()
 
 				try:
-					event = ts3conn.wait_for_event(timeout=550)
+					event = ts3conn.wait_for_event(timeout=60)
 				except ts3.query.TS3TimeoutError:
 					pass
 				else:
@@ -203,10 +189,7 @@ You can find more examples in the ``ts3.examples`` package.
 		# You may have to download it from GitHub first.
 		from ts3_examples.viewer import view
 
-		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-			ts3conn.exec_(
-				"login", client_login_name="serveradmin", client_login_password="FoOBa9"
-			)
+		with ts3.query.TS3ServerConnection("telnet://serveradmin:Z0YxRb7u@localhost:10011") as ts3conn:
 			view(ts3conn, sid=1)
 
 *	Download and upload files:
@@ -217,10 +200,7 @@ You can find more examples in the ``ts3.examples`` package.
 
 		import ts3
 
-		with ts3.query.TS3ServerConnection("localhost") as ts3conn:
-			ts3conn.exec_(
-				"login", client_login_name="serveradmin", client_login_password="FoOBa9"
-			)
+		with ts3.query.TS3ServerConnection("telnet://serveradmin:Z0YxRb7u@localhost:10011") as ts3conn:
 			ts3conn.exec_("use", sid=1)
 
 			# Create a new TS3FileTransfer instance associated with the
@@ -246,7 +226,7 @@ You can find more examples in the ``ts3.examples`` package.
 		import time
 		import ts3
 
-		with ts3.query.TS3ClientConnection("localhost") as ts3conn:
+		with ts3.query.TS3ServerConnection("telnet://localhost:25639") as ts3conn:
 			ts3conn.exec_("auth", apikey="AAAA-....-EEEE")
 
 			# Register for events
