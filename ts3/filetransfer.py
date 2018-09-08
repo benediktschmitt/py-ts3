@@ -58,8 +58,9 @@ class TS3UploadError(TS3FileTransferError):
     def __init__(self, send_size, err=None):
         #: The number of sent bytes till the error occured.
         self.send_size = send_size
-        #: If the upload failed due to a thrown exception, this attribute
-        #: contains it.
+
+        #: A string describing the condition which caused the exception more
+        #: precise.
         self.err = err
         return None
 
@@ -78,8 +79,9 @@ class TS3DownloadError(TS3FileTransferError):
     def __init__(self, read_size, err=None):
         #: The number of read bytes untill the error occured.
         self.read_size = read_size
-        #: If the download failed due to a thrown exception, this attribute
-        #: contains the original exception.
+
+        #: A string describing the condition which caused the exception more
+        #: precise.
         self.err = err
         return None
 
@@ -95,8 +97,25 @@ class TS3FileTransfer(object):
     A high-level TS3 file transfer handler.
 
     The recommended methods to download or upload a file are:
+
         * :meth:`init_download`
         * :meth:`init_upload`
+
+    You can either use the low-level class methods,
+    e.g. :meth:`download_by_resp` or the high-level ones like
+    :meth:`init_download` to handle the file transfers::
+
+        ts3ft = TS3FileTransfer(ts3conn)
+		with open("baz.png", "rb") as file:
+			ts3ft.init_upload(input_file=file, name="/baz.png", cid=2)
+		with open("baz1.png", "wb") as file:
+			ts3ft.init_download(output_file=file, name="/baz.png", cid=2)
+
+    File transports can be monitored using a *reporthook*, a function which
+    is periodically called with the current transfer stats::
+
+        def reporthook(size, block_size, total_size):
+            print("{}% done.".format(size/total_size))
     """
 
     # Counter for the client file transfer ids.
@@ -161,34 +180,35 @@ class TS3FileTransfer(object):
 
         **query_resp_hook**, if provided, is called, when the response of the
         ftinitdownload query has been received. Its single parameter is the
-        the response of the querry.
+        the response of the query.
 
         For downloading the file from the server, :meth:`download()` is called.
         So take a look a this method for further information.
 
-        .. seealso::
-
-            * The TS3 *ftinitdownload* command
-            * :func:`~urllib.request.urlretrieve`
+        :seealso: The TS3 *ftinitdownload* command
         """
-        ftid = self.get_ftid()
-
-        query = self.ts3conn.query(
-            "ftinitdownload", clientftfid=ftid, name=name, cid=cid, cpw=cpw, seekpos=seekpos
-        )
-        resp = query.fetch()
+        resp = self.ts3conn.query("ftinitdownload",
+            clientftfid=self.get_ftid(),
+            name=name,
+            cid=cid,
+            cpw=cpw,
+            seekpos=seekpos
+        ).fetch()
 
         if query_resp_hook is not None:
             query_resp_hook(resp)
         return self.download_by_resp(
             output_file=output_file, ftinitdownload_resp=resp,
             seekpos=seekpos, reporthook=reporthook,
-            fallbackhost=self.ts3conn.telnet_conn.host)
+            fallbackhost=self.ts3conn.host)
 
     @classmethod
     def download_by_resp(cls, output_file, ftinitdownload_resp,
                          seekpos=0, reporthook=None, fallbackhost=None):
         """
+        Kicks off a file download by using a query response to a
+        *ftinitdownload* command.
+
         This is *almost* a shortcut for:
 
             >>> TS3FileTransfer.download(
@@ -202,6 +222,8 @@ class TS3FileTransfer(object):
 
         Note, that the value of ``resp[0]["ip"]`` is a csv list and needs
         to be parsed.
+
+        :seealso: :meth:`download`
         """
         if "ip" in ftinitdownload_resp[0]:
             ip = cls._ip_from_resp(ftinitdownload_resp[0]["ip"])
@@ -228,8 +250,8 @@ class TS3FileTransfer(object):
         and the download with the file transfer key **ftkey**.
 
         If **seekpos** and the total **size** are provided, the **reporthook**
-        function (lambda read_size, block_size, total_size: None) is called
-        after receiving a new block.
+        function (``lambda read_size, block_size, total_size: None``) is called
+        each time a new data block has been received.
 
         If you provide **seekpos** and **total_size**, this method will check,
         if the download is complete and raise a :exc:`TS3DownloadError` if not.
@@ -277,11 +299,11 @@ class TS3FileTransfer(object):
 
         # Catch all socket errors.
         except OSError as err:
-            raise TS3DownloadError(read_size, err)
+            raise TS3DownloadError(read_size) from err
 
         # Raise an error, if the download is not complete.
         if read_size < total_size:
-            raise TS3DownloadError(read_size)
+            raise TS3DownloadError(read_size, "The download is incomplete.")
         return read_size
 
     # Upload
@@ -301,34 +323,31 @@ class TS3FileTransfer(object):
 
         **query_resp_hook**, if provided, is called, when the response of the
         ftinitupload query has been received. Its single parameter is the
-        the response of the querry.
+        the response of the query.
 
         For uploading the file to the server :meth:`upload` is called. So
         take a look at this method for further information.
 
-        .. seealso::
-
-            * :meth:`~commands.TS3Commands.ftinitupload`
-            * :func:`~urllib.request.urlretrieve`
+        :seealso: The TS3 *ftinitdownload* command
         """
-        overwrite = "1" if overwrite else "0"
-        resume = "1" if resume else "0"
-
         input_file.seek(0, 2)
         size = input_file.tell()
 
-        ftid = self.get_ftid()
-
-        query = self.ts3conn.query(
-            "ftinitupload", clientftfid=ftid, name=name, cid=cid, cpw=cpw,
-            size=size, overwrite=overwrite, resume=resume)
-        resp = query.fetch()
+        resp = self.ts3conn.query("ftinitupload",
+            clientftfid=self.get_ftid(),
+            name=name,
+            cid=cid,
+            cpw=cpw,
+            size=size,
+            overwrite="1" if overwrite else "0",
+            resume="1" if resume else "0"
+        ).fetch()
 
         if query_resp_hook is not None:
             query_resp_hook(resp)
         return self.upload_by_resp(
             input_file=input_file, ftinitupload_resp=resp,
-            reporthook=reporthook, fallbackhost=self.ts3conn.telnet_conn.host)
+            reporthook=reporthook, fallbackhost=self.ts3conn.host)
 
     @classmethod
     def upload_by_resp(cls, input_file, ftinitupload_resp,
@@ -337,18 +356,17 @@ class TS3FileTransfer(object):
         This is *almost* a shortcut for:
 
             >>> TS3FileTransfer.upload(
-                    input_file = file,
-                    adr = (resp[0]["ip"], int(resp[0]["port"])),
-                    ftkey = resp[0]["ftkey"],
-                    seekpos = resp[0]["seekpos"],
-                    reporthook = reporthook
-                    )
-            ...
+            ...     input_file = file,
+            ...     adr = (resp[0]["ip"], int(resp[0]["port"])),
+            ...     ftkey = resp[0]["ftkey"],
+            ...     seekpos = resp[0]["seekpos"],
+            ...     reporthook = reporthook
+            ...    )
 
         Note, that the value of ``resp[0]["ip"]`` is a csv list and needs
         to be parsed.
 
-        For the final upload, :meth:`upload` is called.
+        :seealso: :meth:`upload`
         """
         if "ip" in ftinitupload_resp[0]:
             ip = cls._ip_from_resp(ftinitupload_resp[0]["ip"])
@@ -367,8 +385,7 @@ class TS3FileTransfer(object):
             reporthook=reporthook)
 
     @classmethod
-    def upload(cls, input_file, adr, ftkey,
-               seekpos=0, reporthook=None):
+    def upload(cls, input_file, adr, ftkey, seekpos=0, reporthook=None):
         """
         Uploads the data in the file **input_file** to the TS3 server listening
         at the address **adr**. **ftkey** is used to authenticate the file
@@ -377,8 +394,12 @@ class TS3FileTransfer(object):
         When the upload begins, the *get pointer* of the **input_file** is set
         to seekpos.
 
-        If the **reporthook** function (lambda send_size, block_size, total_size)
-        is provided, it is called after sending a block to the server.
+        If the **reporthook** function
+        (``lambda send_size, block_size, total_size``) is provided, it is called
+        each time a data block has been successfully transfered.
+
+        :raises TS3UploadError:
+            If the upload is incomplete or a socket error occured.
         """
         if isinstance(ftkey, str):
             ftkey = ftkey.encode()
@@ -410,9 +431,9 @@ class TS3FileTransfer(object):
                     if not data:
                         break
         except OSError:
-            raise TS3FtUploadError(send_size, err)
+            raise TS3FtUploadError(send_size) from err
 
         # Raise an error, if the upload is not complete.
         if send_size < total_size:
-            raise TS3FtUploadError(send_size)
+            raise TS3FtUploadError(send_size, "The upload is incomplete.")
         return send_size
