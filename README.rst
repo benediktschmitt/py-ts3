@@ -42,7 +42,7 @@ This package is registered on PyPi, so you're done with:
 
 .. code-block:: bash
 
-	$ pip3 install ts3>=2.0.0b2
+	$ pip3 install "ts3>=2.0.0b2" --upgrade
 
 TS3 Server Whitelist
 --------------------
