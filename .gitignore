@@ -19,6 +19,7 @@ lib
 lib64
 *__pycache__
 MANIFEST
+venv
 
 # Installer logs
 pip-log.txt
