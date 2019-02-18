@@ -245,10 +245,14 @@ class TS3SSHTransport(TS3Transport):
         # Load the host key and warn if not provided.
         if "host_key" in kargs:
             client.load_host_keys(kargs["host_key"])
+        elif kargs.get("load_system_host_keys", False):
+            client.load_system_host_keys()
         else:
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             warnings.warn(
-                "You should provide a 'host_key' to improve security.", Warning
+                "You should provide a 'host_key' to improve security "\
+                "or set 'load_system_host_keys' to true.",
+                 Warning
             )
 
         client.connect(
