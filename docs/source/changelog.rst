@@ -38,7 +38,7 @@ Changelog
     *   **added** :class:`TS3ClientConnection`
     *   **removed** the monstrous :mod:`commands` module, use :class:`TS3QueryBuilder` instead.
     *   **removed** the :mod:`TS3Escape` class, use the :class:`TS3QueryBuilder` and the
-        :func:`escape` and :func:`unespace` functions instead.
+        :func:`escape` and :func:`unescape` functions instead.
 
     Version 2.0.0 introduces support for the client query API and pipelining
     query commands. This come at the costs and benefits of having a new
@@ -65,7 +65,7 @@ Changelog
 
         #.  The **command** is the first parameter of *exec_()*
         #.  The **options** are simple string arguments after the command.
-        #.  The **parameters** are given as keyworkd arguments.
+        #.  The **parameters** are given as keyword arguments.
 
     **Update or not?**
 
