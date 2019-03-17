@@ -633,7 +633,7 @@ class TS3BaseConnection(object):
         Sends an empty query to the query service in order to prevent automatic
         disconnect. Make sure to call it at least once in 5 minutes.
         """
-        self._transport.send_line(b" ")
+        self.exec_("version")
         return None
 
     def exec_(self, cmd, *options, **params):
