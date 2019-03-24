@@ -3,6 +3,13 @@
 Changelog
 =========
 
+*   **2.0.0b3**
+
+    *   *changed* :meth:`TS3BaseConnection.send_keepalive` now sends the
+        *version* command instead of an empty line.
+        (`issue 77 <https://github.com/benediktschmitt/py-ts3/issues/77>`_)
+        (`issue 84 <https://github.com/benediktschmitt/py-ts3/issues/84>`_)
+
 *   **2.0.0b2**
 
     *   **added** SSH support
