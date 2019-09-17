@@ -4092,12 +4092,12 @@ class TS3Commands(object):
         cparams["token"] = token
         return self._return_proxy("tokenuse", cparams, uparams, options)
 
-    def use(self, *, sid=None, port=None, virtual=False):
+    def use(self, *, sid=None, port=None, client_nickname=None, virtual=False):
         """
         Usage::
 
-            use [sid={serverID}] [port={serverPort}] [-virtual]
-            use {serverID}
+            use [sid={serverID}] [port={serverPort}] [-virtual] [client_nickname={nickname}]
+            use {serverID} [-virtual] [client_nickname={nickname}]
 
         Selects the virtual server specified with sid or port to allow further
         interaction. The ServerQuery client will appear on the virtual server
@@ -4124,6 +4124,7 @@ class TS3Commands(object):
 
         cparams["sid"] = sid
         cparams["port"] = port
+        cparams["client_nickname"] = client_nickname
 
         if virtual:
             options.append("virtual")
