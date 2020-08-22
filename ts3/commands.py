@@ -77,6 +77,33 @@ class TS3Commands(object):
         """
         return (command, cparameters, uparameters, options)
 
+
+    def auth(self, *, apikey):
+        """
+        Usage::
+
+            auth apikey={string}
+
+        Authenticates connecting application with API key of user.
+
+        Example::
+
+            auth apikey=AAAA-BBBB-CCCC-DDDD-EEEE
+            error id=0 msg=ok
+
+        Example::
+            >>> ts3cmd.auth(api_token="AAAA-BBBB-CCCC-DDDD-EEEE")
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["apikey"] = apikey
+
+        return self._return_proxy("auth", cparams, uparams, options)
+
+
+
     def banadd(self, *, ip=None, name=None, uid=None, time=None, banreason=None):
         """
         Usage::
@@ -375,6 +402,34 @@ class TS3Commands(object):
         if permsid:
             option.append("permsid")
         return self._return_proxy("channelclientpermlist", cparams, uparams, options)
+
+    def channelconnectinfo(self, *, cid=None):
+        """
+        Usage::
+
+              channelconnectinfo [cid={channelid}]
+
+        Get channel connection information for specified channelid from the currently
+        selected server connection handler. If no channelid is provided, information
+        for the current channel will be received.
+
+        Example::
+
+               channelconnectinfo
+               path=test\/subtest password=secret
+               error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.channelconnectinfo()
+            >>> ts3cmd.channelconnectinfo(cli=4)
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cid"] = cid
+        return self._return_proxy("channelconnectinfo", cparams, uparams, options)
 
     def channelcreate(self, *, channel_name, **channel_properties):
         """
@@ -814,6 +869,49 @@ class TS3Commands(object):
 
         cparams["cid"] = cid
         return self._return_proxy("channelinfo", cparams, uparams, options)
+
+    def channelclientlist(self, *, cid, uid=False, away=False, voice=False,
+                       icon=False, groups=False, country=False):
+        """
+        Usage::
+
+            channelclientlist cid=<cID> [-uid] [-away] [-voice] [-groups] [-icon] [-country]
+
+        Displays a list of clients that are in the channel specified by the cid parameter.
+        Included information is the clientID, client database id, nickname, channelID and client type.
+        Please take note that you can only view clients in channels that you are currently subscribed to.
+
+        Example::
+
+          channelclientlist cid=184
+          clid=4 cid=184 client_database_id=35 client_nickname=MuhChy client_type=0
+          error id=0 msg=ok
+
+
+        Example::
+
+            >>> ts3cmd.channelclientlist(cid=4, voice=True)
+            ...
+        """
+
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["cid"] = cid
+        if uid:
+            options.append("uid")
+        if away:
+            options.append("away")
+        if voice:
+            options.append("voice")
+        if groups:
+            options.append("groups")
+        if icon:
+            options.append("icon")
+        if country:
+            options.append("country")
+        return self._return_proxy("clientlist", cparams, uparams, options)
 
     def channellist(self, *, topic=False, flags=False, voice=False,
                     limits=False, icon=False, secondsempty=False):
@@ -1582,6 +1680,44 @@ class TS3Commands(object):
 
         cparams.update(client_properties)
         return self._return_proxy("clientupdate", cparams, uparams, options)
+
+    def clientvariable(self, *, clid, **client_properties):
+        """
+        Usage::
+
+            clientvariable ( clid={clientID} properties )...
+
+        Retrieves client variables from the client (no network usage). For each client
+        you can specify one or more properties that should be queried, and this whole
+        block of clientID and properties can be repeated to get information about
+        multiple clients with one call of clientvariable.
+
+
+        Example::
+
+           clientvariable clid=4 client_nickname client_input_muted
+           clid=4 client_nickname=ScP client_input_muted=0
+           error id=0 msg=ok
+
+           clientvariable clid=1449 client_country|clid=83 client_country
+           clid=1449 client_country=DE|clid=83 client_country=IT
+           error id=0 msg=ok
+
+        Example::
+
+            >>> ts3cmd.clientvariable(clid=4, client_output_muted=None)
+            ...
+        """
+        cparams = OrderedDict()
+        uparams = list()
+        options = list()
+
+        cparams["clid"] = clid
+
+        for properties in client_properties:
+            cparams[properties] = True
+
+        return self._return_proxy("clientvariable", cparams, uparams, options)
 
     def complainadd(self, *, tcldbid, message):
         """
